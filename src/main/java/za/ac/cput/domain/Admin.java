@@ -1,7 +1,6 @@
 package za.ac.cput.domain;
 
-/* Admin.java
-   Admin entity
+/* Admin entity
    Author: Athi (220212317)
    Date: 13 March 2026
 */
@@ -14,7 +13,9 @@ public class Admin {
     private String adminLevel;
 
 
-    private Admin() {}
+    private Admin() {
+
+    }
 
     private Admin(Builder builder) {
         this.adminId = builder.adminId;
@@ -24,15 +25,19 @@ public class Admin {
     }
 
     public String getAdminId() {
+
         return adminId;
     }
     public String getFullName() {
+
         return fullName;
     }
     public String getEmail() {
+
         return email;
     }
     public String getAdminLevel() {
+
         return adminLevel;
     }
 
