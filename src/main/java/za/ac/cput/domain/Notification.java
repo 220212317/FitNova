@@ -1,34 +1,34 @@
 package za.ac.cput.domain;
 import java.time.LocalDateTime;
 
-public class Notifications {
+public class Notification {
 
-    private int notificationsID;
+    private int notificationID;
     private String message;
-    private String notificationsType;
+    private String notificationType;
     private LocalDateTime dateSent;
     private String status;
     private int userID;
 
-    private Notifications(Builder builder) {
-        this.notificationsID = builder.notificationsID;
+    private Notification(Builder builder) {
+        this.notificationID = builder.notificationID;
         this.message = builder.message;
-        this.notificationsType = builder.notificationsType;
+        this.notificationType = builder.notificationType;
         this.dateSent = builder.dateSent;
         this.status = builder.status;
         this.userID = builder.userID;
     }
 
-    public int getNotificationsID() {
-        return notificationsID;
+    public int getNotificationID() {
+        return notificationID;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public String getNotificationsType() {
-        return notificationsType;
+    public String getNotificationType() {
+        return notificationType;
     }
 
     public LocalDateTime getDateSent() {
@@ -41,15 +41,15 @@ public class Notifications {
 
     public static class Builder {
 
-        private int notificationsID;
+        private int notificationID;
         private String message;
-        private String notificationsType;
+        private String notificationType;
         private LocalDateTime dateSent;
         private String status;
         private int userID;
 
-        public Builder setNotificationsID(int notificationsID) {
-            this.notificationsID = notificationsID;
+        public Builder setNotificationID(int notificationID) {
+            this.notificationID = notificationID;
             return this;
         }
 
@@ -58,8 +58,8 @@ public class Notifications {
             return this;
         }
 
-        public Builder setNotificationsType(String notificationsType) {
-            this.notificationsType = notificationsType;
+        public Builder setNotificationType(String notificationType) {
+            this.notificationType = notificationType;
             return this;
         }
 
@@ -78,8 +78,8 @@ public class Notifications {
             return this;
         }
 
-        public Notifications build() {
-            return new Notifications(this);
+        public Notification build() {
+            return new Notification(this);
         }
     }
 }
