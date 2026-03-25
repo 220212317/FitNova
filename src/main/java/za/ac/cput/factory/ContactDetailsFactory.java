@@ -1,7 +1,15 @@
 package za.ac.cput.factory;
 
 import za.ac.cput.entity.ContactDetails;
+
 import za.ac.cput.util.helper;
+
+/*
+ContactDetails.java
+Factory for Contact Details
+Author: Inga Plati (230126634)
+Date: 25 March 2026
+*/
 
 public class ContactDetailsFactory {
 
@@ -10,6 +18,7 @@ public class ContactDetailsFactory {
             String cellphoneNumber,
             String emergencyContactNumber,
             String emergencyContactName) {
+
 
         if (helper.isNullOrEmpty(contactId) ||
                 helper.isNullOrEmpty(cellphoneNumber) ||
