@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 public class UserProfile
 {
-    private String memberId;
+    private String profileId;
     private String firstName;
     private String lastName;
     private String gender ;
@@ -17,7 +17,7 @@ public class UserProfile
 
 
     private UserProfile(Builder builder){
-       this.memberId = builder.memberId;
+       this.profileId = builder.profileId;
        this.firstName = builder.firstName;
        this.lastName = builder.lastName;
        this.gender = builder.gender;
@@ -25,12 +25,12 @@ public class UserProfile
 
     }
 
-    public String getMemberId() {
-        return memberId;
+    public String getProfileId() {
+        return profileId;
     }
 
-    public void setMemberId(String memberId) {
-        this.memberId = memberId;
+    public void setProfileId(String profileId) {
+        this.profileId = profileId;
     }
 
     public String getFirstName() {
@@ -66,15 +66,15 @@ public class UserProfile
     }
 
     public static class Builder {
-        private String memberId;
+        private String profileId;
         private String firstName;
         private String lastName;
         private String gender ;
         private LocalDate dateOfBirth;
 
 
-        public Builder memberId(String memberId){
-            this.memberId = memberId;
+        public Builder profileId(String profileId){
+            this.profileId = profileId;
             return this;
 
         }
@@ -108,7 +108,7 @@ public class UserProfile
         @Override
         public String toString() {
             return "Builder{" +
-                    "memberId='" + memberId + '\'' +
+                    "profileId='" + profileId + '\'' +
                     ", firstName='" + firstName + '\'' +
                     ", lastName='" + lastName + '\'' +
                     ", gender='" + gender + '\'' +

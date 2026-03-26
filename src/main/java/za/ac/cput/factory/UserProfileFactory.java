@@ -12,10 +12,10 @@ import za.ac.cput.util.helper;
 import java.time.LocalDate;
 
 public class UserProfileFactory {
-    public static UserProfile CreateUserProfile(String memberId,
+    public static UserProfile CreateUserProfile(String profileId,
                                                 String firstName,
                                                 String lastName, String gender, LocalDate dateOfBirth) {
-        if (helper.isNullOrEmpty(memberId))
+        if (helper.isNullOrEmpty(profileId))
             throw new IllegalArgumentException("memberId required");
         if (helper.isNullOrEmpty(firstName))
             throw new IllegalArgumentException("firstName required");
@@ -23,7 +23,7 @@ public class UserProfileFactory {
             throw new IllegalArgumentException("lastName required");
         if (helper.isNullOrEmpty(gender))
             throw new IllegalArgumentException("gender required");
-        return new UserProfile.Builder().memberId(memberId).firstName(firstName).
+        return new UserProfile.Builder().profileId(profileId).firstName(firstName).
                 lastName(lastName).gender(gender).dateOfBirth(dateOfBirth).build();
 
 

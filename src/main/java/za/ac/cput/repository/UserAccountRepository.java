@@ -1,4 +1,6 @@
 package za.ac.cput.repository;
 
-public interface UserAccountRepository {
+import za.ac.cput.entity.UserAccount;
+
+public interface UserAccountRepository extends IRepository<UserAccount,String> {
 }

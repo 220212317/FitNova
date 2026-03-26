@@ -18,9 +18,9 @@ public class UserAccountFactory
     RoleType role, LocalDate registrationDate
     ) {
     if(helper.isNullOrEmpty(accountId))
-        throw new IllegalArgumentException("AccountId aquired");
+        throw new IllegalArgumentException("AccountId required");
      if(helper.isNullOrEmpty(email))
-         throw new IllegalArgumentException("Invalid email");
+         throw new IllegalArgumentException(" email required");
      if(helper.isNullOrEmpty(password))
          throw new IllegalArgumentException("Password is required");
 
