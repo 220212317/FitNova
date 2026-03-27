@@ -12,13 +12,4 @@ import java.util.List;
 
 public interface AddressRepository extends IRepository<Address, String> {
 
-    Address create(Address address);
-
-    Address read(String id);
-
-    Address update(Address address);
-
-    boolean delete(String addressId);
-
-    List<Address> getAll();
 }

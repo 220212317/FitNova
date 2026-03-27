@@ -17,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserProfileFactoryTest {
 
-    private static final String PROFILE_ID   = "P001";
-    private static final String FIRST_NAME   = "Avuyile";
-    private static final String LAST_NAME    = "Sitoyi";
-    private static final String GENDER       = "Male";
-    private static final LocalDate DOB       = LocalDate.of(2000, 5, 15);
+    private static final String PROFILE_ID = "P001";
+    private static final String FIRST_NAME = "Avuyile";
+    private static final String LAST_NAME = "Sitoyi";
+    private static final String GENDER = "Male";
+    private static final LocalDate DOB = LocalDate.of(2000, 5, 15);
 
 
     @Test
@@ -76,7 +76,6 @@ class UserProfileFactoryTest {
     }
 
 
-
     @Test
     void testCreateUserProfile_Fail_NullProfileId() {
         assertThrows(IllegalArgumentException.class, () ->
@@ -104,7 +103,6 @@ class UserProfileFactoryTest {
                 UserProfileFactory.CreateUserProfile(
                         PROFILE_ID, FIRST_NAME, LAST_NAME, null, DOB));
     }
-
 
 
     @Test
@@ -136,7 +134,6 @@ class UserProfileFactoryTest {
     }
 
 
-
     @Test
     void testTwoProfiles_AreIndependent() {
         UserProfile profile1 = UserProfileFactory.CreateUserProfile(
@@ -146,6 +143,6 @@ class UserProfileFactoryTest {
 
         assertNotEquals(profile1.getProfileId(), profile2.getProfileId());
         assertNotEquals(profile1.getFirstName(), profile2.getFirstName());
-        assertNotEquals(profile1.getLastName(),  profile2.getLastName());
+        assertNotEquals(profile1.getLastName(), profile2.getLastName());
     }
 }

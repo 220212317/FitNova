@@ -2,7 +2,6 @@ package za.ac.cput.repository;
 
 
 /**
-
  * 26March 2026
  * Author: Avuyile Sitoyi
  * (240971051)
@@ -81,7 +80,6 @@ class UserProfileRepositoryTest {
     }
 
 
-
     @Test
     void testRead_ExistingProfile_NotNull() {
         repo.create(profile1);
@@ -106,7 +104,6 @@ class UserProfileRepositoryTest {
     }
 
 
-
     @Test
     void testReadAll_NotNull() {
         assertNotNull(repo.getAll());
@@ -127,7 +124,6 @@ class UserProfileRepositoryTest {
         repo.create(profile1);
         assertEquals(sizeBefore + 1, repo.getAll().size());
     }
-
 
 
     @Test
@@ -176,7 +172,6 @@ class UserProfileRepositoryTest {
         UserProfile result = repo.update(updated);
         assertEquals("Updated", result.getLastName());
     }
-
 
 
     @Test
