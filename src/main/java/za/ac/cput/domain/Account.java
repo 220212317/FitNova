@@ -2,10 +2,10 @@ package za.ac.cput.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 /*
  * Author: Athi Sintiya
@@ -22,6 +22,9 @@ public class Account {
     private String password;
     private LocalDate registrationDate;
 
+    @OneToOne(mappedBy = "account")
+    private User user;
+
     protected Account() {
     }
 
@@ -30,6 +33,7 @@ public class Account {
         this.email = builder.email;
         this.password = builder.password;
         this.registrationDate = builder.registrationDate;
+        this.user = builder.user;
     }
 
     public String getAccountId() {
@@ -48,7 +52,9 @@ public class Account {
         return registrationDate;
     }
 
-
+    public User getUser() {
+        return user;
+    }
 
     @Override
     public String toString() {
@@ -65,6 +71,7 @@ public class Account {
         private String email;
         private String password;
         private LocalDate registrationDate;
+        private User user;
 
         public Builder setAccountId(String accountId) {
             this.accountId = accountId;
@@ -86,11 +93,17 @@ public class Account {
             return this;
         }
 
+        public Builder setUser(User user) {
+            this.user = user;
+            return this;
+        }
+
         public Builder copy(Account account) {
-            this.accountId = account.getAccountId();
-            this.email = account.getEmail();
-            this.password = account.getPassword();
-            this.registrationDate = account.getRegistrationDate();
+            this.accountId = account.accountId;
+            this.email = account.email;
+            this.password = account.password;
+            this.registrationDate = account.registrationDate;
+            this.user = account.user;
             return this;
         }
 
