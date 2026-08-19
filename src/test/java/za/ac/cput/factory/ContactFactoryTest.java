@@ -17,14 +17,14 @@ class ContactFactoryTest {
         assertNotNull(contact.getContactId());
         assertEquals("07123456789", contact.getCellphoneNumber());
         assertEquals("0819875642", contact.getAlternativeCellphoneNumber());
-        assertEquals("lisa@gmail.com",contact.getEmailAddress());
+        assertEquals("lisa@gmail.com", contact.getEmailAddress());
     }
 
     @Test
     void createContactWithEmptyCellphoneNumber() {
-        Contact contact = ContactFactory.createContact( "",
+        Contact contact = ContactFactory.createContact("",
                 "0711234567",
-                "lisakhanya@gmail.com" );
+                "lisakhanya@gmail.com");
 
         assertNull(contact);
     }
@@ -32,46 +32,46 @@ class ContactFactoryTest {
 
     @Test
     void createContactWithNullCellphoneNumber() {
-     Contact contact = ContactFactory.createContact( null,
-            "0711234567",
-            "lisakhanya@gmail.com" );
-
-        assertNull(contact);
-    }
-
-    @Test
-    void createContactWithEmptyEmail(){
-        Contact contact = ContactFactory.createContact( "0821234567",
+        Contact contact = ContactFactory.createContact(null,
                 "0711234567",
-                "" );
+                "lisakhanya@gmail.com");
 
         assertNull(contact);
     }
 
     @Test
-    void createContactWithNullEmail(){
-        Contact contact = ContactFactory.createContact( "0821234567",
+    void createContactWithEmptyEmail() {
+        Contact contact = ContactFactory.createContact("0821234567",
                 "0711234567",
-                null );
+                "");
 
         assertNull(contact);
     }
 
     @Test
-    void createContactWithInvalidEmail(){
-        Contact contact = ContactFactory.createContact( "0821234567",
+    void createContactWithNullEmail() {
+        Contact contact = ContactFactory.createContact("0821234567",
                 "0711234567",
-                "invalid-email" );
+                null);
 
         assertNull(contact);
     }
 
     @Test
-    void createContactWithDifferentValidEmail(){
-        Contact contact = ContactFactory.createContact( "0839876543",
+    void createContactWithInvalidEmail() {
+        Contact contact = ContactFactory.createContact("0821234567",
+                "0711234567",
+                "invalid-email");
+
+        assertNull(contact);
+    }
+
+    @Test
+    void createContactWithDifferentValidEmail() {
+        Contact contact = ContactFactory.createContact("0839876543",
                 "0729876543",
-                "test.user@gmail.com" );
+                "test.user@gmail.com");
         assertNotNull(contact);
-        assertNotNull("test.user@gmail.com" , contact.getEmailAddress());
+        assertNotNull("test.user@gmail.com", contact.getEmailAddress());
     }
 }
