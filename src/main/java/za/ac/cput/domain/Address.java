@@ -2,9 +2,8 @@ package za.ac.cput.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-
-import java.util.Objects;
 
 /*
  * Author: Athi Sintiya
@@ -25,6 +24,9 @@ public class Address {
     private String province;
     private String country;
 
+    @OneToOne(mappedBy = "address")
+    private User user;
+
     protected Address() {
     }
 
@@ -37,6 +39,7 @@ public class Address {
         this.postalCode = builder.postalCode;
         this.province = builder.province;
         this.country = builder.country;
+        this.user = builder.user;
     }
 
     public String getAddressId() {
@@ -71,7 +74,9 @@ public class Address {
         return country;
     }
 
-
+    public User getUser() {
+        return user;
+    }
 
     @Override
     public String toString() {
@@ -96,6 +101,7 @@ public class Address {
         private String postalCode;
         private String province;
         private String country;
+        private User user;
 
         public Builder setAddressId(String addressId) {
             this.addressId = addressId;
@@ -137,15 +143,21 @@ public class Address {
             return this;
         }
 
+        public Builder setUser(User user) {
+            this.user = user;
+            return this;
+        }
+
         public Builder copy(Address address) {
-            this.addressId = address.getAddressId();
-            this.streetNumber = address.getStreetNumber();
-            this.streetName = address.getStreetName();
-            this.suburbName = address.getSuburbName();
-            this.city = address.getCity();
-            this.postalCode = address.getPostalCode();
-            this.province = address.getProvince();
-            this.country = address.getCountry();
+            this.addressId = address.addressId;
+            this.streetNumber = address.streetNumber;
+            this.streetName = address.streetName;
+            this.suburbName = address.suburbName;
+            this.city = address.city;
+            this.postalCode = address.postalCode;
+            this.province = address.province;
+            this.country = address.country;
+            this.user = address.user;
             return this;
         }
 
