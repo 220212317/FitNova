@@ -27,7 +27,7 @@ public class User {
     private Account account;
 
     @OneToOne
-    @JoinColumn(name = "demographic_id", referencedColumnName = "demographyId")
+    @JoinColumn(name = "demographic_id", referencedColumnName = "demography_id")
     private Demographic demographic;
 
     @OneToOne
@@ -42,7 +42,7 @@ public class User {
     @JoinColumn(name = "next_of_kin_contact_id", referencedColumnName = "nextOfKinContactId")
     private NextOfKinContact nextOfKinContact;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "member")
     private List<Booking> bookings = new ArrayList<>();
 
     @OneToMany(mappedBy = "trainer")
