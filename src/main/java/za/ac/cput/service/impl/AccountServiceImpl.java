@@ -41,7 +41,10 @@ public class AccountServiceImpl implements IAccountService {
 
     @Override
     public boolean delete(String accountId) {
-        repository.deleteById(accountId);
+        if (repository.existsById(accountId)) {
+            repository.deleteById(accountId);
+            return true;
+        }
         return false;
     }
 
