@@ -6,9 +6,10 @@ import za.ac.cput.domain.User;
 import za.ac.cput.domain.enums.SlotStatus;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static za.ac.cput.domain.enums.SlotStatus.*;
 
 class AvailabilitySlotFactoryTest {
 
@@ -24,24 +25,33 @@ class AvailabilitySlotFactoryTest {
         AvailabilitySlot slot = AvailabilitySlotFactory.createAvailabilitySlot(
                 "SLOT001",
                 LocalDate.of(2026, 8, 20),
-                LocalDateTime.of(2026, 8, 20, 9, 0),
-                LocalDateTime.of(2026, 8, 20, 10, 0),
-                SlotStatus.AVAILABLE,
+                LocalTime.of(9, 0),
+                LocalTime.of(10, 0),
+                AVAILABLE,
                 trainer
         );
 
         assertNotNull(slot);
         assertEquals("SLOT001", slot.getSlotId());
-        assertEquals(LocalDate.of(2026, 8, 20), slot.getDate());
         assertEquals(
-                LocalDateTime.of(2026, 8, 20, 9, 0),
+                LocalDate.of(2026, 8, 20),
+                slot.getDate()
+        );
+        assertEquals(
+                LocalTime.of(9, 0),
                 slot.getStartTime()
         );
         assertEquals(
-                LocalDateTime.of(2026, 8, 20, 10, 0),
+                LocalTime.of(10, 0),
                 slot.getEndTime()
         );
-        assertEquals(SlotStatus.AVAILABLE, slot.getStatus());
-        assertEquals(trainer, slot.getTrainer());
+        assertEquals(
+                AVAILABLE,
+                slot.getStatus()
+        );
+        assertEquals(
+                trainer,
+                slot.getTrainer()
+        );
     }
 }
