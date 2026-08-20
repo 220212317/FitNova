@@ -44,8 +44,12 @@ public class UserRoleServiceImpl implements IUserRoleService {
     }
 
     @Override
-    public void delete(String userRoleId) {
+    public boolean delete(String userRoleId) {
+        if (!userRoleRepository.existsById(userRoleId)) {
+            return false;
+        }
         userRoleRepository.deleteById(userRoleId);
+        return true;
     }
 
     @Override
