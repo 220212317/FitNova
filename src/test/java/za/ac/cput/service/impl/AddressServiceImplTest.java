@@ -42,7 +42,7 @@ class AddressServiceImplTest {
 
     @Test
     @Order(1)
-    void a_create() {
+    void create() {
         Address created = addressService.create(address);
         assertNotNull(created);
         assertEquals(address.getAddressId(), created.getAddressId());
@@ -51,7 +51,7 @@ class AddressServiceImplTest {
 
     @Test
     @Order(2)
-    void b_read() {
+    void read() {
         Address read = addressService.read(address.getAddressId());
         assertNotNull(read);
         assertEquals(address.getCity(), read.getCity());
@@ -60,7 +60,7 @@ class AddressServiceImplTest {
 
     @Test
     @Order(3)
-    void c_update() {
+    void update() {
         Address updatedAddress = new Address.Builder()
                 .copy(address)
                 .setSuburbName("Zonnebloem")
@@ -73,7 +73,7 @@ class AddressServiceImplTest {
 
     @Test
     @Order(4)
-    void d_findAddressByCity() {
+    void findAddressByCity() {
         List<Address> addresses = addressService.findAddressByCity(CITY);
         assertNotNull(addresses);
         assertFalse(addresses.isEmpty());
@@ -82,7 +82,7 @@ class AddressServiceImplTest {
 
     @Test
     @Order(5)
-    void e_findAddressByProvince() {
+    void findAddressByProvince() {
         List<Address> addresses = addressService.findAddressByProvince(PROVINCE);
         assertNotNull(addresses);
         assertFalse(addresses.isEmpty());
@@ -91,7 +91,7 @@ class AddressServiceImplTest {
 
     @Test
     @Order(6)
-    void f_findAddressByPostalCode() {
+    void findAddressByPostalCode() {
         List<Address> addresses = addressService.findAddressByPostalCode(POSTAL_CODE);
         assertNotNull(addresses);
         assertFalse(addresses.isEmpty());
@@ -100,7 +100,7 @@ class AddressServiceImplTest {
 
     @Test
     @Order(7)
-    void g_getAll() {
+    void getAll() {
         List<Address> all = addressService.getAll();
         assertNotNull(all);
         assertFalse(all.isEmpty());
@@ -109,7 +109,7 @@ class AddressServiceImplTest {
 
     @Test
     @Order(8)
-    void h_delete() {
+    void delete() {
         addressService.delete(address.getAddressId());
         Address read = addressService.read(address.getAddressId());
         assertNull(read);
