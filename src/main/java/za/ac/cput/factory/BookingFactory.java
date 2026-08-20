@@ -7,7 +7,11 @@ import za.ac.cput.domain.enums.BookingStatus;
 import za.ac.cput.util.Helper;
 
 import java.time.LocalDateTime;
-
+/*
+* Avuyile Sitoyi
+* 240971051
+*
+* */
 public class BookingFactory {
     public static Booking createBooking(String bookingId,
                                         LocalDateTime bookingDateTime,
@@ -28,15 +32,22 @@ public class BookingFactory {
             return null;
         }
 
-
+        String finalId;
+        if (bookingId == null || bookingId.trim().isEmpty()) {
+            finalId = Helper.generateId();
+        } else {
+            finalId = bookingId;
+        }
 
         return new Booking.Builder()
-                .setBookingId(Helper.generateId())
+                .setBookingId(finalId)
                 .setBookingDateTime(bookingDateTime)
                 .setStatus(status)
                 .setMember(member)
                 .setSlot(slot)
                 .build();
+
+
     }
 
 }
