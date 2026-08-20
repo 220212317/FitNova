@@ -5,6 +5,7 @@ import za.ac.cput.domain.AvailabilitySlot;
 import za.ac.cput.domain.Booking;
 import za.ac.cput.domain.User;
 import za.ac.cput.domain.enums.BookingStatus;
+import za.ac.cput.domain.enums.SlotStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 public class BookingFactoryTest {
+
     private User buildMember() {
         return new User.Builder()
                 .setUserId("U001")
@@ -22,64 +24,75 @@ public class BookingFactoryTest {
                 .build();
     }
 
-//    private AvailabilitySlot buildSlot() {
-//        return new AvailabilitySlot.Builder()
-//                .setSlotId("S001")
-//                .setDate(LocalDate.now().plusDays(1))
-//                .setStartTime(LocalTime.of(9, 0))
-//                .setEndTime(LocalTime.of(10, 0))
-//                .setStatus(SlotStatus.AVAILABLE)
-//                .build();
-//    }
+    private User buildTrainer() {
+        return new User.Builder()
+                .setUserId("T001")
+                .setFirstName("Lindiwe")
+                .setLastName("Dube")
+                .setDateOfBirth(LocalDate.of(1990, 3, 15))
+                .build();
+    }
 
-//    @Test
-//    void testCreateBooking_ValidData_ReturnsBooking() {
-//        User member = buildMember();
-//        AvailabilitySlot slot = buildSlot();
-//        LocalDateTime bookingDateTime = LocalDateTime.now().plusDays(1);
-//
-//        Booking booking = BookingFactory.createBooking("B001", bookingDateTime, BookingStatus.CONFIRMED, member, slot);
-//
-//        assertNotNull(booking);
-//        assertEquals("B001", booking.getBookingId());
-//        assertEquals(bookingDateTime, booking.getBookingDateTime());
-//        assertEquals(BookingStatus.CONFIRMED, booking.getStatus());
-//        assertEquals(member, booking.getMember());
-//        assertEquals(slot, booking.getSlot());
-//    }
+    private AvailabilitySlot buildSlot() {
+        LocalDate slotDate = LocalDate.now().plusDays(1);
+        return new AvailabilitySlot.Builder()
+                .setSlotId("S001")
+                .setDate(slotDate)
+                .setStartTime(slotDate.atTime(9, 0))
+                .setEndTime(slotDate.atTime(10, 0))
+                .setStatus(SlotStatus.AVAILABLE)
+                .setTrainer(buildTrainer())
+                .build();
+    }
 
-//    @Test
-//    void testCreateBooking_NoIdSupplied_GeneratesId() {
-//        Booking booking = BookingFactory.createBooking(null, LocalDateTime.now().plusDays(1),
-//                BookingStatus.CONFIRMED, buildMember(), buildSlot());
-//
-//        assertNotNull(booking);
-//        assertFalse(booking.getBookingId() == null || booking.getBookingId().trim().isEmpty());
-//    }
+    @Test
+    void testCreateBooking_ValidData_ReturnsBooking() {
+        User member = buildMember();
+        AvailabilitySlot slot = buildSlot();
+        LocalDateTime bookingDateTime = LocalDateTime.now().plusDays(1);
 
-//    @Test
-//    void testCreateBooking_NullBookingDateTime_ReturnsNull() {
-//        Booking booking = BookingFactory.createBooking("B002", null,
-//                BookingStatus.CONFIRMED, buildMember(), buildSlot());
-//
-//        assertNull(booking);
-//    }
+        Booking booking = BookingFactory.createBooking("B001", bookingDateTime, BookingStatus.CONFIRMED, member, slot);
 
-//    @Test
-//    void testCreateBooking_NullStatus_ReturnsNull() {
-//        Booking booking = BookingFactory.createBooking("B003", LocalDateTime.now().plusDays(1),
-//                null, buildMember(), buildSlot());
-//
-//        assertNull(booking);
-//    }
+        assertNotNull(booking);
+        assertEquals("B001", booking.getBookingId());
+        assertEquals(bookingDateTime, booking.getBookingDateTime());
+        assertEquals(BookingStatus.CONFIRMED, booking.getStatus());
+        assertEquals(member, booking.getMember());
+        assertEquals(slot, booking.getSlot());
+    }
 
-//    @Test
-//    void testCreateBooking_NullMember_ReturnsNull() {
-//        Booking booking = BookingFactory.createBooking("B004", LocalDateTime.now().plusDays(1),
-//                BookingStatus.CONFIRMED, null, buildSlot());
-//
-//        assertNull(booking);
-//    }
+    @Test
+    void testCreateBooking_NoIdSupplied_GeneratesId() {
+        Booking booking = BookingFactory.createBooking(null, LocalDateTime.now().plusDays(1),
+                BookingStatus.CONFIRMED, buildMember(), buildSlot());
+
+        assertNotNull(booking);
+        assertFalse(booking.getBookingId() == null || booking.getBookingId().trim().isEmpty());
+    }
+
+    @Test
+    void testCreateBooking_NullBookingDateTime_ReturnsNull() {
+        Booking booking = BookingFactory.createBooking("B002", null,
+                BookingStatus.CONFIRMED, buildMember(), buildSlot());
+
+        assertNull(booking);
+    }
+
+    @Test
+    void testCreateBooking_NullStatus_ReturnsNull() {
+        Booking booking = BookingFactory.createBooking("B003", LocalDateTime.now().plusDays(1),
+                null, buildMember(), buildSlot());
+
+        assertNull(booking);
+    }
+
+    @Test
+    void testCreateBooking_NullMember_ReturnsNull() {
+        Booking booking = BookingFactory.createBooking("B004", LocalDateTime.now().plusDays(1),
+                BookingStatus.CONFIRMED, null, buildSlot());
+
+        assertNull(booking);
+    }
 
     @Test
     void testCreateBooking_NullSlot_ReturnsNull() {
