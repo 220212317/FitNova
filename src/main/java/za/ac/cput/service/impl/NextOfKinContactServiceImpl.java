@@ -1,4 +1,5 @@
 package za.ac.cput.service.impl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import za.ac.cput.domain.NextOfKinContact;
 import za.ac.cput.repository.INextOfKinContactRepository;
@@ -12,6 +13,7 @@ public class NextOfKinContactServiceImpl  implements INextOfKinContactService {
 
     private INextOfKinContactRepository repository;
 
+    @Autowired
     public NextOfKinContactServiceImpl(INextOfKinContactRepository repository) {
         this.repository = repository;
     }
@@ -40,25 +42,19 @@ public class NextOfKinContactServiceImpl  implements INextOfKinContactService {
     }
 
     @Override
-    public Optional<NextOfKinContact> findByfirstName(String firstName) {
+    public NextOfKinContact findByfirstName(String firstName) {
         return repository.findByfirstName(firstName);
     }
 
     @Override
-    public Optional<NextOfKinContact> findBylastName(String lastName) {
+    public NextOfKinContact findBylastName(String lastName) {
         return repository.findBylastName(lastName);
     }
 
     @Override
-    public Optional<NextOfKinContact> findByrelationship(String relationship) {
+    public NextOfKinContact findByrelationship(String relationship) {
         return repository.findByrelationship(relationship);
     }
-
-    @Override
-    public Optional<NextOfKinContact> findBycellphoneNumber(String cellphoneNumber) {
-        return repository.findBycellphoneNumber(cellphoneNumber);
-    }
-
     @Override
     public boolean delete(String nextOfKinContactId) {
         if(repository.existsById(nextOfKinContactId)){
