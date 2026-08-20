@@ -40,8 +40,9 @@ public class AccountServiceImpl implements IAccountService {
     }
 
     @Override
-    public void delete(String accountId) {
+    public boolean delete(String accountId) {
         repository.deleteById(accountId);
+        return false;
     }
 
     @Override
