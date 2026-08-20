@@ -38,7 +38,7 @@ class AccountServiceImplTest {
 
     @Test
     @Order(1)
-    void a_create() {
+    void create() {
         Account created = accountService.create(account);
         assertNotNull(created);
         assertEquals(account.getAccountId(), created.getAccountId());
@@ -47,7 +47,7 @@ class AccountServiceImplTest {
 
     @Test
     @Order(2)
-    void b_read() {
+    void read() {
         Account read = accountService.read(account.getAccountId());
         assertNotNull(read);
         assertEquals(account.getEmail(), read.getEmail());
@@ -56,7 +56,7 @@ class AccountServiceImplTest {
 
     @Test
     @Order(3)
-    void c_update() {
+    void update() {
         Account updatedAccount = new Account.Builder()
                 .copy(account)
                 .setPassword("NewSecurePass456")
@@ -69,7 +69,7 @@ class AccountServiceImplTest {
 
     @Test
     @Order(4)
-    void d_findByEmail() {
+    void findByEmail() {
         Account found = accountService.findByEmail(EMAIL);
         assertNotNull(found);
         assertEquals(EMAIL, found.getEmail());
@@ -78,7 +78,7 @@ class AccountServiceImplTest {
 
     @Test
     @Order(5)
-    void e_findAccountByRegistrationDate() {
+    void findAccountByRegistrationDate() {
         List<Account> accounts = accountService.findAccountByRegistrationDate(REG_DATE);
         assertNotNull(accounts);
         assertFalse(accounts.isEmpty());
@@ -87,7 +87,7 @@ class AccountServiceImplTest {
 
     @Test
     @Order(6)
-    void f_getAll() {
+    void getAll() {
         List<Account> all = accountService.getAll();
         assertNotNull(all);
         assertFalse(all.isEmpty());
@@ -96,7 +96,7 @@ class AccountServiceImplTest {
 
     @Test
     @Order(7)
-    void g_delete() {
+    void delete() {
         accountService.delete(account.getAccountId());
         Account read = accountService.read(account.getAccountId());
         assertNull(read);
