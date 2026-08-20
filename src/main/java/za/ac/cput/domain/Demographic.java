@@ -50,8 +50,8 @@ public class Demographic {
     public String toString() {
         return "Demographic{" +
                 "demographyId='" + demographyId + '\'' +
-                ", gender=" + gender +
-                ", race=" + race +
+                ", genderId=" + (gender != null ? gender.getGenderId() : null) +
+                ", raceId=" + (race != null ? race.getRaceId() : null) +
                 '}';
     }
 
