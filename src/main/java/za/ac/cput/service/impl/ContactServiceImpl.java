@@ -1,4 +1,5 @@
 package za.ac.cput.service.impl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import za.ac.cput.domain.Contact;
 import za.ac.cput.repository.IContactRepository;
@@ -12,6 +13,7 @@ public class ContactServiceImpl implements IContactService {
 
     private IContactRepository repository;
 
+    @Autowired
     public ContactServiceImpl(IContactRepository repository) {
         this.repository = repository;
     }
@@ -35,12 +37,12 @@ public class ContactServiceImpl implements IContactService {
     }
 
     @Override
-    public Optional<Contact> findByCellphoneNumber(String cellphoneNumber) {
+    public Contact findByCellphoneNumber(String cellphoneNumber) {
         return repository.findByCellphoneNumber(cellphoneNumber);
     }
 
     @Override
-    public Optional<Contact> findByEmailAddress(String emailAddress) {
+    public Contact findByEmailAddress(String emailAddress) {
         return repository.findByEmailAddress(emailAddress);
     }
 
