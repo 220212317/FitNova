@@ -24,15 +24,6 @@ public class BookingFactoryTest {
                 .build();
     }
 
-    private User buildTrainer() {
-        return new User.Builder()
-                .setUserId("T001")
-                .setFirstName("Lindiwe")
-                .setLastName("Dube")
-                .setDateOfBirth(LocalDate.of(1990, 3, 15))
-                .build();
-    }
-
     private AvailabilitySlot buildSlot() {
         LocalDate slotDate = LocalDate.now().plusDays(1);
         return new AvailabilitySlot.Builder()
@@ -41,7 +32,6 @@ public class BookingFactoryTest {
                 .setStartTime(slotDate.atTime(9, 0))
                 .setEndTime(slotDate.atTime(10, 0))
                 .setStatus(SlotStatus.AVAILABLE)
-                .setTrainer(buildTrainer())
                 .build();
     }
 
