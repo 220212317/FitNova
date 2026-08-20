@@ -12,7 +12,7 @@ import jakarta.persistence.OneToMany;
 import za.ac.cput.domain.enums.SlotStatus;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +27,8 @@ public class AvailabilitySlot {
     private String slotId;
 
     private LocalDate date;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalTime startTime;
+    private LocalTime endTime;
 
     @Enumerated(EnumType.STRING)
     private SlotStatus status;
@@ -63,11 +63,11 @@ public class AvailabilitySlot {
         return date;
     }
 
-    public LocalDateTime getStartTime() {
+    public LocalTime getStartTime() {
         return startTime;
     }
 
-    public LocalDateTime getEndTime() {
+    public LocalTime getEndTime() {
         return endTime;
     }
 
@@ -87,8 +87,8 @@ public class AvailabilitySlot {
 
         private String slotId;
         private LocalDate date;
-        private LocalDateTime startTime;
-        private LocalDateTime endTime;
+        private LocalTime startTime;
+        private LocalTime endTime;
         private SlotStatus status;
         private User trainer;
         private List<Booking> bookings = new ArrayList<>();
@@ -103,12 +103,12 @@ public class AvailabilitySlot {
             return this;
         }
 
-        public Builder setStartTime(LocalDateTime startTime) {
+        public Builder setStartTime(LocalTime startTime) {
             this.startTime = startTime;
             return this;
         }
 
-        public Builder setEndTime(LocalDateTime endTime) {
+        public Builder setEndTime(LocalTime endTime) {
             this.endTime = endTime;
             return this;
         }
