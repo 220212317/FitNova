@@ -39,8 +39,9 @@ public class AddressServiceImpl implements IAddressService {
     }
 
     @Override
-    public void delete(String addressId) {
+    public boolean delete(String addressId) {
         repository.deleteById(addressId);
+        return false;
     }
 
     @Override
