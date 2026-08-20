@@ -4,6 +4,6 @@ import java.util.Optional;
 //Lisakhanya Tshokolo 220239215
 
 public interface IContactService extends IService<Contact,String> {
-    Optional<Contact> findByCellphoneNumber(String cellphoneNumber);
-    Optional<Contact> findByEmailAddress(String emailAddress);
+    Contact findByCellphoneNumber(String cellphoneNumber);
+    Contact findByEmailAddress(String emailAddress);
 }
