@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 public class BookingFactoryTest {
-
     private User buildMember() {
         return new User.Builder()
                 .setUserId("U001")
@@ -25,24 +24,13 @@ public class BookingFactoryTest {
                 .build();
     }
 
-    private User buildTrainer() {
-        return new User.Builder()
-                .setUserId("T001")
-                .setFirstName("Lindiwe")
-                .setLastName("Dube")
-                .setDateOfBirth(LocalDate.of(1990, 3, 15))
-                .build();
-    }
-
     private AvailabilitySlot buildSlot() {
-        LocalDate slotDate = LocalDate.now().plusDays(1);
         return new AvailabilitySlot.Builder()
                 .setSlotId("S001")
-                .setDate(slotDate)
+                .setDate(LocalDate.now().plusDays(1))
                 .setStartTime(LocalTime.of(9, 0))
                 .setEndTime(LocalTime.of(10, 0))
                 .setStatus(SlotStatus.AVAILABLE)
-                .setTrainer(buildTrainer())
                 .build();
     }
 
