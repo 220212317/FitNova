@@ -33,9 +33,10 @@ public class BookingFactory {
         }
 
 
+        String validBookingId = Helper.isNullOrEmpty(bookingId) ? Helper.generateId() : bookingId;
 
         return new Booking.Builder()
-                .setBookingId(Helper.generateId())
+                .setBookingId(validBookingId)
                 .setBookingDateTime(bookingDateTime)
                 .setStatus(status)
                 .setMember(member)
