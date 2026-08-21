@@ -55,6 +55,12 @@ public class NextOfKinContactServiceImpl  implements INextOfKinContactService {
     public NextOfKinContact findByrelationship(String relationship) {
         return repository.findByrelationship(relationship);
     }
+
+   /* @Override
+    public List<NextOfKinContact> findByUser_UserId(String userId) {
+        return repository.findByUser_UserId(userId);
+    }*/
+
     @Override
     public boolean delete(String nextOfKinContactId) {
         if(repository.existsById(nextOfKinContactId)){
