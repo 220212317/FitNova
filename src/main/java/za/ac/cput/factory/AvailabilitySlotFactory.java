@@ -5,7 +5,7 @@ import za.ac.cput.domain.User;
 import za.ac.cput.domain.enums.SlotStatus;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /*
  * Author: Phumelela Sakie (240040546)
@@ -16,8 +16,8 @@ public class AvailabilitySlotFactory {
     public static AvailabilitySlot createAvailabilitySlot(
             String slotId,
             LocalDate date,
-            LocalDateTime startTime,
-            LocalDateTime endTime,
+            LocalTime startTime,
+            LocalTime endTime,
             SlotStatus status,
             User trainer) {
 

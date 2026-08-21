@@ -7,6 +7,7 @@ import za.ac.cput.domain.enums.SlotStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,8 +25,8 @@ class AvailabilitySlotFactoryTest {
         AvailabilitySlot slot = AvailabilitySlotFactory.createAvailabilitySlot(
                 "SLOT001",
                 LocalDate.of(2026, 8, 20),
-                LocalDateTime.of(2026, 8, 20, 9, 0),
-                LocalDateTime.of(2026, 8, 20, 10, 0),
+                LocalTime.of( 8, 20, 9, 0),
+                LocalTime.of( 8, 20, 10, 0),
                 SlotStatus.AVAILABLE,
                 trainer
         );
