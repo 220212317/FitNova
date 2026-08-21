@@ -1,6 +1,8 @@
 package za.ac.cput.domain;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 //Lisakhanya Tshokolo 220239215
 
 @Entity
@@ -13,6 +15,10 @@ public class NextOfKinContact {
     private String relationship;
     private String cellphoneNumber;
 
+   /* @ManyToOne
+    @JoinColumn(name = "user_id" , referencedColumnName = "userId",nullable = false)
+    private User user;*/
+
     protected NextOfKinContact() {
     }
 
@@ -22,6 +28,7 @@ public class NextOfKinContact {
         this.lastName = builder.lastName;
         this.relationship = builder.relationship;
         this.cellphoneNumber = builder.cellphoneNumber;
+        //this.user = builder.user;
     }
 
     public String getNextOfKinContactId() {
@@ -49,12 +56,17 @@ public class NextOfKinContact {
         return cellphoneNumber;
     }
 
+    /*public User getUser() {
+        return user;
+    }*/
+
     public static class Builder {
         private String nextOfKinContactId;
         private String firstName;
         private String lastName;
         private String relationship;
         private String cellphoneNumber;
+       // private User user;
 
         public Builder setNextOfKinContactId(String nextOfKinContactId) {
             this.nextOfKinContactId = nextOfKinContactId;
@@ -80,6 +92,10 @@ public class NextOfKinContact {
             this.cellphoneNumber = cellphoneNumber;
             return this;
         }
+        /*public Builder setUser(User user) {
+            this.user = user;
+            return this;
+        }*/
 
         public Builder copy(za.ac.cput.domain.NextOfKinContact nextOfKinContact) {
             this.nextOfKinContactId = nextOfKinContact.nextOfKinContactId;
@@ -87,6 +103,7 @@ public class NextOfKinContact {
             this.lastName = nextOfKinContact.lastName;
             this.relationship = nextOfKinContact.relationship;
             this.cellphoneNumber = nextOfKinContact.cellphoneNumber;
+            //this.user = nextOfKinContact.user;
             return this;
         }
 
