@@ -9,12 +9,12 @@ import za.ac.cput.domain.enums.SlotStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class BookingFactoryTest {
-
     private User buildMember() {
         return new User.Builder()
                 .setUserId("U001")
@@ -25,12 +25,11 @@ public class BookingFactoryTest {
     }
 
     private AvailabilitySlot buildSlot() {
-        LocalDate slotDate = LocalDate.now().plusDays(1);
         return new AvailabilitySlot.Builder()
                 .setSlotId("S001")
-                .setDate(slotDate)
-                .setStartTime(slotDate.atTime(9, 0))
-                .setEndTime(slotDate.atTime(10, 0))
+                .setDate(LocalDate.now().plusDays(1))
+                .setStartTime(LocalTime.of(9, 0))
+                .setEndTime(LocalTime.of(10, 0))
                 .setStatus(SlotStatus.AVAILABLE)
                 .build();
     }
