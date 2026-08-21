@@ -32,22 +32,16 @@ public class BookingFactory {
             return null;
         }
 
-        String finalId;
-        if (bookingId == null || bookingId.trim().isEmpty()) {
-            finalId = Helper.generateId();
-        } else {
-            finalId = bookingId;
-        }
+
+        String validBookingId = Helper.isNullOrEmpty(bookingId) ? Helper.generateId() : bookingId;
 
         return new Booking.Builder()
-                .setBookingId(finalId)
+                .setBookingId(validBookingId)
                 .setBookingDateTime(bookingDateTime)
                 .setStatus(status)
                 .setMember(member)
                 .setSlot(slot)
                 .build();
-
-
     }
 
 }
