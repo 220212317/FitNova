@@ -46,6 +46,11 @@ public class ContactServiceImpl implements IContactService {
         return repository.findByEmailAddress(emailAddress);
     }
 
+    /*@Override
+    public Contact findByUser_UserId(String userId) {
+        return repository.findByUser_UserId(userId);
+    }*/
+
     @Override
     public List<Contact> getAll() {
         return repository.findAll();
