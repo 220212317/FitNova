@@ -9,6 +9,7 @@ import za.ac.cput.domain.enums.SlotStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,8 +39,8 @@ public class BookingFactoryTest {
         return new AvailabilitySlot.Builder()
                 .setSlotId("S001")
                 .setDate(slotDate)
-                .setStartTime(slotDate.atTime(9, 0))
-                .setEndTime(slotDate.atTime(10, 0))
+                .setStartTime(LocalTime.of(9, 0))
+                .setEndTime(LocalTime.of(10, 0))
                 .setStatus(SlotStatus.AVAILABLE)
                 .setTrainer(buildTrainer())
                 .build();
