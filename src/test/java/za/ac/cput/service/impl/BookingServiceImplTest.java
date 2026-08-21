@@ -8,6 +8,8 @@ import za.ac.cput.domain.Booking;
 import za.ac.cput.domain.User;
 import za.ac.cput.domain.enums.BookingStatus;
 import za.ac.cput.domain.enums.SlotStatus;
+import za.ac.cput.repository.IAvailabilitySlotRepository;
+import za.ac.cput.repository.IUserRepository;
 import za.ac.cput.service.IBookingService;
 
 import java.time.LocalDate;
@@ -28,23 +30,42 @@ class BookingServiceImplTest {
     @Autowired
     private IBookingService bookingService;
 
-    private User buildMember() {
-        return new User.Builder()
+    @Autowired
+    private IUserRepository userRepository;
+
+    @Autowired
+    private IAvailabilitySlotRepository availabilitySlotRepository;
+
+    private User persistedMember() {
+        User member = new User.Builder()
                 .setUserId("U-" + UUID.randomUUID())
-                .setFirstName("Avuyile")
-                .setLastName("Sitoyi")
+                .setFirstName("Lisakhanya")
+                .setLastName("Tshokolo")
                 .setDateOfBirth(LocalDate.of(2000, 3, 14))
                 .build();
+        return userRepository.save(member);
     }
 
-    private AvailabilitySlot buildSlot() {
-        return new AvailabilitySlot.Builder()
+    private User persistedTrainer() {
+        User trainer = new User.Builder()
+                .setUserId("U-" + UUID.randomUUID())
+                .setFirstName("Athi")
+                .setLastName("Gatyeni")
+                .setDateOfBirth(LocalDate.of(1990, 6, 1))
+                .build();
+        return userRepository.save(trainer);
+    }
+
+    private AvailabilitySlot persistedSlot() {
+        AvailabilitySlot slot = new AvailabilitySlot.Builder()
                 .setSlotId("S-" + UUID.randomUUID())
                 .setDate(LocalDate.now().plusDays(1))
                 .setStartTime(LocalTime.of(8, 0))
                 .setEndTime(LocalTime.of(9, 0))
                 .setStatus(SlotStatus.AVAILABLE)
+                .setTrainer(persistedTrainer())
                 .build();
+        return availabilitySlotRepository.save(slot);
     }
 
     private Booking buildBooking(User member, AvailabilitySlot slot, BookingStatus status) {
@@ -59,7 +80,7 @@ class BookingServiceImplTest {
 
     @Test
     void create() {
-        Booking booking = buildBooking(buildMember(), buildSlot(), BookingStatus.CONFIRMED);
+        Booking booking = buildBooking(persistedMember(), persistedSlot(), BookingStatus.CONFIRMED);
 
         Booking created = bookingService.create(booking);
 
@@ -70,7 +91,7 @@ class BookingServiceImplTest {
 
     @Test
     void read() {
-        Booking booking = bookingService.create(buildBooking(buildMember(), buildSlot(), BookingStatus.CONFIRMED));
+        Booking booking = bookingService.create(buildBooking(persistedMember(), persistedSlot(), BookingStatus.CONFIRMED));
 
         Booking read = bookingService.read(booking.getBookingId());
 
@@ -80,7 +101,7 @@ class BookingServiceImplTest {
 
     @Test
     void update() {
-        Booking booking = bookingService.create(buildBooking(buildMember(), buildSlot(), BookingStatus.CONFIRMED));
+        Booking booking = bookingService.create(buildBooking(persistedMember(), persistedSlot(), BookingStatus.CONFIRMED));
 
         Booking changed = new Booking.Builder()
                 .copy(booking)
@@ -95,7 +116,7 @@ class BookingServiceImplTest {
 
     @Test
     void delete() {
-        Booking booking = bookingService.create(buildBooking(buildMember(), buildSlot(), BookingStatus.CONFIRMED));
+        Booking booking = bookingService.create(buildBooking(persistedMember(), persistedSlot(), BookingStatus.CONFIRMED));
 
         boolean deleted = bookingService.delete(booking.getBookingId());
 
@@ -105,7 +126,7 @@ class BookingServiceImplTest {
 
     @Test
     void getAll() {
-        Booking booking = bookingService.create(buildBooking(buildMember(), buildSlot(), BookingStatus.CONFIRMED));
+        Booking booking = bookingService.create(buildBooking(persistedMember(), persistedSlot(), BookingStatus.CONFIRMED));
 
         List<Booking> bookings = bookingService.getAll();
 
@@ -115,8 +136,8 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingsByMember() {
-        User member = buildMember();
-        Booking booking = bookingService.create(buildBooking(member, buildSlot(), BookingStatus.CONFIRMED));
+        User member = persistedMember();
+        Booking booking = bookingService.create(buildBooking(member, persistedSlot(), BookingStatus.CONFIRMED));
 
         List<Booking> bookings = bookingService.getBookingsByMember(member.getUserId());
 
@@ -126,8 +147,8 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingsBySlot() {
-        AvailabilitySlot slot = buildSlot();
-        Booking booking = bookingService.create(buildBooking(buildMember(), slot, BookingStatus.CONFIRMED));
+        AvailabilitySlot slot = persistedSlot();
+        Booking booking = bookingService.create(buildBooking(persistedMember(), slot, BookingStatus.CONFIRMED));
 
         List<Booking> bookings = bookingService.getBookingsBySlot(slot.getSlotId());
 
@@ -137,12 +158,14 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingsByStatus() {
-        Booking booking = bookingService.create(buildBooking(buildMember(), buildSlot(), BookingStatus.CANCELLED));
+        Booking booking = bookingService.create(buildBooking(persistedMember(), persistedSlot(), BookingStatus.CANCELLED));
 
         List<Booking> bookings = bookingService.getBookingsByStatus(BookingStatus.CANCELLED);
 
         assertNotNull(bookings);
         assertTrue(bookings.stream().anyMatch(b -> b.getBookingId().equals(booking.getBookingId())));
     }
+
+
 
 }
