@@ -12,7 +12,6 @@ import jakarta.persistence.OneToMany;
 import za.ac.cput.domain.enums.SlotStatus;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
