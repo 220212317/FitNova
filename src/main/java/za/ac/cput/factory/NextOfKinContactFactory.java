@@ -6,7 +6,7 @@ import za.ac.cput.util.Helper;
 
 public class NextOfKinContactFactory {
     public static NextOfKinContact createNextOfKinContact(
-            /*User user*/ String firstName, String lastName, String relationship, String cellphoneNumber) {
+            String firstName, String lastName, String relationship, String cellphoneNumber) {
 
         /*if (user == null) {
             return null;
