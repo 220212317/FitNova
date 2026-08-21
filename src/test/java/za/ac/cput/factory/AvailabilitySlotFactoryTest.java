@@ -25,8 +25,8 @@ class AvailabilitySlotFactoryTest {
         AvailabilitySlot slot = AvailabilitySlotFactory.createAvailabilitySlot(
                 "SLOT001",
                 LocalDate.of(2026, 8, 20),
-                LocalTime.of( 8, 20, 9, 0),
-                LocalTime.of( 8, 20, 10, 0),
+                LocalTime.of(2026, 8),
+                LocalTime.of(2026, 8),
                 SlotStatus.AVAILABLE,
                 trainer
         );
