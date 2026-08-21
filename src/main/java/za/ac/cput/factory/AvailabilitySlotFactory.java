@@ -5,7 +5,6 @@ import za.ac.cput.domain.User;
 import za.ac.cput.domain.enums.SlotStatus;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /*
