@@ -9,6 +9,8 @@ import za.ac.cput.domain.User;
 import za.ac.cput.util.Helper;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * UserFactory.java
@@ -19,7 +21,7 @@ public class UserFactory {
 
     public static User createUser(String userId, String firstName, String lastName, LocalDate dateOfBirth,
                                   Account account, Demographic demographic, Address address,
-                                  Contact contact, NextOfKinContact nextOfKinContact) {
+                                  Contact contact, List<NextOfKinContact> nextOfKinContacts) {
 
         if (Helper.isNullOrEmpty(firstName)) {
             return null;
@@ -49,8 +51,8 @@ public class UserFactory {
             return null;
         }
 
-        if (nextOfKinContact == null) {
-            return null;
+        if (nextOfKinContacts == null) {
+            nextOfKinContacts = new ArrayList<>();
         }
 
         if (Helper.isNullOrEmpty(userId)) {
@@ -66,14 +68,14 @@ public class UserFactory {
                 .setDemographic(demographic)
                 .setAddress(address)
                 .setContact(contact)
-                .setNextOfKinContact(nextOfKinContact)
+                .setNextOfKinContacts(nextOfKinContacts)
                 .build();
     }
 
     public static User createUser(String firstName, String lastName, LocalDate dateOfBirth,
                                   Account account, Demographic demographic, Address address,
-                                  Contact contact, NextOfKinContact nextOfKinContact) {
+                                  Contact contact, List<NextOfKinContact> nextOfKinContacts) {
         return createUser(Helper.generateId(), firstName, lastName, dateOfBirth,
-                account, demographic, address, contact, nextOfKinContact);
+                account, demographic, address, contact, nextOfKinContacts);
     }
 }

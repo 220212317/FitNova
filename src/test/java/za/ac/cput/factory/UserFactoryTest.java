@@ -12,6 +12,7 @@ import za.ac.cput.domain.NextOfKinContact;
 import za.ac.cput.domain.User;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,21 +55,22 @@ class UserFactoryTest {
                 .build();
     }
 
-    private NextOfKinContact buildNextOfKinContact() {
-        return new NextOfKinContact.Builder()
+    private List<NextOfKinContact> buildNextOfKinContacts() {
+        NextOfKinContact nextOfKin = new NextOfKinContact.Builder()
                 .setNextOfKinContactId("NOK001")
                 .setFirstName("Zanele")
                 .setLastName("Nkosi")
                 .setRelationship("Sister")
                 .setCellphoneNumber("0837654321")
                 .build();
+        return List.of(nextOfKin);
     }
 
     @Test
     @Order(1)
     void createUserValid() {
         User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.of(1999, 5, 20),
-                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContact());
+                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContacts());
 
         assertNotNull(user);
         assertNotNull(user.getUserId());
@@ -79,7 +81,7 @@ class UserFactoryTest {
         assertNotNull(user.getDemographic());
         assertNotNull(user.getAddress());
         assertNotNull(user.getContact());
-        assertNotNull(user.getNextOfKinContact());
+        assertEquals(1, user.getNextOfKinContacts().size());
         System.out.println("Valid User: " + user);
     }
 
@@ -87,7 +89,7 @@ class UserFactoryTest {
     @Order(2)
     void createUserWithSuppliedId() {
         User user = UserFactory.createUser("U001", "Sipho", "Dlamini", LocalDate.of(1995, 3, 10),
-                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContact());
+                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContacts());
 
         assertNotNull(user);
         assertEquals("U001", user.getUserId());
@@ -96,90 +98,129 @@ class UserFactoryTest {
 
     @Test
     @Order(3)
-    void createUserNullFirstNameReturnsNull() {
-        User user = UserFactory.createUser(null, "Nkosi", LocalDate.of(1999, 5, 20),
-                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContact());
+    void createUserWithMultipleNextOfKinContacts() {
+        NextOfKinContact first = new NextOfKinContact.Builder()
+                .setNextOfKinContactId("NOK001")
+                .setFirstName("Zanele")
+                .setLastName("Nkosi")
+                .setRelationship("Sister")
+                .setCellphoneNumber("0837654321")
+                .build();
 
-        assertNull(user);
+        NextOfKinContact second = new NextOfKinContact.Builder()
+                .setNextOfKinContactId("NOK002")
+                .setFirstName("Bongani")
+                .setLastName("Nkosi")
+                .setRelationship("Brother")
+                .setCellphoneNumber("0831112222")
+                .build();
+
+        User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.of(1999, 5, 20),
+                buildAccount(), buildDemographic(), buildAddress(), buildContact(), List.of(first, second));
+
+        assertNotNull(user);
+        assertEquals(2, user.getNextOfKinContacts().size());
     }
 
     @Test
     @Order(4)
-    void createUserEmptyFirstNameReturnsNull() {
-        User user = UserFactory.createUser("   ", "Nkosi", LocalDate.of(1999, 5, 20),
-                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContact());
+    void createUserWithNoNextOfKinContactsIsValid() {
+        // UML: User 1 -> 0..* NextOfKinContact, so zero contacts is legal.
+        User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.of(1999, 5, 20),
+                buildAccount(), buildDemographic(), buildAddress(), buildContact(), List.of());
 
-        assertNull(user);
+        assertNotNull(user);
+        assertTrue(user.getNextOfKinContacts().isEmpty());
     }
 
     @Test
     @Order(5)
-    void createUserNullLastNameReturnsNull() {
-        User user = UserFactory.createUser("Thando", null, LocalDate.of(1999, 5, 20),
-                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContact());
+    void createUserWithNullNextOfKinContactsIsNormalisedToEmpty() {
+        User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.of(1999, 5, 20),
+                buildAccount(), buildDemographic(), buildAddress(), buildContact(), null);
 
-        assertNull(user);
+        assertNotNull(user);
+        assertNotNull(user.getNextOfKinContacts());
+        assertTrue(user.getNextOfKinContacts().isEmpty());
     }
 
     @Test
     @Order(6)
-    void createUserNullDateOfBirthReturnsNull() {
-        User user = UserFactory.createUser("Thando", "Nkosi", null,
-                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContact());
+    void createUserNullFirstNameReturnsNull() {
+        User user = UserFactory.createUser(null, "Nkosi", LocalDate.of(1999, 5, 20),
+                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContacts());
 
         assertNull(user);
     }
 
     @Test
     @Order(7)
-    void createUserFutureDateOfBirthReturnsNull() {
-        User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.now().plusDays(1),
-                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContact());
+    void createUserEmptyFirstNameReturnsNull() {
+        User user = UserFactory.createUser("   ", "Nkosi", LocalDate.of(1999, 5, 20),
+                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContacts());
 
         assertNull(user);
     }
 
     @Test
     @Order(8)
-    void createUserNullAccountReturnsNull() {
-        User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.of(1999, 5, 20),
-                null, buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContact());
+    void createUserNullLastNameReturnsNull() {
+        User user = UserFactory.createUser("Thando", null, LocalDate.of(1999, 5, 20),
+                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContacts());
 
         assertNull(user);
     }
 
     @Test
     @Order(9)
-    void createUserNullDemographicReturnsNull() {
-        User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.of(1999, 5, 20),
-                buildAccount(), null, buildAddress(), buildContact(), buildNextOfKinContact());
+    void createUserNullDateOfBirthReturnsNull() {
+        User user = UserFactory.createUser("Thando", "Nkosi", null,
+                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContacts());
 
         assertNull(user);
     }
 
     @Test
     @Order(10)
-    void createUserNullAddressReturnsNull() {
-        User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.of(1999, 5, 20),
-                buildAccount(), buildDemographic(), null, buildContact(), buildNextOfKinContact());
+    void createUserFutureDateOfBirthReturnsNull() {
+        User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.now().plusDays(1),
+                buildAccount(), buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContacts());
 
         assertNull(user);
     }
 
     @Test
     @Order(11)
-    void createUserNullContactReturnsNull() {
+    void createUserNullAccountReturnsNull() {
         User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.of(1999, 5, 20),
-                buildAccount(), buildDemographic(), buildAddress(), null, buildNextOfKinContact());
+                null, buildDemographic(), buildAddress(), buildContact(), buildNextOfKinContacts());
 
         assertNull(user);
     }
 
     @Test
     @Order(12)
-    void createUserNullNextOfKinContactReturnsNull() {
+    void createUserNullDemographicReturnsNull() {
         User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.of(1999, 5, 20),
-                buildAccount(), buildDemographic(), buildAddress(), buildContact(), null);
+                buildAccount(), null, buildAddress(), buildContact(), buildNextOfKinContacts());
+
+        assertNull(user);
+    }
+
+    @Test
+    @Order(13)
+    void createUserNullAddressReturnsNull() {
+        User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.of(1999, 5, 20),
+                buildAccount(), buildDemographic(), null, buildContact(), buildNextOfKinContacts());
+
+        assertNull(user);
+    }
+
+    @Test
+    @Order(14)
+    void createUserNullContactReturnsNull() {
+        User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.of(1999, 5, 20),
+                buildAccount(), buildDemographic(), buildAddress(), null, buildNextOfKinContacts());
 
         assertNull(user);
     }

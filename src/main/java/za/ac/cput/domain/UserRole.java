@@ -13,7 +13,6 @@ import jakarta.persistence.*;
 public class UserRole {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String userRoleId;
 
     @ManyToOne
