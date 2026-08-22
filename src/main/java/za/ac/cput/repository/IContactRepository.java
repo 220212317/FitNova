@@ -7,5 +7,4 @@ import java.util.Optional;
 public interface IContactRepository extends JpaRepository<Contact, String> {
     Contact findByCellphoneNumber(String cellphoneNumber);
     Contact findByEmailAddress(String emailAddress);
-    //Contact findByUser_UserId(String userId);
 }
