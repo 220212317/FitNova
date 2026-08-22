@@ -22,23 +22,23 @@ public class User {
     private String lastName;
     private LocalDate dateOfBirth;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "account_id", referencedColumnName = "accountId")
     private Account account;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "demographic_id", referencedColumnName = "demography_id")
     private Demographic demographic;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "address_id", referencedColumnName = "addressId")
     private Address address;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "contact_id", referencedColumnName = "contactId")
     private Contact contact;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "next_of_kin_contact_id", referencedColumnName = "nextOfKinContactId")
     private NextOfKinContact nextOfKinContact;
 
