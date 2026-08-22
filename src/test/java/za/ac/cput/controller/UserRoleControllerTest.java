@@ -18,7 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
- * Author: Collins Shibambo
+ * Author:  Collins Shibambo
  * 230093183
  */
 
@@ -29,6 +29,7 @@ class UserRoleControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    private String userBaseUrl = "/user";
     private String baseUrl = "/userrole";
 
     private static Account account = AccountFactory.createAccount(
@@ -65,6 +66,17 @@ class UserRoleControllerTest {
 
     @Test
     @Order(1)
+    void setupUser() {
+        String url = userBaseUrl + "/create";
+        ResponseEntity<User> response = restTemplate.postForEntity(url, user, User.class);
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        System.out.println("Setup - created User: " + response.getBody());
+    }
+
+    @Test
+    @Order(2)
     void create() {
         String url = baseUrl + "/create";
         ResponseEntity<UserRole> response = restTemplate.postForEntity(url, userRole, UserRole.class);
@@ -75,7 +87,7 @@ class UserRoleControllerTest {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     void read() {
         String url = baseUrl + "/read/" + userRole.getUserRoleId();
         ResponseEntity<UserRole> response = restTemplate.getForEntity(url, UserRole.class);
@@ -86,7 +98,7 @@ class UserRoleControllerTest {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     void readNotFound() {
         String url = baseUrl + "/read/NON-EXISTENT-ID";
         ResponseEntity<UserRole> response = restTemplate.getForEntity(url, UserRole.class);
@@ -94,7 +106,7 @@ class UserRoleControllerTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void findByUser() {
         String url = baseUrl + "/findByUser/" + user.getUserId();
         ResponseEntity<UserRole[]> response = restTemplate.getForEntity(url, UserRole[].class);
@@ -106,18 +118,19 @@ class UserRoleControllerTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void findByRole() {
         String url = baseUrl + "/findByRole/" + RoleType.MEMBER;
         ResponseEntity<UserRole[]> response = restTemplate.getForEntity(url, UserRole[].class);
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().length > 0);
         System.out.println("Found by role: " + List.of(response.getBody()));
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     void findByUserAndRole() {
         String url = baseUrl + "/findByUserAndRole/" + user.getUserId() + "/" + RoleType.MEMBER;
         ResponseEntity<UserRole> response = restTemplate.getForEntity(url, UserRole.class);
@@ -128,7 +141,7 @@ class UserRoleControllerTest {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     void update() {
         String url = baseUrl + "/update";
         UserRole updatedUserRole = new UserRole.Builder().copy(userRole)
@@ -155,7 +168,7 @@ class UserRoleControllerTest {
     }
 
     @Test
-    @Order(8)
+    @Order(9)
     void getAll() {
         String url = baseUrl + "/getAll";
         ResponseEntity<UserRole[]> response = restTemplate.getForEntity(url, UserRole[].class);
