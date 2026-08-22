@@ -4,6 +4,8 @@
      Date: 18 August 2026 */
 package za.ac.cput.domain;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -12,6 +14,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
 public class User {
 
     @Id
@@ -38,9 +41,8 @@ public class User {
     @JoinColumn(name = "contact_id", referencedColumnName = "contactId")
     private Contact contact;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "next_of_kin_contact_id", referencedColumnName = "nextOfKinContactId")
-    private NextOfKinContact nextOfKinContact;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NextOfKinContact> nextOfKinContacts = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
     private List<Booking> bookings = new ArrayList<>();
@@ -64,7 +66,7 @@ public class User {
         this.demographic = builder.demographic;
         this.address = builder.address;
         this.contact = builder.contact;
-        this.nextOfKinContact = builder.nextOfKinContact;
+        this.nextOfKinContacts = builder.nextOfKinContacts;
         this.bookings = builder.bookings;
         this.availabilitySlots = builder.availabilitySlots;
         this.userRoles = builder.userRoles;
@@ -102,8 +104,8 @@ public class User {
         return contact;
     }
 
-    public NextOfKinContact getNextOfKinContact() {
-        return nextOfKinContact;
+    public List<NextOfKinContact> getNextOfKinContacts() {
+        return nextOfKinContacts;
     }
 
     public List<Booking> getBookings() {
@@ -137,7 +139,7 @@ public class User {
         private Demographic demographic;
         private Address address;
         private Contact contact;
-        private NextOfKinContact nextOfKinContact;
+        private List<NextOfKinContact> nextOfKinContacts = new ArrayList<>();
         private List<Booking> bookings = new ArrayList<>();
         private List<AvailabilitySlot> availabilitySlots = new ArrayList<>();
         private List<UserRole> userRoles = new ArrayList<>();
@@ -182,8 +184,8 @@ public class User {
             return this;
         }
 
-        public Builder setNextOfKinContact(NextOfKinContact nextOfKinContact) {
-            this.nextOfKinContact = nextOfKinContact;
+        public Builder setNextOfKinContacts(List<NextOfKinContact> nextOfKinContacts) {
+            this.nextOfKinContacts = nextOfKinContacts;
             return this;
         }
 
@@ -211,7 +213,7 @@ public class User {
             this.demographic = user.demographic;
             this.address = user.address;
             this.contact = user.contact;
-            this.nextOfKinContact = user.nextOfKinContact;
+            this.nextOfKinContacts = user.nextOfKinContacts;
             this.bookings = user.bookings;
             this.availabilitySlots = user.availabilitySlots;
             this.userRoles = user.userRoles;
