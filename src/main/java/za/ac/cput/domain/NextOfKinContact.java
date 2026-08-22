@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "next_of_kin_contact")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "nextOfKinContactId")
 public class NextOfKinContact {
 
     @Id
