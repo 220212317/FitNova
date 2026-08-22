@@ -8,10 +8,6 @@ public class NextOfKinContactFactory {
     public static NextOfKinContact createNextOfKinContact(
             String firstName, String lastName, String relationship, String cellphoneNumber,User user) {
 
-        /*if (user == null) {
-            return null;
-        }*/
-
         if (Helper.isNullOrEmpty(firstName)) {
                 return null;
         }
