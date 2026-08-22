@@ -2,6 +2,7 @@ package za.ac.cput.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import za.ac.cput.domain.NextOfKinContact;
+import za.ac.cput.domain.User;
 import za.ac.cput.repository.INextOfKinContactRepository;
 import za.ac.cput.service.INextOfKinContactService;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.Optional;
 @Service
 public class NextOfKinContactServiceImpl  implements INextOfKinContactService {
 
-    private INextOfKinContactRepository repository;
+    private final INextOfKinContactRepository repository;
 
     @Autowired
     public NextOfKinContactServiceImpl(INextOfKinContactRepository repository) {
@@ -42,24 +43,24 @@ public class NextOfKinContactServiceImpl  implements INextOfKinContactService {
     }
 
     @Override
-    public NextOfKinContact findByfirstName(String firstName) {
-        return repository.findByfirstName(firstName);
+    public NextOfKinContact findByFirstName(String firstName) {
+        return repository.findByFirstName(firstName);
     }
 
     @Override
-    public NextOfKinContact findBylastName(String lastName) {
-        return repository.findBylastName(lastName);
+    public NextOfKinContact findByLastName(String lastName) {
+        return repository.findByLastName(lastName);
     }
 
     @Override
-    public NextOfKinContact findByrelationship(String relationship) {
-        return repository.findByrelationship(relationship);
+    public NextOfKinContact findByRelationship(String relationship) {
+        return repository.findByRelationship(relationship);
     }
 
-   /* @Override
-    public List<NextOfKinContact> findByUser_UserId(String userId) {
-        return repository.findByUser_UserId(userId);
-    }*/
+    @Override
+    public List<NextOfKinContact> findByUser(User user) {
+        return repository.findByUser(user);
+    }
 
     @Override
     public boolean delete(String nextOfKinContactId) {
