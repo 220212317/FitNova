@@ -1,11 +1,14 @@
 package za.ac.cput.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 /*
  * Author: Athi Sintiya
@@ -18,11 +21,17 @@ public class Account {
 
     @Id
     private String accountId;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
     private String password;
+
     private LocalDate registrationDate;
 
     @OneToOne(mappedBy = "account")
+    @JsonIgnore
     private User user;
 
     protected Account() {
@@ -54,6 +63,18 @@ public class Account {
 
     public User getUser() {
         return user;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Account account)) return false;
+        return Objects.equals(accountId, account.accountId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(accountId);
     }
 
     @Override
