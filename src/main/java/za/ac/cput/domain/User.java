@@ -18,7 +18,6 @@ import java.util.List;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String userId;
 
     private String firstName;

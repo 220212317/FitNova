@@ -59,7 +59,9 @@ public class UserFactory {
             userId = Helper.generateId();
         }
 
-        return new User.Builder()
+        List<NextOfKinContact> linkedNextOfKinContacts = new ArrayList<>();
+
+        User user = new User.Builder()
                 .setUserId(userId)
                 .setFirstName(firstName.trim())
                 .setLastName(lastName.trim())
@@ -68,8 +70,22 @@ public class UserFactory {
                 .setDemographic(demographic)
                 .setAddress(address)
                 .setContact(contact)
-                .setNextOfKinContacts(nextOfKinContacts)
+                .setNextOfKinContacts(linkedNextOfKinContacts)
                 .build();
+
+        for (NextOfKinContact nextOfKinContact : nextOfKinContacts) {
+            if (nextOfKinContact == null) {
+                continue;
+            }
+            linkedNextOfKinContacts.add(
+                    new NextOfKinContact.Builder()
+                            .copy(nextOfKinContact)
+                            .setUser(user)
+                            .build()
+            );
+        }
+
+        return user;
     }
 
     public static User createUser(String firstName, String lastName, LocalDate dateOfBirth,
