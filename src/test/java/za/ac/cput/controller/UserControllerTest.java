@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
- * Collins Shibambbo
+ * Author: Collins Shibambo
  * 230093183
  */
 
@@ -55,22 +55,39 @@ class UserControllerTest {
 
     private static User user = UserFactory.createUser(
             "USER-CTRL-001", "Thando", "Nkosi", LocalDate.of(1999, 5, 20),
-            account, demographic, address, contact, nextOfKinContact
+            account, demographic, address, contact, List.of(nextOfKinContact)
     );
 
     @Test
     @Order(1)
+    void setupGenderAndRace() {
+        ResponseEntity<Gender> genderResponse = restTemplate.postForEntity("/gender/create", gender, Gender.class);
+        assertNotNull(genderResponse);
+        assertNotNull(genderResponse.getBody());
+        assertEquals(HttpStatus.OK, genderResponse.getStatusCode());
+
+        ResponseEntity<Race> raceResponse = restTemplate.postForEntity("/race/create", race, Race.class);
+        assertNotNull(raceResponse);
+        assertNotNull(raceResponse.getBody());
+        assertEquals(HttpStatus.OK, raceResponse.getStatusCode());
+
+        System.out.println("Setup - created Gender: " + genderResponse.getBody() + ", Race: " + raceResponse.getBody());
+    }
+
+    @Test
+    @Order(2)
     void create() {
         String url = baseUrl + "/create";
         ResponseEntity<User> response = restTemplate.postForEntity(url, user, User.class);
         assertNotNull(response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals("USER-CTRL-001", response.getBody().getUserId());
         System.out.println("Created: " + response.getBody());
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     void read() {
         String url = baseUrl + "/read/" + user.getUserId();
         ResponseEntity<User> response = restTemplate.getForEntity(url, User.class);
@@ -81,7 +98,7 @@ class UserControllerTest {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     void readNotFound() {
         String url = baseUrl + "/read/NON-EXISTENT-ID";
         ResponseEntity<User> response = restTemplate.getForEntity(url, User.class);
@@ -89,7 +106,7 @@ class UserControllerTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void findByFirstNameAndLastName() {
         String url = baseUrl + "/findByName/Thando/Nkosi";
         ResponseEntity<User[]> response = restTemplate.getForEntity(url, User[].class);
@@ -101,7 +118,7 @@ class UserControllerTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void searchByLastName() {
         String url = baseUrl + "/searchByLastName/nko";
         ResponseEntity<User[]> response = restTemplate.getForEntity(url, User[].class);
@@ -113,7 +130,7 @@ class UserControllerTest {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     void update() {
         String url = baseUrl + "/update";
         User updatedUser = new User.Builder().copy(user)
@@ -140,7 +157,7 @@ class UserControllerTest {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     void getAll() {
         String url = baseUrl + "/getAll";
         ResponseEntity<User[]> response = restTemplate.getForEntity(url, User[].class);
