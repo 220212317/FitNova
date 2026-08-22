@@ -11,6 +11,7 @@ import za.ac.cput.domain.User;
 import za.ac.cput.factory.NextOfKinContactFactory;
 import za.ac.cput.repository.IUserRepository;
 import za.ac.cput.service.IUserService;
+import za.ac.cput.util.Helper;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,7 @@ class NextOfKinContactServiceImplTest {
     @Order(1)
     void create() {
         user = userRepository.save(new User.Builder()
+                .setUserId(Helper.generateId())
                 .setFirstName("Lisakhanya")
                 .setLastName("Tshokolo")
                 .build()
@@ -45,8 +47,12 @@ class NextOfKinContactServiceImplTest {
 
         nextOfKinContact = NextOfKinContactFactory.createNextOfKinContact("Vivian","Tshokolo","Mother","07338487",user);
 
+        assertNotNull(nextOfKinContact);
+        assertNotNull(nextOfKinContact.getNextOfKinContactId());
+
         NextOfKinContact created = nextOfKinContactServiceImpl.create(nextOfKinContact);
         assertNotNull(created);
+        assertNotNull(nextOfKinContact.getNextOfKinContactId(), created.getNextOfKinContactId());
         assertEquals(nextOfKinContact.getFirstName(), created.getFirstName());
         assertEquals(nextOfKinContact.getLastName(), created.getLastName());
         assertEquals(nextOfKinContact.getRelationship(), created.getRelationship());
