@@ -82,6 +82,17 @@ class NextOfKinContactControllerTest {
 
         System.out.println("Update completed");
     }
+    @Test
+    @Order(7)
+    void delete() {
+        String nextOfKinContactId = "PUT-A-REAL-ID-HERE";
+
+        restTemplate.delete(
+                getBaseUrl() + "/delete/" + nextOfKinContactId
+        );
+
+        System.out.println("Delete completed");
+    }
 
     @Test
     @Order(4)
@@ -129,15 +140,5 @@ class NextOfKinContactControllerTest {
                 + response.getBody());
     }
 
-    @Test
-    @Order(7)
-    void delete() {
-        String nextOfKinContactId = "PUT-A-REAL-ID-HERE";
 
-        restTemplate.delete(
-                getBaseUrl() + "/delete/" + nextOfKinContactId
-        );
-
-        System.out.println("Delete completed");
-    }
 }
