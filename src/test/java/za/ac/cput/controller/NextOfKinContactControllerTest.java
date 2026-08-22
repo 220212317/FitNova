@@ -10,7 +10,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
 import za.ac.cput.domain.NextOfKinContact;
+import za.ac.cput.domain.User;
 import za.ac.cput.factory.NextOfKinContactFactory;
+import za.ac.cput.repository.IUserRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
 //Lisakhanya Tshokolo 220239215
@@ -19,34 +21,48 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class NextOfKinContactControllerTest {
+
     @LocalServerPort
     private int port;
 
     @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private IUserRepository userRepository;
+
+    private static User user;
+
     private String getBaseUrl() {
+
         return "http://localhost:" + port + "/nextofkincontact";
     }
+    private static String createdId;
 
     @Test
     @Order(1)
     void create() {
+
+        user = userRepository.save(new User.Builder()
+                .setFirstName("Lisakhanya")
+                .setLastName("Tshokolo")
+                .build()
+        );
+
         NextOfKinContact contact = NextOfKinContactFactory.createNextOfKinContact(
                 "Vivian",
                 "Tshokolo",
                 "Mother",
-                "0821234567"
+                "0821234567",
+                user
         );
 
         ResponseEntity<NextOfKinContact> response = restTemplate.postForEntity(
-                getBaseUrl() + "/create",
-                contact,
-                NextOfKinContact.class
-        );
+                getBaseUrl() + "/create", contact, NextOfKinContact.class);
 
         assertNotNull(response);
         assertNotNull(response.getBody());
+        createdId = response.getBody().getNextOfKinContactId();
 
         System.out.println("Create Response: " + response.getBody());
     }
@@ -54,12 +70,9 @@ class NextOfKinContactControllerTest {
     @Test
     @Order(2)
     void read() {
-        String nextOfKinContactId = "PUT-A-REAL-ID-HERE";
+        //String nextOfKinContactId = "PUT-A-REAL-ID-HERE";
 
-        ResponseEntity<NextOfKinContact> response = restTemplate.getForEntity(
-                getBaseUrl() + "/read/" + nextOfKinContactId,
-                NextOfKinContact.class
-        );
+        ResponseEntity<NextOfKinContact> response = restTemplate.getForEntity(getBaseUrl() + "/read/" + createdId, NextOfKinContact.class);
 
         assertNotNull(response);
         System.out.println("Read Response: " + response.getBody());
@@ -72,26 +85,13 @@ class NextOfKinContactControllerTest {
                 "Vvian",
                 "Tshokolo",
                 "Mother",
-                "0798765432"
+                "0798765432",
+                user
         );
 
-        restTemplate.put(
-                getBaseUrl() + "/update",
-                contact
-        );
+        restTemplate.put(getBaseUrl() + "/update", contact);
 
         System.out.println("Update completed");
-    }
-    @Test
-    @Order(7)
-    void delete() {
-        String nextOfKinContactId = "PUT-A-REAL-ID-HERE";
-
-        restTemplate.delete(
-                getBaseUrl() + "/delete/" + nextOfKinContactId
-        );
-
-        System.out.println("Delete completed");
     }
 
     @Test
@@ -99,14 +99,10 @@ class NextOfKinContactControllerTest {
     void findByFirstName() {
         String firstName = "Vivian";
 
-        ResponseEntity<NextOfKinContact> response = restTemplate.getForEntity(
-                getBaseUrl() + "/findByFirstName?firstName=" + firstName,
-                NextOfKinContact.class
-        );
+        ResponseEntity<NextOfKinContact> response = restTemplate.getForEntity(getBaseUrl() + "/findByFirstName?firstName=" + firstName, NextOfKinContact.class);
 
         assertNotNull(response);
-        System.out.println("Find By First Name Response: "
-                + response.getBody());
+        System.out.println("Find By First Name Response: " + response.getBody());
     }
 
     @Test
@@ -114,14 +110,10 @@ class NextOfKinContactControllerTest {
     void findByLastName() {
         String lastName = "Tshokolo";
 
-        ResponseEntity<NextOfKinContact> response = restTemplate.getForEntity(
-                getBaseUrl() + "/findByLastName?lastName=" + lastName,
-                NextOfKinContact.class
-        );
+        ResponseEntity<NextOfKinContact> response = restTemplate.getForEntity(getBaseUrl() + "/findByLastName?lastName=" + lastName, NextOfKinContact.class);
 
         assertNotNull(response);
-        System.out.println("Find By Last Name Response: "
-                + response.getBody());
+        System.out.println("Find By Last Name Response: " + response.getBody());
     }
 
     @Test
@@ -129,16 +121,20 @@ class NextOfKinContactControllerTest {
     void findByRelationship() {
         String relationship = "Mother";
 
-        ResponseEntity<NextOfKinContact> response = restTemplate.getForEntity(
-                getBaseUrl() + "/findByRelationship?relationship="
-                        + relationship,
-                NextOfKinContact.class
-        );
+        ResponseEntity<NextOfKinContact> response = restTemplate.getForEntity(getBaseUrl() + "/findByRelationship?relationship=" + relationship, NextOfKinContact.class);
 
         assertNotNull(response);
-        System.out.println("Find By Relationship Response: "
-                + response.getBody());
+        System.out.println("Find By Relationship Response: " + response.getBody());
     }
 
+    @Test
+    @Order(7)
+    void delete() {
+        //String nextOfKinContactId = "PUT-A-REAL-ID-HERE";
+
+        restTemplate.delete(getBaseUrl() + "/delete/" + createdId);
+
+        System.out.println("Delete completed");
+    }
 
 }

@@ -5,10 +5,7 @@ import za.ac.cput.util.Helper;
 //Lisakhanya Tshokolo 22023921
 
 public class ContactFactory {
-    public static Contact createContact(/*User user*/ String cellphoneNumber, String alternativeCellphoneNumber, String emailAddress) {
-       /*if(user == null){
-           return null;
-       }*/
+    public static Contact createContact(String cellphoneNumber, String alternativeCellphoneNumber, String emailAddress) {
 
         if(Helper.isNullOrEmpty(cellphoneNumber) ){
             return null;
@@ -26,7 +23,6 @@ public class ContactFactory {
 
         return new Contact.Builder()
                 .setContactId(contactId)
-                //.setUser(user)
                 .setCellphoneNumber(cellphoneNumber)
                 .setAlternativeCellphoneNumber(alternativeCellphoneNumber)
                 .setEmailAddress(emailAddress)

@@ -7,7 +7,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import za.ac.cput.domain.NextOfKinContact;
+import za.ac.cput.domain.User;
 import za.ac.cput.factory.NextOfKinContactFactory;
+import za.ac.cput.repository.IUserRepository;
+import za.ac.cput.service.IUserService;
+
 import java.util.Collections;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,42 +25,32 @@ class NextOfKinContactServiceImplTest {
     @Autowired
     private NextOfKinContactServiceImpl nextOfKinContactServiceImpl;
 
-    private static NextOfKinContact nextOfKinContact =
-            NextOfKinContactFactory.createNextOfKinContact(
-                    "Vivia",
-                    "Tshokolo",
-                    "Mother",
-                    "0733838487"
-            );
+    @Autowired
+    private IUserRepository userRepository;
+
+    private static User user;
+
+    private static NextOfKinContact nextOfKinContact;
 
     @Test
     @Order(1)
     void create() {
+        user = userRepository.save(new User.Builder()
+                .setFirstName("Lisakhanya")
+                .setLastName("Tshokolo")
+                .build()
+        );
+        assertNotNull(user);
+        assertNotNull(user.getUserId());
 
-        NextOfKinContact created =
-                nextOfKinContactServiceImpl.create(nextOfKinContact);
+        nextOfKinContact = NextOfKinContactFactory.createNextOfKinContact("Vivian","Tshokolo","Mother","07338487",user);
 
+        NextOfKinContact created = nextOfKinContactServiceImpl.create(nextOfKinContact);
         assertNotNull(created);
-
-        assertEquals(
-                nextOfKinContact.getFirstName(),
-                created.getFirstName()
-        );
-
-        assertEquals(
-                nextOfKinContact.getLastName(),
-                created.getLastName()
-        );
-
-        assertEquals(
-                nextOfKinContact.getRelationship(),
-                created.getRelationship()
-        );
-
-        assertEquals(
-                nextOfKinContact.getCellphoneNumber(),
-                created.getCellphoneNumber()
-        );
+        assertEquals(nextOfKinContact.getFirstName(), created.getFirstName());
+        assertEquals(nextOfKinContact.getLastName(), created.getLastName());
+        assertEquals(nextOfKinContact.getRelationship(), created.getRelationship());
+        assertEquals(nextOfKinContact.getCellphoneNumber(), created.getCellphoneNumber());
 
         System.out.println("Created: " + created);
     }
@@ -66,17 +60,10 @@ class NextOfKinContactServiceImplTest {
     @Order(2)
     void read() {
 
-        NextOfKinContact read =
-                nextOfKinContactServiceImpl.read(
-                        nextOfKinContact.getNextOfKinContactId()
-                );
+        NextOfKinContact read = nextOfKinContactServiceImpl.read(nextOfKinContact.getNextOfKinContactId());
 
         assertNotNull(read);
-
-        assertEquals(
-                nextOfKinContact.getNextOfKinContactId(),
-                read.getNextOfKinContactId()
-        );
+        assertEquals(nextOfKinContact.getNextOfKinContactId(), read.getNextOfKinContactId());
 
         System.out.println("Read: " + read);
     }
@@ -86,21 +73,15 @@ class NextOfKinContactServiceImplTest {
     @Order(3)
     void update() {
 
-        NextOfKinContact updated =
-                new NextOfKinContact.Builder()
+        NextOfKinContact updated = new NextOfKinContact.Builder()
                         .copy(nextOfKinContact)
                         .setCellphoneNumber("0791234567")
                         .build();
 
-        NextOfKinContact result =
-                nextOfKinContactServiceImpl.update(updated);
+        NextOfKinContact result = nextOfKinContactServiceImpl.update(updated);
 
         assertNotNull(result);
-
-        assertEquals(
-                "0791234567",
-                result.getCellphoneNumber()
-        );
+        assertEquals("0791234567", result.getCellphoneNumber());
 
         System.out.println("Updated: " + result);
     }
@@ -110,113 +91,78 @@ class NextOfKinContactServiceImplTest {
     @Order(4)
     void getAll() {
 
-        List<NextOfKinContact> contacts =
-                nextOfKinContactServiceImpl.getAll();
+        List<NextOfKinContact> contacts = nextOfKinContactServiceImpl.getAll();
 
         assertNotNull(contacts);
-
         assertFalse(contacts.isEmpty());
 
-        System.out.println(
-                "All Next Of Kin Contacts: " + contacts
-        );
+        System.out.println("All Next Of Kin Contacts: " + contacts);
     }
 
 
     @Test
     @Order(5)
-    void findByfirstName() {
+    void findByFirstName() {
+        NextOfKinContact found = nextOfKinContactServiceImpl.findByFirstName(nextOfKinContact.getFirstName());
 
-        List<NextOfKinContact> contacts =
-                Collections.singletonList(
-                        nextOfKinContactServiceImpl.findByfirstName(
-                                nextOfKinContact.getFirstName()
-                        )
-                );
+        assertNotNull(found);
+        assertEquals("Vivian", found.getFirstName());
 
-        assertNotNull(contacts);
+        System.out.println("Found by first name: " + found);
 
-        assertFalse(contacts.isEmpty());
-
-        assertEquals(
-                "Vivia",
-                contacts.get(0).getFirstName()
-        );
-
-        System.out.println(
-                "Found by first name: " + contacts
-        );
     }
 
 
     @Test
     @Order(6)
-    void findBylastName() {
+    void findByLastName() {
+        NextOfKinContact found = nextOfKinContactServiceImpl.findByLastName(nextOfKinContact.getLastName());
 
-        List<NextOfKinContact> contacts =
-                Collections.singletonList(
-                        nextOfKinContactServiceImpl.findBylastName(
-                                nextOfKinContact.getLastName()
-                        )
-                );
+        assertNotNull(found);
+        assertEquals("Tshokolo", found.getLastName());
 
-        assertNotNull(contacts);
+        System.out.println("Found by last name: " + found);
 
-        assertFalse(contacts.isEmpty());
 
-        assertEquals(
-                "Tshokolo",
-                contacts.get(0).getLastName()
-        );
-
-        System.out.println(
-                "Found by last name: " + contacts
-        );
     }
 
 
     @Test
     @Order(7)
-    void findByrelationship() {
+    void findByRelationship() {
+        NextOfKinContact found = nextOfKinContactServiceImpl.findByRelationship(nextOfKinContact.getRelationship());
 
-        NextOfKinContact foundRelationship =
-                nextOfKinContactServiceImpl.findByrelationship(
-                        nextOfKinContact.getRelationship()
-                );
+        assertNotNull(found);
+        assertEquals("Mother", found.getRelationship());
 
-        assertNotNull(foundRelationship);
+        System.out.println("Found by relationship: " + found);
 
-        assertEquals(
-                "Mother",
-                foundRelationship.getRelationship()
-        );
+    }
 
-        System.out.println(
-                "Found by relationship: " + foundRelationship
-        );
+    @Test
+    @Order(8)
+    void findByUser() {
+        List<NextOfKinContact> contacts = nextOfKinContactServiceImpl.findByUser(user);
+
+        assertNotNull(contacts);
+        assertFalse(contacts.isEmpty());
+
+        System.out.println("Found by user: " + contacts);
     }
 
 
     @Test
-    @Order(8)
+    @Order(9)
     void delete() {
 
-        boolean deleted =
-                nextOfKinContactServiceImpl.delete(
-                        nextOfKinContact.getNextOfKinContactId()
-                );
+        boolean deleted = nextOfKinContactServiceImpl.delete(nextOfKinContact.getNextOfKinContactId());
 
         assertTrue(deleted);
 
-        NextOfKinContact deletedContact =
-                nextOfKinContactServiceImpl.read(
-                        nextOfKinContact.getNextOfKinContactId()
-                );
+        NextOfKinContact deletedContact = nextOfKinContactServiceImpl.read(nextOfKinContact.getNextOfKinContactId());
 
         assertNull(deletedContact);
 
-        System.out.println(
-                "Next Of Kin Contact deleted successfully"
-        );
+        System.out.println("Next Of Kin Contact deleted successfully");
     }
 }

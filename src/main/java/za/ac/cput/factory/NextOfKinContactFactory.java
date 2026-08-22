@@ -6,7 +6,7 @@ import za.ac.cput.util.Helper;
 
 public class NextOfKinContactFactory {
     public static NextOfKinContact createNextOfKinContact(
-            String firstName, String lastName, String relationship, String cellphoneNumber) {
+            String firstName, String lastName, String relationship, String cellphoneNumber,User user) {
 
         /*if (user == null) {
             return null;
@@ -27,15 +27,19 @@ public class NextOfKinContactFactory {
                 return null;
         }
 
-        String nextofkinContactId = Helper.generateId();
+        if (user == null) {
+            return null;
+        }
+
+        String nextOfKinContactId = Helper.generateId();
 
         return new NextOfKinContact.Builder()
-                .setNextOfKinContactId(nextofkinContactId)
-                //.setUser(user)
+                .setNextOfKinContactId(nextOfKinContactId)
                 .setFirstName(firstName)
                 .setLastName(lastName)
                 .setRelationship(relationship)
                 .setCellphoneNumber(cellphoneNumber)
+                .setUser(user)
                 .build();
     }
 }

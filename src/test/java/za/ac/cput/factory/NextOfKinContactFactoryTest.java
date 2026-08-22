@@ -1,18 +1,25 @@
 package za.ac.cput.factory;
 import org.junit.jupiter.api.Test;
 import za.ac.cput.domain.NextOfKinContact;
+import za.ac.cput.domain.User;
 
 import static org.junit.jupiter.api.Assertions.*;
 //Lisakhanya Tshokolo 220239215
 
 class NextOfKinContactFactoryTest {
+    private static final User user = new User.Builder()
+            .setUserId("C20")
+            .setFirstName("Lisakhanya")
+            .setLastName("Tshokolo")
+            .build();
 
     @Test
     void createNextOfKinContact() {
         NextOfKinContact contact = NextOfKinContactFactory.createNextOfKinContact("Vivian",
                 "Tshokolo",
                 "Mother",
-                "0821234567");
+                "0821234567",
+                user);
 
         assertNotNull(contact);
         assertNotNull(contact.getNextOfKinContactId());
@@ -20,6 +27,7 @@ class NextOfKinContactFactoryTest {
         assertEquals("Tshokolo", contact.getLastName());
         assertEquals("Mother", contact.getRelationship());
         assertEquals("0821234567", contact.getCellphoneNumber());
+        assertEquals(user, contact.getUser());
     }
 
     @Test
@@ -28,7 +36,8 @@ class NextOfKinContactFactoryTest {
                 "",
                 "Tshokolo",
                 "Mother",
-                "0821234567");
+                "0821234567",
+                user);
 
         assertNull(contact);
     }
@@ -39,7 +48,8 @@ class NextOfKinContactFactoryTest {
                 null,
                 "Tshokolo",
                 "Mother",
-                "0821234567");
+                "0821234567",
+                user);
         assertNull(contact);
     }
 
@@ -49,7 +59,8 @@ class NextOfKinContactFactoryTest {
                 "Vivian",
                 "",
                 "Mother",
-                "0821234567");
+                "0821234567",
+                user);
         assertNull(contact);
     }
 
@@ -59,7 +70,8 @@ class NextOfKinContactFactoryTest {
                 "Vivian",
                 null,
                 "Mother",
-                "0821234567");
+                "0821234567",
+                user);
         assertNull(contact);
     }
 
@@ -69,7 +81,8 @@ class NextOfKinContactFactoryTest {
                 "Vivian",
                 "Tshokolo",
                 "",
-                "0821234567");
+                "0821234567",
+                user);
         assertNull(contact);
     }
 
@@ -79,7 +92,8 @@ class NextOfKinContactFactoryTest {
                 "Vivian",
                 "Tshokolo",
                 null,
-                "0821234567");
+                "0821234567",
+                user);
         assertNull(contact);
     }
 
@@ -89,7 +103,8 @@ class NextOfKinContactFactoryTest {
                 "John",
                 "Tshokolo",
                 "Mother",
-                "");
+                "",
+                user);
         assertNull(contact);
     }
 
@@ -99,7 +114,15 @@ class NextOfKinContactFactoryTest {
                 "Vivian",
                 "Tshokolo",
                 "Mother",
-                null);
+                null,
+                user);
+        assertNull(contact);
+    }
+
+    @Test
+    void createNextOfKinContactWithNullUser() {
+        NextOfKinContact contact = NextOfKinContactFactory.createNextOfKinContact(
+                "Vivian", "Tshokolo", "Mother", "0821234567", null);
         assertNull(contact);
     }
 
