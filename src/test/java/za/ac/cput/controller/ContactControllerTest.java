@@ -79,6 +79,19 @@ class ContactControllerTest {
     }
 
     @Test
+    @Order(6)
+    void delete() {
+        String contactId = "PUT-A-REAL-ID-HERE";
+
+        restTemplate.delete(
+                getBaseUrl() + "/delete/" + contactId
+        );
+
+        System.out.println("Delete completed");
+
+    }
+
+    @Test
     @Order(4)
     void findByCellphoneNumber() {
         String cellphoneNumber = "0821234567";
@@ -108,16 +121,5 @@ class ContactControllerTest {
         System.out.println("Find By Email Response: " + response.getBody());
     }
 
-    @Test
-    @Order(6)
-    void delete() {
-        String contactId = "PUT-A-REAL-ID-HERE";
 
-        restTemplate.delete(
-                getBaseUrl() + "/delete/" + contactId
-        );
-
-        System.out.println("Delete completed");
-
-    }
 }
