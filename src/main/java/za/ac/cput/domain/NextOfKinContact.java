@@ -1,12 +1,14 @@
 package za.ac.cput.domain;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import jakarta.persistence.*;
 //Lisakhanya Tshokolo 220239215
 
 @Entity
+@Table(name = "next_of_kin_contact")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "nextOfKinContactId")
 public class NextOfKinContact {
+
     @Id
     private String nextOfKinContactId;
 
@@ -15,9 +17,9 @@ public class NextOfKinContact {
     private String relationship;
     private String cellphoneNumber;
 
-   /* @ManyToOne
-    @JoinColumn(name = "user_id" , referencedColumnName = "userId",nullable = false)
-    private User user;*/
+    @ManyToOne
+    @JoinColumn(name = "user_id" , referencedColumnName = "userId")
+    private User user;
 
     protected NextOfKinContact() {
     }
@@ -28,7 +30,7 @@ public class NextOfKinContact {
         this.lastName = builder.lastName;
         this.relationship = builder.relationship;
         this.cellphoneNumber = builder.cellphoneNumber;
-        //this.user = builder.user;
+        this.user = builder.user;
     }
 
     public String getNextOfKinContactId() {
@@ -56,9 +58,21 @@ public class NextOfKinContact {
         return cellphoneNumber;
     }
 
-    /*public User getUser() {
+    public User getUser() {
         return user;
-    }*/
+    }
+
+    @Override
+    public String toString() {
+        return "NextOfKinContact{" +
+                "nextOfKinContactId='" + nextOfKinContactId + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", relationship='" + relationship + '\'' +
+                ", cellphoneNumber='" + cellphoneNumber + '\'' +
+                ", user=" + user +
+                '}';
+    }
 
     public static class Builder {
         private String nextOfKinContactId;
@@ -66,7 +80,7 @@ public class NextOfKinContact {
         private String lastName;
         private String relationship;
         private String cellphoneNumber;
-       // private User user;
+        private User user;
 
         public Builder setNextOfKinContactId(String nextOfKinContactId) {
             this.nextOfKinContactId = nextOfKinContactId;
@@ -92,10 +106,10 @@ public class NextOfKinContact {
             this.cellphoneNumber = cellphoneNumber;
             return this;
         }
-        /*public Builder setUser(User user) {
+        public Builder setUser(User user) {
             this.user = user;
             return this;
-        }*/
+        }
 
         public Builder copy(za.ac.cput.domain.NextOfKinContact nextOfKinContact) {
             this.nextOfKinContactId = nextOfKinContact.nextOfKinContactId;
@@ -103,7 +117,7 @@ public class NextOfKinContact {
             this.lastName = nextOfKinContact.lastName;
             this.relationship = nextOfKinContact.relationship;
             this.cellphoneNumber = nextOfKinContact.cellphoneNumber;
-            //this.user = nextOfKinContact.user;
+            this.user = nextOfKinContact.user;
             return this;
         }
 
