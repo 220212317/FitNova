@@ -3,7 +3,10 @@ package za.ac.cput.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import za.ac.cput.domain.NextOfKinContact;
+import za.ac.cput.domain.User;
 import za.ac.cput.service.INextOfKinContactService;
+import za.ac.cput.service.IUserService;
+import za.ac.cput.service.impl.UserServiceImpl;
 
 import java.util.List;
 
@@ -12,10 +15,12 @@ import java.util.List;
 public class NextOfKinContactController {
 
     private final INextOfKinContactService nextOfKinContactService;
+    private final IUserService userService;
 
     @Autowired
-    public NextOfKinContactController(INextOfKinContactService nextOfKinContactService) {
+    public NextOfKinContactController(INextOfKinContactService nextOfKinContactService, IUserService userService) {
         this.nextOfKinContactService = nextOfKinContactService;
+        this.userService = userService;
     }
 
     @PostMapping("/create")
@@ -35,23 +40,24 @@ public class NextOfKinContactController {
 
     @GetMapping("/findByFirstName")
     public NextOfKinContact findByFirstName(@RequestParam String firstName) {
-        return nextOfKinContactService.findByfirstName(firstName);
+        return nextOfKinContactService.findByFirstName(firstName);
     }
 
     @GetMapping("/findByLastName")
     public NextOfKinContact findByLastName(@RequestParam String lastName) {
-        return nextOfKinContactService.findBylastName(lastName);
+        return nextOfKinContactService.findByLastName(lastName);
     }
 
     @GetMapping("/findByRelationship")
     public NextOfKinContact findByRelationship(@RequestParam String relationship) {
-        return nextOfKinContactService.findByrelationship(relationship);
+        return nextOfKinContactService.findByRelationship(relationship);
     }
 
-    /*@GetMapping("/findByUser/{userId}")
-    public List<NextOfKinContact> findByUserId(@PathVariable String userId) {
-        return nextOfKinContactService.findByUser_UserId(userId);
-    }*/
+    @GetMapping("/findByUser/{userId}")
+    public List<NextOfKinContact> findByUser(@PathVariable String userId) {
+        User user = userService.read(userId);
+        return nextOfKinContactService.findByUser(user);
+    }
 
     @GetMapping("/getAll")
     public List<NextOfKinContact> getAll() {
