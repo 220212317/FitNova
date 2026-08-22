@@ -1,12 +1,14 @@
 package za.ac.cput.domain;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import jakarta.persistence.*;
 //Lisakhanya Tshokolo 220239215
 
 @Entity
+@Table(name ="contacts")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "contactId")
 public class Contact {
+
     @Id
     private String contactId;
 
@@ -14,9 +16,6 @@ public class Contact {
     private String alternativeCellphoneNumber;
     private String emailAddress;
 
-   /* @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "userId",nullable = false, unique = true)
-    private User user;*/
 
     protected Contact() {
     }
@@ -26,7 +25,6 @@ public class Contact {
         this.cellphoneNumber = builder.cellphoneNumber;
         this.alternativeCellphoneNumber = builder.alternativeCellphoneNumber;
         this.emailAddress = builder.emailAddress;
-        //this.user = builder.user;
     }
 
     public String getContactId() {
@@ -48,16 +46,21 @@ public class Contact {
         return emailAddress;
     }
 
-   /* public User getUser() {
-        return user;
-    }*/
+    @Override
+    public String toString() {
+        return "Contact{" +
+                "contactId='" + contactId + '\'' +
+                ", cellphoneNumber='" + cellphoneNumber + '\'' +
+                ", alternativeCellphoneNumber='" + alternativeCellphoneNumber + '\'' +
+                ", emailAddress='" + emailAddress + '\'' +
+                '}';
+    }
 
     public static class Builder {
         private String contactId;
         private String cellphoneNumber;
         private String alternativeCellphoneNumber;
         private String emailAddress;
-       // private User user;
 
         public Builder setContactId(String contactId) {
             this.contactId = contactId;
@@ -79,17 +82,11 @@ public class Contact {
             return this;
         }
 
-       /* public Builder setUser(User user) {
-            this.user = user;
-            return this;
-        }*/
-
         public Builder copy(za.ac.cput.domain.Contact contact) {
             this.contactId = contact.contactId;
             this.cellphoneNumber = contact.cellphoneNumber;
             this.alternativeCellphoneNumber = contact.alternativeCellphoneNumber;
             this.emailAddress = contact.emailAddress;
-            //this.user = contact.user;
             return this;
         }
 
