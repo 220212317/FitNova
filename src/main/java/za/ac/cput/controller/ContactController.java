@@ -41,11 +41,6 @@ public class ContactController {
         return contactService.findByEmailAddress(emailAddress);
     }
 
-    /*@GetMapping("/findByUser/{userId}")
-    public Contact findByUserId(@PathVariable String userId) {
-        return contactService.findByUser_UserId(userId);
-    }*/
-
     @GetMapping("/getAll")
     public java.util.List<Contact> getAll() {
         return contactService.getAll();
