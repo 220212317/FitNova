@@ -1,9 +1,13 @@
 package za.ac.cput.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
+import java.util.Objects;
 
 /*
  * Author: Athi Sintiya
@@ -16,15 +20,26 @@ public class Address {
 
     @Id
     private String addressId;
+
     private String streetNumber;
+
+    @Column(nullable = false)
     private String streetName;
+
     private String suburbName;
+
+    @Column(nullable = false)
     private String city;
+
     private String postalCode;
+
     private String province;
+
+    @Column(nullable = false)
     private String country;
 
     @OneToOne(mappedBy = "address")
+    @JsonIgnore
     private User user;
 
     protected Address() {
@@ -76,6 +91,18 @@ public class Address {
 
     public User getUser() {
         return user;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Address address)) return false;
+        return Objects.equals(addressId, address.addressId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(addressId);
     }
 
     @Override
