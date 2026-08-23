@@ -125,7 +125,6 @@ class UserFactoryTest {
     @Test
     @Order(4)
     void createUserWithNoNextOfKinContactsIsValid() {
-        // UML: User 1 -> 0..* NextOfKinContact, so zero contacts is legal.
         User user = UserFactory.createUser("Thando", "Nkosi", LocalDate.of(1999, 5, 20),
                 buildAccount(), buildDemographic(), buildAddress(), buildContact(), List.of());
 
