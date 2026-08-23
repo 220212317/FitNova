@@ -1,13 +1,13 @@
-/*
- * IDemographicService.java
- * Author: Inga Plati
- * 230126634
- */
 package za.ac.cput.service;
 
 import za.ac.cput.domain.Demographic;
 
 import java.util.List;
+
+/*
+ * Author: Inga Plati
+ * 230126634
+ */
 
 public interface IDemographicService {
 
@@ -17,7 +17,7 @@ public interface IDemographicService {
 
     Demographic update(Demographic demographic);
 
-    void delete(String demographyId);
+    boolean delete(String demographyId);
 
     List<Demographic> getAll();
 }
