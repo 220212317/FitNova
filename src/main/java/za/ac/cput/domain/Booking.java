@@ -103,7 +103,7 @@ public class Booking {
     public int hashCode() {
         return Objects.hash(bookingId);
     }
-/*
+
     @Override
     public String toString() {
         return "Booking{" +
@@ -114,7 +114,6 @@ public class Booking {
                 ", slot=" + (slot != null ? slot.getSlotId() : null) +
                 '}';
     }
-*/
 
     public static class Builder {
         private String bookingId = UUID.randomUUID().toString();
