@@ -1,57 +1,70 @@
-/*
- * RaceController.java
- * Author: Inga Plati
- * 230126634
- */
 package za.ac.cput.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import za.ac.cput.domain.Race;
 import za.ac.cput.service.IRaceService;
 
 import java.util.List;
 
+/*
+ * RaceController.java
+ * Author: Inga Plati
+ * 230126634
+ */
+
 @RestController
 @RequestMapping("/race")
 public class RaceController {
 
-    private final IRaceService service;
+    private final IRaceService raceService;
 
     @Autowired
-    public RaceController(IRaceService service) {
-        this.service = service;
+    public RaceController(IRaceService raceService) {
+        this.raceService = raceService;
     }
 
     @PostMapping("/create")
-    public Race create(@RequestBody Race race) {
-        return service.create(race);
+    public ResponseEntity<Race> create(@RequestBody Race race) {
+        Race created = raceService.create(race);
+        if (created == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @GetMapping("/read/{raceId}")
-    public Race read(@PathVariable String raceId) {
-        return service.read(raceId);
+    public ResponseEntity<Race> read(@PathVariable String raceId) {
+        Race race = raceService.read(raceId);
+        if (race == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(race);
     }
 
     @PutMapping("/update")
-    public Race update(@RequestBody Race race) {
-        return service.update(race);
+    public ResponseEntity<Race> update(@RequestBody Race race) {
+        Race updated = raceService.update(race);
+        if (updated == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/delete/{raceId}")
-    public void delete(@PathVariable String raceId) {
-        service.delete(raceId);
+    public ResponseEntity<Void> delete(@PathVariable String raceId) {
+        boolean deleted = raceService.delete(raceId);
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/getAll")
-    public List<Race> getAll() {
-        return service.getAll();
+    public ResponseEntity<List<Race>> getAll() {
+        List<Race> races = raceService.getAll();
+        return ResponseEntity.ok(races);
     }
 }
