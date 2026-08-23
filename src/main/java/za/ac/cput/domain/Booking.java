@@ -1,5 +1,6 @@
 package za.ac.cput.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import za.ac.cput.domain.enums.BookingStatus;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "booking")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Booking {
 
     @Id
@@ -27,14 +29,14 @@ public class Booking {
     @Column(name = "status", nullable = false)
     private BookingStatus status;
 
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"bookings", "availabilitySlots", "userRoles", "hibernateLazyInitializer", "handler"})
     private User member;
 
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "slot_id", nullable = false)
+    @JsonIgnoreProperties({"bookings", "trainer", "hibernateLazyInitializer", "handler"})
     private AvailabilitySlot slot;
 
     protected Booking() {
@@ -53,20 +55,40 @@ public class Booking {
         return bookingId;
     }
 
+    public void setBookingId(String bookingId) {
+        this.bookingId = bookingId;
+    }
+
     public LocalDateTime getBookingDateTime() {
         return bookingDateTime;
+    }
+
+    public void setBookingDateTime(LocalDateTime bookingDateTime) {
+        this.bookingDateTime = bookingDateTime;
     }
 
     public BookingStatus getStatus() {
         return status;
     }
 
+    public void setStatus(BookingStatus status) {
+        this.status = status;
+    }
+
     public User getMember() {
         return member;
     }
 
+    public void setMember(User member) {
+        this.member = member;
+    }
+
     public AvailabilitySlot getSlot() {
         return slot;
+    }
+
+    public void setSlot(AvailabilitySlot slot) {
+        this.slot = slot;
     }
 
     @Override
@@ -126,7 +148,7 @@ public class Booking {
             return this;
         }
 
-      
+
         public Builder copy(Booking booking) {
             this.bookingId = booking.bookingId;
             this.bookingDateTime = booking.bookingDateTime;
