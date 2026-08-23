@@ -181,7 +181,6 @@ class  UserRoleControllerTest {
     }
 
     @Test
-    @Disabled
     void delete() {
         String url = baseUrl + "/delete/" + userRole.getUserRoleId();
         restTemplate.delete(url);
