@@ -52,7 +52,6 @@ class AccountServiceImplTest {
     }
 
     @Test
-    @Disabled
     void delete() {
         accountService.delete(account.getAccountId());
         Account read = accountService.read(account.getAccountId());
