@@ -88,7 +88,6 @@ class AccountControllerTest {
     }
 
     @Test
-    @Disabled
     void delete() {
         String url = baseUrl + "/delete/" + account.getAccountId();
         restTemplate.delete(url);

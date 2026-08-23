@@ -91,7 +91,6 @@ class AddressControllerTest {
     }
 
     @Test
-    @Disabled
     void delete() {
         String url = baseUrl + "/delete/" + address.getAddressId();
         restTemplate.delete(url);
