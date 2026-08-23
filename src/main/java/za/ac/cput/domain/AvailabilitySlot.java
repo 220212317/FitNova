@@ -1,5 +1,7 @@
 package za.ac.cput.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -34,12 +36,23 @@ public class AvailabilitySlot {
     private SlotStatus status;
 
     // Many AvailabilitySlots can belong to one User
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "trainer_id", nullable = false)
+    @JsonIgnoreProperties({
+            "account",
+            "demographic",
+            "address",
+            "contact",
+            "nextOfKinContact",
+            "bookings",
+            "availabilitySlots",
+            "userRoles"
+    })
     private User trainer;
 
     // One AvailabilitySlot can have many Bookings
     @OneToMany(mappedBy = "slot")
+    @JsonIgnore
     private List<Booking> bookings = new ArrayList<>();
 
     protected AvailabilitySlot() {
