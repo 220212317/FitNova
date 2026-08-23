@@ -1,8 +1,3 @@
-/*
- * GenderServiceImpl.java
- * Author: Inga Plati
- * 230126634
- */
 package za.ac.cput.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +7,11 @@ import za.ac.cput.repository.IGenderRepository;
 import za.ac.cput.service.IGenderService;
 
 import java.util.List;
+
+/*
+ * Author: Inga Plati
+ * 230126634
+ */
 
 @Service
 public class GenderServiceImpl implements IGenderService {
@@ -25,16 +25,25 @@ public class GenderServiceImpl implements IGenderService {
 
     @Override
     public Gender create(Gender gender) {
+        if (gender == null || gender.getGenderId() == null) {
+            return null;
+        }
         return repository.save(gender);
     }
 
     @Override
     public Gender read(String genderId) {
+        if (genderId == null) {
+            return null;
+        }
         return repository.findById(genderId).orElse(null);
     }
 
     @Override
     public Gender update(Gender gender) {
+        if (gender == null || gender.getGenderId() == null) {
+            return null;
+        }
         if (!repository.existsById(gender.getGenderId())) {
             return null;
         }
@@ -42,8 +51,12 @@ public class GenderServiceImpl implements IGenderService {
     }
 
     @Override
-    public void delete(String genderId) {
+    public boolean delete(String genderId) {
+        if (genderId == null || !repository.existsById(genderId)) {
+            return false;
+        }
         repository.deleteById(genderId);
+        return true;
     }
 
     @Override
