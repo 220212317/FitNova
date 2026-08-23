@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import java.util.Objects;
 
 /*
+ * Address.java
  * Author: Athi Sintiya
  * 220212317
  */
