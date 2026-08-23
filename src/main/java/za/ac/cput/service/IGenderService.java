@@ -1,13 +1,13 @@
-/*
- * IGenderService.java
- * Author: Inga Plati
- * 230126634
- */
 package za.ac.cput.service;
 
 import za.ac.cput.domain.Gender;
 
 import java.util.List;
+
+/*
+ * Author: Inga Plati
+ * 230126634
+ */
 
 public interface IGenderService {
 
@@ -17,7 +17,7 @@ public interface IGenderService {
 
     Gender update(Gender gender);
 
-    void delete(String genderId);
+    boolean delete(String genderId);
 
     List<Gender> getAll();
 }

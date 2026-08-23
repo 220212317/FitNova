@@ -10,6 +10,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
+import java.util.Objects;
+
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Race {
@@ -17,6 +19,8 @@ public class Race {
     @Id
     @Column(name = "race_id")
     private String raceId;
+
+    @Column(nullable = false)
     private String description;
 
     public Race() {
@@ -37,6 +41,19 @@ public class Race {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Race)) return false;
+        Race race = (Race) o;
+        return Objects.equals(raceId, race.raceId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(raceId);
     }
 
     @Override

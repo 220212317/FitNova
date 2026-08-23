@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
+import java.util.Objects;
+
 @Entity
 public class Demographic {
 
@@ -17,11 +19,11 @@ public class Demographic {
     @Column(name = "demography_id")
     private String demographyId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "gender_id")
     private Gender gender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "race_id")
     private Race race;
 
@@ -44,6 +46,19 @@ public class Demographic {
 
     public Race getRace() {
         return race;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Demographic)) return false;
+        Demographic that = (Demographic) o;
+        return Objects.equals(demographyId, that.demographyId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(demographyId);
     }
 
     @Override

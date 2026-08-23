@@ -1,13 +1,13 @@
-/*
- * IRaceService.java
- * Author: Inga Plati
- * 230126634
- */
 package za.ac.cput.service;
 
 import za.ac.cput.domain.Race;
 
 import java.util.List;
+
+/*
+ * Author: Inga Plati
+ * 230126634
+ */
 
 public interface IRaceService {
 
@@ -17,7 +17,7 @@ public interface IRaceService {
 
     Race update(Race race);
 
-    void delete(String raceId);
+    boolean delete(String raceId);
 
     List<Race> getAll();
 }
