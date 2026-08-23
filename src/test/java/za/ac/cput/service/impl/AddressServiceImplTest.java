@@ -55,7 +55,6 @@ class AddressServiceImplTest {
     }
 
     @Test
-    @Disabled
     void delete() {
         addressService.delete(address.getAddressId());
         Address read = addressService.read(address.getAddressId());
