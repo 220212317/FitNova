@@ -26,26 +26,38 @@ public class AccountServiceImpl implements IAccountService {
 
     @Override
     public Account create(Account account) {
+        if (account == null || account.getAccountId() == null) {
+            return null;
+        }
         return repository.save(account);
     }
 
     @Override
     public Account read(String accountId) {
+        if (accountId == null) {
+            return null;
+        }
         return repository.findById(accountId).orElse(null);
     }
 
     @Override
     public Account update(Account account) {
+        if (account == null || account.getAccountId() == null) {
+            return null;
+        }
+        if (!repository.existsById(account.getAccountId())) {
+            return null;
+        }
         return repository.save(account);
     }
 
     @Override
     public boolean delete(String accountId) {
-        if (repository.existsById(accountId)) {
-            repository.deleteById(accountId);
-            return true;
+        if (accountId == null || !repository.existsById(accountId)) {
+            return false;
         }
-        return false;
+        repository.deleteById(accountId);
+        return true;
     }
 
     @Override
@@ -55,11 +67,17 @@ public class AccountServiceImpl implements IAccountService {
 
     @Override
     public Account findByEmail(String email) {
+        if (email == null) {
+            return null;
+        }
         return repository.findByEmail(email);
     }
 
     @Override
     public List<Account> findAccountByRegistrationDate(LocalDate registrationDate) {
+        if (registrationDate == null) {
+            return List.of();
+        }
         return repository.findAccountByRegistrationDate(registrationDate);
     }
 }

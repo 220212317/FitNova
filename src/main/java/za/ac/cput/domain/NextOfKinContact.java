@@ -1,5 +1,6 @@
 package za.ac.cput.domain;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 //Lisakhanya Tshokolo 220239215
@@ -18,6 +19,7 @@ public class NextOfKinContact {
 
     @ManyToOne
     @JoinColumn(name = "user_id" , referencedColumnName = "userId")
+    @JsonIgnore
     private User user;
 
     protected NextOfKinContact() {
