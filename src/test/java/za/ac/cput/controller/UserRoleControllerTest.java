@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class UserRoleControllerTest {
+class  UserRoleControllerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -74,12 +74,12 @@ class UserRoleControllerTest {
         ResponseEntity<Gender> genderResponse = restTemplate.postForEntity("/gender/create", gender, Gender.class);
         assertNotNull(genderResponse);
         assertNotNull(genderResponse.getBody());
-        assertEquals(HttpStatus.OK, genderResponse.getStatusCode());
+        assertEquals(HttpStatus.CREATED, genderResponse.getStatusCode());
 
         ResponseEntity<Race> raceResponse = restTemplate.postForEntity("/race/create", race, Race.class);
         assertNotNull(raceResponse);
         assertNotNull(raceResponse.getBody());
-        assertEquals(HttpStatus.OK, raceResponse.getStatusCode());
+        assertEquals(HttpStatus.CREATED, raceResponse.getStatusCode());
 
         System.out.println("Setup - created Gender: " + genderResponse.getBody() + ", Race: " + raceResponse.getBody());
     }
