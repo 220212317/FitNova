@@ -154,7 +154,6 @@ class UserControllerTest {
     }
 
     @Test
-    @Disabled
     void delete() {
         String url = baseUrl + "/delete/" + user.getUserId();
         restTemplate.delete(url);
