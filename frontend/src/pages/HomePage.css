@@ -1,0 +1,970 @@
+/* =====================================================
+       FITNOVA HOME PAGE
+   ===================================================== */
+
+.fitnova-home {
+    width: 100%;
+    min-height: 100vh;
+    background: #ffffff;
+    color: #17202a;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+.fitnova-home .fn-navbar {
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e4e7;
+}
+
+.fitnova-home .fn-navbar-container {
+    width: 94%;
+    max-width: 1280px;
+    min-height: 78px;
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    gap: 40px;
+
+    box-sizing: border-box;
+}
+
+.fitnova-home .fn-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    color: #17202a;
+    text-decoration: none;
+
+    font-size: 25px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+.fitnova-home .fn-brand-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+    background: #2f8f63;
+    color: #ffffff;
+
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.fitnova-home .fn-nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+
+    margin-left: auto;
+}
+
+.fitnova-home .fn-nav-menu a {
+    color: #53615a;
+    text-decoration: none;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    transition: color 0.2s ease;
+}
+
+.fitnova-home .fn-nav-menu a:hover {
+    color: #2f8f63;
+}
+
+.fitnova-home .fn-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fitnova-home .fn-login-button {
+    padding: 11px 16px;
+
+    border: none;
+    background: transparent;
+
+    color: #34413b;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.fitnova-home .fn-nav-cta {
+    padding: 12px 19px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: #2f8f63;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+}
+
+.fitnova-home .fn-nav-cta:hover {
+    background: #267750;
+}
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.fitnova-home .fn-hero {
+    width: 100%;
+    background: #f1f7f4;
+}
+
+.fitnova-home .fn-hero-container {
+    width: 92%;
+    max-width: 1280px;
+    min-height: 590px;
+
+    margin: 0 auto;
+    padding: 80px 0;
+
+    display: grid;
+    grid-template-columns: 1fr 0.85fr;
+    align-items: center;
+    gap: 80px;
+
+    box-sizing: border-box;
+}
+
+.fitnova-home .fn-hero-content {
+    max-width: 650px;
+}
+
+.fitnova-home .fn-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 8px 14px;
+
+    border: 1px solid #d6e5dc;
+    border-radius: 30px;
+
+    background: #ffffff;
+    color: #4d7562;
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.fitnova-home .fn-hero-badge span {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+    background: #2f8f63;
+}
+
+.fitnova-home .fn-hero-content h1 {
+    margin: 25px 0 0;
+
+    color: #17202a;
+
+    font-size: clamp(52px, 6vw, 78px);
+    line-height: 1;
+    letter-spacing: -3px;
+    font-weight: 800;
+}
+
+.fitnova-home .fn-hero-content h1 strong {
+    color: #2f8f63;
+}
+
+.fitnova-home .fn-hero-content > p {
+    max-width: 610px;
+
+    margin: 28px 0;
+
+    color: #69756f;
+
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+.fitnova-home .fn-hero-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fitnova-home .fn-primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 15px 22px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #2f8f63;
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.fitnova-home .fn-primary-button:hover {
+    background: #267750;
+    transform: translateY(-1px);
+}
+
+.fitnova-home .fn-primary-button span {
+    margin-left: 10px;
+    font-size: 18px;
+}
+
+.fitnova-home .fn-outline-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 14px 22px;
+
+    border: 1px solid #c9d9d0;
+    border-radius: 8px;
+
+    background: #ffffff;
+    color: #34413b;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+
+/* =====================================================
+   FITNESS CARD
+===================================================== */
+
+.fitnova-home .fn-hero-preview {
+    display: flex;
+    justify-content: center;
+}
+
+.fitnova-home .fn-fitness-card {
+    width: 100%;
+    max-width: 440px;
+
+    padding: 28px;
+
+    border: 1px solid #dfe8e3;
+    border-radius: 20px;
+
+    background: #ffffff;
+
+    box-shadow: 0 25px 55px rgba(35, 74, 53, 0.13);
+}
+
+.fitnova-home .fn-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding-bottom: 22px;
+    border-bottom: 1px solid #edf0ee;
+}
+
+.fitnova-home .fn-card-top small {
+    color: #8a9691;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.fitnova-home .fn-card-top h3 {
+    margin: 6px 0 0;
+
+    color: #26332d;
+    font-size: 23px;
+}
+
+.fitnova-home .fn-card-icon {
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background: #dff0e6;
+    color: #2f8f63;
+
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.fitnova-home .fn-card-progress {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+
+    padding: 28px 0;
+}
+
+.fitnova-home .fn-progress-circle {
+    width: 115px;
+    height: 115px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background:
+            radial-gradient(
+                    circle,
+                    #ffffff 57%,
+                    transparent 58%
+            ),
+            conic-gradient(
+                    #2f8f63 75%,
+                    #dce9e2 0
+            );
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.fitnova-home .fn-progress-circle strong {
+    color: #26332d;
+    font-size: 23px;
+}
+
+.fitnova-home .fn-progress-circle small {
+    color: #8a9691;
+    font-size: 10px;
+}
+
+.fitnova-home .fn-progress-info {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.fitnova-home .fn-progress-info div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fitnova-home .fn-progress-info span {
+    color: #7a8580;
+    font-size: 12px;
+}
+
+.fitnova-home .fn-progress-info strong {
+    color: #27332e;
+    font-size: 15px;
+}
+
+.fitnova-home .fn-upcoming {
+    padding: 19px;
+
+    border-radius: 12px;
+
+    background: #f1f7f4;
+}
+
+.fitnova-home .fn-upcoming > small {
+    color: #7d8983;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.fitnova-home .fn-session-row {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    margin-top: 14px;
+}
+
+.fitnova-home .fn-session-date {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+.fitnova-home .fn-session-date strong {
+    color: #26332d;
+    font-size: 17px;
+}
+
+.fitnova-home .fn-session-date span {
+    color: #2f8f63;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.fitnova-home .fn-session-row > div:nth-child(2) {
+    flex: 1;
+}
+
+.fitnova-home .fn-session-row > div:nth-child(2) strong {
+    display: block;
+
+    color: #2b3832;
+    font-size: 13px;
+}
+
+.fitnova-home .fn-session-row > div:nth-child(2) small {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #818b86;
+    font-size: 11px;
+}
+
+.fitnova-home .fn-booked {
+    padding: 6px 10px;
+
+    border-radius: 5px;
+
+    background: #dff1e6;
+    color: #2f8f63;
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+
+/* =====================================================
+   SHARED SECTION
+===================================================== */
+
+.fitnova-home .fn-section-container {
+    width: 92%;
+    max-width: 1280px;
+
+    margin: 0 auto;
+}
+
+.fitnova-home .fn-section-label {
+    display: block;
+
+    margin-bottom: 12px;
+
+    color: #2f8f63;
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.fitnova-home .fn-center-heading {
+    max-width: 650px;
+
+    margin: 0 auto 50px;
+
+    text-align: center;
+}
+
+.fitnova-home .fn-center-heading h2 {
+    margin: 0;
+
+    color: #17202a;
+
+    font-size: clamp(38px, 4vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -2px;
+}
+
+.fitnova-home .fn-center-heading h2 strong {
+    color: #2f8f63;
+}
+
+.fitnova-home .fn-center-heading > p {
+    margin-top: 18px;
+
+    color: #758079;
+
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+
+/* =====================================================
+   FEATURES
+===================================================== */
+
+.fitnova-home .fn-features {
+    padding: 100px 0;
+
+    background: #ffffff;
+}
+
+.fitnova-home .fn-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.fitnova-home .fn-feature-card {
+    padding: 27px;
+
+    border: 1px solid #e4eae6;
+    border-radius: 14px;
+
+    background: #ffffff;
+
+    transition: 0.2s ease;
+}
+
+.fitnova-home .fn-feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 35px rgba(30, 65, 47, 0.09);
+}
+
+.fitnova-home .fn-feature-icon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 19px;
+
+    border-radius: 10px;
+
+    background: #e4f1e9;
+
+    font-size: 21px;
+}
+
+.fitnova-home .fn-feature-card h3 {
+    margin: 0;
+
+    color: #293630;
+
+    font-size: 17px;
+}
+
+.fitnova-home .fn-feature-card p {
+    min-height: 72px;
+
+    margin: 11px 0 19px;
+
+    color: #7a8580;
+
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.fitnova-home .fn-feature-card a {
+    color: #2f8f63;
+
+    text-decoration: none;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+/* =====================================================
+   HOW IT WORKS
+===================================================== */
+
+.fitnova-home .fn-how {
+    padding: 100px 0;
+
+    background: #f1f7f4;
+}
+
+.fitnova-home .fn-steps {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 35px;
+}
+
+.fitnova-home .fn-step {
+    width: 260px;
+
+    text-align: center;
+}
+
+.fitnova-home .fn-step-number {
+    width: 62px;
+    height: 62px;
+
+    margin: 0 auto 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #2f8f63;
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.fitnova-home .fn-step h3 {
+    margin: 0 0 10px;
+
+    color: #293630;
+
+    font-size: 17px;
+}
+
+.fitnova-home .fn-step p {
+    margin: 0;
+
+    color: #77827d;
+
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.fitnova-home .fn-step-arrow {
+    padding-top: 20px;
+
+    color: #8aa596;
+
+    font-size: 26px;
+}
+
+
+/* =====================================================
+   FINAL CTA
+===================================================== */
+
+.fitnova-home .fn-final-cta {
+    padding: 100px 20px;
+
+    background: #ffffff;
+
+    text-align: center;
+}
+
+.fitnova-home .fn-final-cta h2 {
+    margin: 0;
+
+    color: #17202a;
+
+    font-size: clamp(42px, 5vw, 64px);
+    line-height: 1;
+    letter-spacing: -2px;
+}
+
+.fitnova-home .fn-final-cta h2 strong {
+    color: #2f8f63;
+}
+
+.fitnova-home .fn-final-cta p {
+    margin: 20px 0 28px;
+
+    color: #77827d;
+
+    font-size: 15px;
+}
+
+.fitnova-home .fn-large-button {
+    padding: 16px 25px;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.fitnova-home .fn-footer {
+    padding: 70px 0 25px;
+
+    background: #17202a;
+    color: #ffffff;
+}
+
+.fitnova-home .fn-footer-container {
+    width: 92%;
+    max-width: 1280px;
+
+    margin: 0 auto;
+
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 60px;
+}
+
+.fitnova-home .fn-footer-brand .fn-brand {
+    color: #ffffff;
+
+    font-size: 25px;
+}
+
+.fitnova-home .fn-footer-brand .fn-brand-icon {
+    background: #2f8f63;
+}
+
+.fitnova-home .fn-footer-brand p {
+    max-width: 350px;
+
+    margin-top: 18px;
+
+    color: #aab4af;
+
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.fitnova-home .fn-footer-column {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+.fitnova-home .fn-footer-column h4 {
+    margin: 0 0 7px;
+
+    color: #ffffff;
+
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.fitnova-home .fn-footer-column a {
+    color: #aab4af;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    transition: color 0.2s ease;
+}
+
+.fitnova-home .fn-footer-column a:hover {
+    color: #ffffff;
+}
+
+.fitnova-home .fn-footer-bottom {
+    width: 92%;
+    max-width: 1280px;
+
+    margin: 55px auto 0;
+    padding-top: 22px;
+
+    border-top: 1px solid #303b43;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    color: #87928d;
+
+    font-size: 11px;
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 1050px) {
+
+    .fitnova-home .fn-navbar-container {
+        gap: 20px;
+    }
+
+    .fitnova-home .fn-nav-menu {
+        gap: 15px;
+    }
+
+    .fitnova-home .fn-nav-menu a {
+        font-size: 13px;
+    }
+
+    .fitnova-home .fn-hero-container {
+        grid-template-columns: 1fr;
+        gap: 55px;
+    }
+
+    .fitnova-home .fn-hero-content {
+        max-width: 700px;
+    }
+
+    .fitnova-home .fn-hero-preview {
+        justify-content: flex-start;
+    }
+
+    .fitnova-home .fn-feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .fitnova-home .fn-footer-container {
+        grid-template-columns: 2fr 1fr 1fr;
+    }
+
+    .fitnova-home .fn-footer-brand {
+        grid-column: 1 / -1;
+    }
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 650px) {
+
+    .fitnova-home .fn-navbar-container {
+        min-height: 68px;
+    }
+
+    .fitnova-home .fn-nav-menu {
+        display: none;
+    }
+
+    .fitnova-home .fn-login-button {
+        display: none;
+    }
+
+    .fitnova-home .fn-brand {
+        font-size: 21px;
+    }
+
+    .fitnova-home .fn-brand-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .fitnova-home .fn-hero-container {
+        padding: 60px 0;
+    }
+
+    .fitnova-home .fn-hero-content h1 {
+        font-size: 48px;
+        letter-spacing: -2px;
+    }
+
+    .fitnova-home .fn-hero-content > p {
+        font-size: 15px;
+    }
+
+    .fitnova-home .fn-hero-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .fitnova-home .fn-hero-buttons a {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .fitnova-home .fn-hero-preview {
+        justify-content: center;
+    }
+
+    .fitnova-home .fn-fitness-card {
+        padding: 21px;
+    }
+
+    .fitnova-home .fn-feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fitnova-home .fn-feature-card p {
+        min-height: auto;
+    }
+
+    .fitnova-home .fn-steps {
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .fitnova-home .fn-step {
+        width: 100%;
+        max-width: 310px;
+    }
+
+    .fitnova-home .fn-step-arrow {
+        display: none;
+    }
+
+    .fitnova-home .fn-features,
+    .fitnova-home .fn-how {
+        padding: 75px 0;
+    }
+
+    .fitnova-home .fn-final-cta {
+        padding: 75px 20px;
+    }
+
+    .fitnova-home .fn-footer {
+        padding: 55px 0 20px;
+    }
+
+    .fitnova-home .fn-footer-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 35px;
+    }
+
+    .fitnova-home .fn-footer-brand {
+        grid-column: 1 / -1;
+    }
+
+    .fitnova-home .fn-footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 9px;
+    }
+}
