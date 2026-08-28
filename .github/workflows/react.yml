@@ -32,5 +32,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run Linter or Tests
-        run: npm test -- --watchAll=false
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
