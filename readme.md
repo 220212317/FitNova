@@ -103,6 +103,6 @@ All system logic is underpinned by automated checks that prevent:
 
 ## 6. UML Diagram
 
-The diagram below models FitNova's core domain entities — `User`, `Account`, `Demographic`, `Contact`, `Address`, `Booking`, `AvailabilitySlot`, and their supporting lookup types — along with the relationships and multiplicities between them.
+The diagram below models FitNova's core domain entities — `User`, `Account`, `Demographic`, `Contact`, `Address`, `Booking`, `AvailabilitySlot`, and their supporting lookup types, along with the relationships and multiplicities between them.
 
 ![FitNova UML Diagram](./FitNova.drawio.svg)
