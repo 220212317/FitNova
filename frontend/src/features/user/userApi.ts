@@ -1,5 +1,5 @@
-/** TODO — Collins Shibambo (230093183) */
-const BASE_URL = "[http://localhost:8080/FitNova](http://localhost:8080/FitNova)";
+
+const BASE_URL = "http://localhost:8080/FitNova";
 
 export interface User {
     userId: string;
