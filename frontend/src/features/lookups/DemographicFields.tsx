@@ -1,9 +1,7 @@
-/** TODO — Inga Plati (230126634) */
 import { useEffect, useState } from 'react';
 import type { Gender, Race } from '../../types';
 import { getAllGenders, getAllRaces } from './lookupsApi';
 import { ApiError } from '../../api/client';
-
 
 interface DemographicFieldsProps {
     genderId: string | null;
@@ -25,24 +23,23 @@ export default function DemographicFields({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        void loadOptions();
-    }, []);
-
-    async function loadOptions() {
-        setLoading(true);
-        setError(null);
-        try {
-
-            const [genderData, raceData] = await Promise.all([getAllGenders(), getAllRaces()]);
-            setGenders(genderData);
-            setRaces(raceData);
-        } catch (err) {
-            setError(err instanceof ApiError ? err.message : 'Failed to load gender/race options.');
-        } finally {
-            setLoading(false);
-        }
+    function loadOptions() {
+        Promise.all([getAllGenders(), getAllRaces()])
+            .then(([genderData, raceData]) => {
+                setGenders(genderData);
+                setRaces(raceData);
+            })
+            .catch((err: unknown) => {
+                setError(err instanceof ApiError ? err.message : 'Failed to load gender/race options.');
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }
+
+    useEffect(() => {
+        loadOptions();
+    }, []);
 
     if (loading) return <p>Loading gender/race options…</p>;
     if (error) return <p role="alert">{error}</p>;
@@ -85,4 +82,3 @@ export default function DemographicFields({
         </fieldset>
     );
 }
-
