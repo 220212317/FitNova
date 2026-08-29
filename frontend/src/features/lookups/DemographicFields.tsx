@@ -4,25 +4,6 @@ import type { Gender, Race } from '../../types';
 import { getAllGenders, getAllRaces } from './lookupsApi';
 import { ApiError } from '../../api/client';
 
-/**
- * DemographicFields
- *
- * NOT a CRUD form like GenderForm/RaceForm — this is a reusable field
- * group meant to be embedded inside a larger form (the People wizard,
- * per issue #87's task list — that wizard itself belongs to whoever owns
- * the People/User feature, not this ticket).
- *
- * It's a *controlled* component: it doesn't own the selected gender/race,
- * the parent form does. This component only fetches the dropdown OPTIONS
- * (all existing Genders/Races) and reports selections upward via callback
- * props. The parent decides what to do with the selection (e.g. bundling
- * it into a Demographic + User create payload) and when to submit.
- *
- * Depends on Gender/Race rows already existing in the database — see the
- * no-cascade note in lookupsApi.ts. If GenderForm/RaceForm haven't been
- * used to create any yet, these dropdowns will be empty except for the
- * placeholder option.
- */
 
 interface DemographicFieldsProps {
     genderId: string | null;
@@ -52,9 +33,7 @@ export default function DemographicFields({
         setLoading(true);
         setError(null);
         try {
-            // Fire both requests together rather than one after the other —
-            // they don't depend on each other, so there's no reason to wait
-            // for genders before starting the races request.
+
             const [genderData, raceData] = await Promise.all([getAllGenders(), getAllRaces()]);
             setGenders(genderData);
             setRaces(raceData);

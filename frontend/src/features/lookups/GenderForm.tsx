@@ -4,16 +4,7 @@ import type { Gender } from '../../types';
 import { getAllGenders, createGender, updateGender, deleteGender } from './lookupsApi';
 import { ApiError } from '../../api/client';
 
-/**
- * GenderForm
- *
- * Full CRUD for the Gender lookup: lists existing genders, and one form
- * that switches between "create new" and "edit selected" depending on
- * whether `editingId` is set.
- *
- * No separate GenderList component — issue #87 only lists GenderForm.tsx
- * for this entity, so list + form live together here.
- */
+
 export default function GenderForm() {
     const [genders, setGenders] = useState<Gender[]>([]);
     const [description, setDescription] = useState('');
@@ -22,8 +13,6 @@ export default function GenderForm() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Runs once, right after the component first renders — this is where
-    // the initial "get everything from the backend" call belongs.
     useEffect(() => {
         void loadGenders();
     }, []);
@@ -42,7 +31,7 @@ export default function GenderForm() {
     }
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-        e.preventDefault(); // stop the browser's default full-page-reload form submit
+        e.preventDefault();
         const trimmed = description.trim();
         if (!trimmed) return;
 
@@ -52,8 +41,7 @@ export default function GenderForm() {
             if (editingId) {
                 await updateGender({ genderId: editingId, description: trimmed });
             } else {
-                // genderId is intentionally omitted — createGender's ensureId()
-                // fallback generates one, since the user isn't choosing an id here.
+
                 await createGender({ description: trimmed });
             }
             resetForm();
@@ -80,8 +68,7 @@ export default function GenderForm() {
         setError(null);
         try {
             await deleteGender(genderId);
-            // If the row being edited was just deleted, don't leave a stale
-            // form pointed at an id that no longer exists.
+
             if (editingId === genderId) resetForm();
             await loadGenders();
         } catch (err) {
