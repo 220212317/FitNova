@@ -4,14 +4,6 @@ import type { Race } from '../../types';
 import { getAllRaces, createRace, updateRace, deleteRace } from './lookupsApi';
 import { ApiError } from '../../api/client';
 
-/**
- * RaceForm
- *
- * Full CRUD for the Race lookup. Structurally identical to GenderForm —
- * same list + form pattern, same ensureId()-backed create flow. Kept as a
- * separate component (not a shared generic one) because issue #87 lists
- * GenderForm.tsx and RaceForm.tsx as two distinct files.
- */
 export default function RaceForm() {
     const [races, setRaces] = useState<Race[]>([]);
     const [description, setDescription] = useState('');
