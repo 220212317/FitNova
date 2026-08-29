@@ -7,23 +7,6 @@ export default function UserList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadUsers();
-    }, []);
-
-    async function loadUsers() {
-        setLoading(true);
-        setError(null);
-        try {
-            const data = await getAllUsers();
-            setUsers(data);
-        } catch (err) {
-            setError(err instanceof ApiError ? err.message : "Failed to load users.");
-        } finally {
-            setLoading(false);
-        }
-    }
-
     async function handleDelete(userId: string, name: string) {
         const confirmed = window.confirm(`Delete ${name}? This cannot be undone.`);
         if (!confirmed) {
@@ -37,6 +20,31 @@ export default function UserList() {
             setError(err instanceof ApiError ? err.message : "Failed to delete user.");
         }
     }
+
+    useEffect(() => {
+        let cancelled = false;
+
+        getAllUsers()
+            .then((data) => {
+                if (!cancelled) {
+                    setUsers(data);
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    setError(err instanceof ApiError ? err.message : "Failed to load users.");
+                }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     if (loading) {
         return <p>Loading users...</p>;
@@ -83,4 +91,3 @@ export default function UserList() {
         </div>
     );
 }
-
