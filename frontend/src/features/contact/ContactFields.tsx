@@ -13,7 +13,13 @@ interface ContactFieldsProps {
     idPrefix?: string;
 }
 
-const ContactFields: React.FC<ContactFieldsProps> = ({values, onChange, errors, disabled = false, idPrefix = "contact",}) => {
+const ContactFields: React.FC<ContactFieldsProps> = ({
+                                                         values,
+                                                         onChange,
+                                                         errors,
+                                                         disabled = false,
+                                                         idPrefix = "contact",
+                                                     }) => {
     const handleChange =
         (field: keyof ContactValues) =>
             (e: React.ChangeEvent<HTMLInputElement>) => {

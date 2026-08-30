@@ -12,7 +12,11 @@ interface NextOfKinFieldsProps {
     disabled?: boolean;
 }
 
-const NextOfKinFields: React.FC<NextOfKinFieldsProps> = ({values, onChange, errors, disabled = false,
+const NextOfKinFields: React.FC<NextOfKinFieldsProps> = ({
+                                                             values,
+                                                             onChange,
+                                                             errors,
+                                                             disabled = false,
                                                          }) => {
     const handleChange =
         (field: keyof NextOfKinValues) =>
