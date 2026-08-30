@@ -166,8 +166,7 @@ const HomePage: React.FC = () => {
 
           <div className="fn-center-heading">
 
-            <span className="fn-section-label">
-            </span>
+            <span className="fn-section-label"></span>
 
             <h2>
               Everything you need
