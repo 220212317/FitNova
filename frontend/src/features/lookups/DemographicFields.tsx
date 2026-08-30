@@ -1,3 +1,4 @@
+/** Inga Plati, 230126634 */
 import { useEffect, useState } from 'react';
 import type { Gender, Race } from '../../types';
 import { getAllGenders, getAllRaces } from './lookupsApi';
