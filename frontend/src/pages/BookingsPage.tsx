@@ -37,9 +37,35 @@ export default function BookingsPage() {
         }
     }, []);
 
+    // Mount-time fetch is written as a plain promise chain (.then/.catch)
+    // rather than calling loadBookings() directly, because
+    // react-hooks/set-state-in-effect flags ANY effect body that
+    // synchronously invokes a function which itself calls a state setter
+    // — regardless of async/await/void. Per that rule's own guidance,
+    // setState is only allowed inside a callback (like .then()), so all
+    // state updates here happen inside the .then()/.catch() callbacks,
+    // not as part of the effect's own synchronous invocation.
     useEffect(() => {
-        void loadBookings();
-    }, [loadBookings]);
+        let cancelled = false;
+
+        getAllBookings()
+            .then((data) => {
+                if (!cancelled) {
+                    setBookings(data);
+                    setLoading(false);
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    setError(messageFor(err));
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     function messageFor(err: unknown): string {
         if (err instanceof ApiError) return err.message;
