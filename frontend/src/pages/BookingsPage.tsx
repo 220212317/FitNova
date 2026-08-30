@@ -1,6 +1,6 @@
 /** TODO — Avuyile Sitoyi (240971051) */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     getAllBookings,
     createBooking,
@@ -24,7 +24,7 @@ export default function BookingsPage() {
     const [view, setView] = useState<ViewState>('list');
     const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
 
-    async function loadBookings() {
+    const loadBookings = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -35,11 +35,11 @@ export default function BookingsPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, []);
 
     useEffect(() => {
-        loadBookings();
-    }, []);
+        void loadBookings();
+    }, [loadBookings]);
 
     function messageFor(err: unknown): string {
         if (err instanceof ApiError) return err.message;
