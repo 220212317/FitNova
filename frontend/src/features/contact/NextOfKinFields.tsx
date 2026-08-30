@@ -1,27 +1,9 @@
 /** TODO — Lisakhanya Tshokolo (220239215) */
 import React from "react";
-
-export interface NextOfKinValues {
-    firstName: string;
-    lastName: string;
-    relationship: string;
-    cellphoneNumber: string;
-    userId?: string;
-}
-
-export const emptyNextOfKinValues: NextOfKinValues = {
-    firstName: "",
-    lastName: "",
-    relationship: "",
-    cellphoneNumber: "",
-};
-
-export interface NextOfKinFieldErrors {
-    firstName?: string;
-    lastName?: string;
-    relationship?: string;
-    cellphoneNumber?: string;
-}
+import type {
+    NextOfKinValues,
+    NextOfKinFieldErrors,
+} from "./contactTypes";
 
 interface NextOfKinFieldsProps {
     values: NextOfKinValues;
@@ -30,21 +12,24 @@ interface NextOfKinFieldsProps {
     disabled?: boolean;
 }
 
-const NextOfKinFields: React.FC<NextOfKinFieldsProps> = ({
-                                                             values,
-                                                             onChange,
-                                                             errors,
-                                                             disabled = false,
+const NextOfKinFields: React.FC<NextOfKinFieldsProps> = ({values, onChange, errors, disabled = false,
                                                          }) => {
     const handleChange =
-        (field: keyof NextOfKinValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
-            onChange({...values, [field]: e.target.value});
-        };
+        (field: keyof NextOfKinValues) =>
+            (e: React.ChangeEvent<HTMLInputElement>) => {
+                onChange({
+                    ...values,
+                    [field]: e.target.value,
+                });
+            };
 
     return (
         <div className="fn-field-group">
             <div className="fn-field">
-                <label htmlFor="nok-firstName">First name</label>
+                <label htmlFor="nok-firstName">
+                    First name
+                </label>
+
                 <input
                     id="nok-firstName"
                     name="firstName"
@@ -55,11 +40,19 @@ const NextOfKinFields: React.FC<NextOfKinFieldsProps> = ({
                     required
                     aria-invalid={!!errors?.firstName}
                 />
-                {errors?.firstName && <small className="fn-field-error">{errors.firstName}</small>}
+
+                {errors?.firstName && (
+                    <small className="fn-field-error">
+                        {errors.firstName}
+                    </small>
+                )}
             </div>
 
             <div className="fn-field">
-                <label htmlFor="nok-lastName">Last name</label>
+                <label htmlFor="nok-lastName">
+                    Last name
+                </label>
+
                 <input
                     id="nok-lastName"
                     name="lastName"
@@ -70,11 +63,19 @@ const NextOfKinFields: React.FC<NextOfKinFieldsProps> = ({
                     required
                     aria-invalid={!!errors?.lastName}
                 />
-                {errors?.lastName && <small className="fn-field-error">{errors.lastName}</small>}
+
+                {errors?.lastName && (
+                    <small className="fn-field-error">
+                        {errors.lastName}
+                    </small>
+                )}
             </div>
 
             <div className="fn-field">
-                <label htmlFor="nok-relationship">Relationship</label>
+                <label htmlFor="nok-relationship">
+                    Relationship
+                </label>
+
                 <input
                     id="nok-relationship"
                     name="relationship"
@@ -85,11 +86,19 @@ const NextOfKinFields: React.FC<NextOfKinFieldsProps> = ({
                     required
                     aria-invalid={!!errors?.relationship}
                 />
-                {errors?.relationship && <small className="fn-field-error">{errors.relationship}</small>}
+
+                {errors?.relationship && (
+                    <small className="fn-field-error">
+                        {errors.relationship}
+                    </small>
+                )}
             </div>
 
             <div className="fn-field">
-                <label htmlFor="nok-cell">Cell number</label>
+                <label htmlFor="nok-cell">
+                    Cell number
+                </label>
+
                 <input
                     id="nok-cell"
                     name="cellphoneNumber"
@@ -101,7 +110,12 @@ const NextOfKinFields: React.FC<NextOfKinFieldsProps> = ({
                     required
                     aria-invalid={!!errors?.cellphoneNumber}
                 />
-                {errors?.cellphoneNumber && <small className="fn-field-error">{errors.cellphoneNumber}</small>}
+
+                {errors?.cellphoneNumber && (
+                    <small className="fn-field-error">
+                        {errors.cellphoneNumber}
+                    </small>
+                )}
             </div>
         </div>
     );
