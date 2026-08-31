@@ -124,6 +124,7 @@ export default function AccountFields({
                 <button type="submit" disabled={submitting}>
                     {submitting ? 'Creating...' : 'Create Account'}
                 </button>
+
             </form>
         </fieldset>
     );
