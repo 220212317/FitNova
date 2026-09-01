@@ -18,9 +18,10 @@ import {
 
 interface UserFormProps {
     onCreated?: () => void;
+    onCancel: () => void;
 }
 
-export default function UserForm({ onCreated }: UserFormProps) {
+export default function UserForm({ onCreated, onCancel }: UserFormProps) {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [dateOfBirth, setDateOfBirth] = useState("");
@@ -206,9 +207,14 @@ export default function UserForm({ onCreated }: UserFormProps) {
                 disabled={!accountReady}
             />
 
-            <button type="button" onClick={handleSubmit} disabled={!accountReady || submitting}>
-                {submitting ? "Creating..." : "Create User"}
-            </button>
+            <div>
+                <button type="button" onClick={onCancel} disabled={submitting}>
+                    Cancel
+                </button>
+                <button type="button" onClick={handleSubmit} disabled={!accountReady || submitting}>
+                    {submitting ? "Creating..." : "Create User"}
+                </button>
+            </div>
         </div>
     );
 }
