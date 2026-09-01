@@ -1,6 +1,8 @@
 /** TODO — Collins Shibambo (230093183) */
 import { useEffect, useState } from "react";
-import { getAllUsers, deleteUser, type User, ApiError } from "./userApi";
+import { getAllUsers, deleteUser } from "./userApi";
+import type { User } from "../../types";
+import { ApiError } from "../../api/client";
 
 export default function UserList() {
     const [users, setUsers] = useState<User[]>([]);

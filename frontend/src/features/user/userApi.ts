@@ -1,93 +1,121 @@
+/** Collins Shibambo (230093183) */
+import { api } from '../../api/client';
+import { ensureId } from '../../api/ids';
+import type { User, UserRole, RoleType } from '../../types';
 
-const BASE_URL = "http://localhost:8080/FitNova";
+export function getAllUsers(): Promise<User[]> {
+    return api.get<User[]>('/user/getAll');
+}
 
-export interface User {
-    userId: string;
+export function getUser(userId: string): Promise<User> {
+    return api.get<User>(`/user/read/${encodeURIComponent(userId)}`);
+}
+
+export function createUser(input: {
+    userId?: string;
     firstName: string;
     lastName: string;
-    dateOfBirth: string;
-    account: unknown;
-    demographic: unknown;
-    address: unknown;
-    contact: unknown;
-    nextOfKinContacts: unknown[];
+    dateOfBirth?: string;
+    account?: User['account'];
+    demographic?: User['demographic'];
+    address?: User['address'];
+    contact?: User['contact'];
+    nextOfKinContacts?: User['nextOfKinContacts'];
+}): Promise<User> {
+    const payload: User = {
+        userId: ensureId(input.userId),
+        firstName: input.firstName,
+        lastName: input.lastName,
+        dateOfBirth: input.dateOfBirth,
+        account: input.account,
+        demographic: input.demographic,
+        address: input.address,
+        contact: input.contact,
+        nextOfKinContacts: input.nextOfKinContacts,
+    };
+    return api.post<User>('/user/create', payload);
 }
 
-export interface UserRole {
-    userRoleId: string;
-    user: User;
-    roleId: "MEMBER" | "TRAINER" | "ADMIN";
-    description: string;
+export function updateUser(user: User): Promise<User> {
+    return api.put<User>('/user/update', user);
 }
 
-export class ApiError extends Error {
-    status: number;
-
-    constructor(status: number, message: string) {
-        super(message);
-        this.status = status;
-    }
+export function deleteUser(userId: string): Promise<void> {
+    return api.delete(`/user/delete/${encodeURIComponent(userId)}`);
 }
 
-async function handleResponse<T>(response: Response): Promise<T> {
-    if (!response.ok) {
-        const text = await response.text().catch(() => "");
-        throw new ApiError(response.status, text || response.statusText);
-    }
-
-    if (response.status === 204) {
-        return undefined as T;
-    }
-
-    return response.json() as Promise<T>;
+export function findUsersByName(firstName: string, lastName: string): Promise<User[]> {
+    return api.get<User[]>(
+        `/user/findByName/${encodeURIComponent(firstName)}/${encodeURIComponent(lastName)}`
+    );
 }
 
-export async function getAllUsers(): Promise<User[]> {
-    const response = await fetch(`${BASE_URL}/user/getAll`);
-    return handleResponse<User[]>(response);
+export function searchUsersByLastName(lastName: string): Promise<User[]> {
+    return api.get<User[]>(`/user/searchByLastName/${encodeURIComponent(lastName)}`);
 }
 
-export async function getUser(userId: string): Promise<User> {
-    const response = await fetch(`${BASE_URL}/user/read/${userId}`);
-    return handleResponse<User>(response);
+export function createUserRole(input: {
+    userRoleId?: string;
+    userId: string;
+    roleId: RoleType;
+    description?: string;
+}): Promise<UserRole> {
+    const payload = {
+        userRoleId: ensureId(input.userRoleId),
+        user: { userId: input.userId },
+        roleId: input.roleId,
+        description: input.description,
+    };
+    return api.post<UserRole>('/userrole/create', payload);
 }
 
-export async function createUser(user: Partial<User>): Promise<User> {
-    const response = await fetch(`${BASE_URL}/user/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user),
-    });
-
-    return handleResponse<User>(response);
+export function getUserRole(userRoleId: string): Promise<UserRole> {
+    return api.get<UserRole>(`/userrole/read/${encodeURIComponent(userRoleId)}`);
 }
 
-export async function updateUser(user: User): Promise<User> {
-    const response = await fetch(`${BASE_URL}/user/update`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user),
-    });
-
-    return handleResponse<User>(response);
+export function updateUserRole(userRole: UserRole): Promise<UserRole> {
+    return api.put<UserRole>('/userrole/update', userRole);
 }
 
-export async function deleteUser(userId: string): Promise<void> {
-    const response = await fetch(`${BASE_URL}/user/delete/${userId}`, {
-        method: "DELETE",
-    });
-
-    return handleResponse<void>(response);
+export function deleteUserRole(userRoleId: string): Promise<void> {
+    return api.delete(`/userrole/delete/${encodeURIComponent(userRoleId)}`);
 }
 
-export async function createUserRole(
-    userRole: Partial<UserRole>
+export function findUserRolesByUser(userId: string): Promise<UserRole[]> {
+    return api.get<UserRole[]>(`/userrole/findByUser/${encodeURIComponent(userId)}`);
+}
+
+export function findUserRolesByRole(roleId: RoleType): Promise<UserRole[]> {
+    return api.get<UserRole[]>(`/userrole/findByRole/${encodeURIComponent(roleId)}`);
+}
+
+export function findUserRoleByUserAndRole(
+    userId: string,
+    roleId: RoleType
 ): Promise<UserRole> {
-    const response = await fetch(`${BASE_URL}/userrole/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userRole),
-    });
-
-    return handleResponse<UserRole>(response);
+    return api.get<UserRole>(
+        `/userrole/findByUserAndRole/${encodeURIComponent(userId)}/${encodeURIComponent(roleId)}`
+    );
 }
+
+export function getAllUserRoles(): Promise<UserRole[]> {
+    return api.get<UserRole[]>('/userrole/getAll');
+}
+
+export const userApi = {
+    getAllUsers,
+    getUser,
+    createUser,
+    updateUser,
+    deleteUser,
+    findUsersByName,
+    searchUsersByLastName,
+    createUserRole,
+    getUserRole,
+    updateUserRole,
+    deleteUserRole,
+    findUserRolesByUser,
+    findUserRolesByRole,
+    findUserRoleByUserAndRole,
+    getAllUserRoles,
+};
