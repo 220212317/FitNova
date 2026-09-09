@@ -1,8 +1,17 @@
 /** TODO — Phumelela Sakie (240040546) */
-import { useEffect, useState } from "react";
+
+import { useState } from "react";
 import type { FormEvent } from "react";
-import type {AvailabilitySlot} from "../../types";
-import {createSlot, normalizeTime, type SlotFormData, updateSlot} from "./slotsApi.ts";
+
+import type { AvailabilitySlot } from "../../types";
+
+import {
+    createSlot,
+    normalizeTime,
+    updateSlot,
+} from "./slotsApi";
+
+import type { SlotFormData } from "./slotsApi";
 
 interface SlotFormProps {
     editingSlot: AvailabilitySlot | null;
@@ -10,45 +19,47 @@ interface SlotFormProps {
     onCancelEdit: () => void;
 }
 
-function SlotForm({
-                      editingSlot,
-                      onSaved,
-                      onCancelEdit,
-                  }: SlotFormProps) {
-    const [date, setDate] = useState("");
-    const [startTime, setStartTime] = useState("");
-    const [endTime, setEndTime] = useState("");
-    const [status, setStatus] = useState("AVAILABLE");
-    const [trainerUserId, setTrainerUserId] = useState("");
+interface SlotFormFieldsProps {
+    editingSlot: AvailabilitySlot | null;
+    onSaved: () => void;
+    onCancelEdit: () => void;
+}
+
+function SlotFormFields({
+                            editingSlot,
+                            onSaved,
+                            onCancelEdit,
+                        }: SlotFormFieldsProps) {
+
+    const [date, setDate] = useState(
+        editingSlot?.date ?? ""
+    );
+
+    const [startTime, setStartTime] = useState(
+        editingSlot?.startTime
+            ? editingSlot.startTime.substring(0, 5)
+            : ""
+    );
+
+    const [endTime, setEndTime] = useState(
+        editingSlot?.endTime
+            ? editingSlot.endTime.substring(0, 5)
+            : ""
+    );
+
+    const [status, setStatus] = useState(
+        editingSlot?.status ?? "AVAILABLE"
+    );
+
+    const [trainerUserId, setTrainerUserId] = useState(
+        editingSlot?.trainer?.userId ?? ""
+    );
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
     const isEditing = editingSlot !== null;
-
-    useEffect(() => {
-        if (editingSlot) {
-            setDate(editingSlot.date || "");
-            setStartTime(
-                editingSlot.startTime
-                    ? editingSlot.startTime.substring(0, 5)
-                    : ""
-            );
-            setEndTime(
-                editingSlot.endTime
-                    ? editingSlot.endTime.substring(0, 5)
-                    : ""
-            );
-            setStatus(editingSlot.status || "AVAILABLE");
-            setTrainerUserId(editingSlot.trainer?.userId || "");
-        } else {
-            resetForm();
-        }
-
-        setError("");
-        setSuccess("");
-    }, [editingSlot]);
 
     function resetForm() {
         setDate("");
@@ -89,7 +100,9 @@ function SlotForm({
         return "";
     }
 
-    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(
+        event: FormEvent<HTMLFormElement>
+    ) {
         event.preventDefault();
 
         setError("");
@@ -114,15 +127,25 @@ function SlotForm({
             setLoading(true);
 
             if (isEditing && editingSlot) {
-                await updateSlot(editingSlot.slotId, formData);
-                setSuccess("Availability slot updated successfully.");
+                await updateSlot(
+                    editingSlot.slotId,
+                    formData
+                );
+
+                setSuccess(
+                    "Availability slot updated successfully."
+                );
             } else {
                 await createSlot(formData);
-                setSuccess("Availability slot created successfully.");
+
+                setSuccess(
+                    "Availability slot created successfully."
+                );
             }
 
             resetForm();
             onSaved();
+
         } catch (err) {
             setError(
                 err instanceof Error
@@ -143,9 +166,15 @@ function SlotForm({
 
     return (
         <div className="slot-form">
-            <h2>{isEditing ? "Edit Availability Slot" : "Create Availability Slot"}</h2>
+
+            <h2>
+                {isEditing
+                    ? "Edit Availability Slot"
+                    : "Create Availability Slot"}
+            </h2>
 
             <form onSubmit={handleSubmit}>
+
                 <div>
                     <label htmlFor="slot-date">
                         Date
@@ -155,7 +184,9 @@ function SlotForm({
                         id="slot-date"
                         type="date"
                         value={date}
-                        onChange={(event) => setDate(event.target.value)}
+                        onChange={(event) =>
+                            setDate(event.target.value)
+                        }
                         required
                     />
                 </div>
@@ -169,7 +200,9 @@ function SlotForm({
                         id="slot-start-time"
                         type="time"
                         value={startTime}
-                        onChange={(event) => setStartTime(event.target.value)}
+                        onChange={(event) =>
+                            setStartTime(event.target.value)
+                        }
                         required
                     />
                 </div>
@@ -183,7 +216,9 @@ function SlotForm({
                         id="slot-end-time"
                         type="time"
                         value={endTime}
-                        onChange={(event) => setEndTime(event.target.value)}
+                        onChange={(event) =>
+                            setEndTime(event.target.value)
+                        }
                         required
                     />
                 </div>
@@ -196,8 +231,11 @@ function SlotForm({
                     <select
                         id="slot-status"
                         value={status}
-                        onChange={(event) => setStatus(event.target.value)}
-                        required
+                        onChange={(event) =>
+                            setStatus(
+                                event.target.value as "AVAILABLE" | "BOOKED" | "UNAVAILABLE"
+                            )
+                        }
                     >
                         <option value="AVAILABLE">
                             AVAILABLE
@@ -211,6 +249,7 @@ function SlotForm({
                             UNAVAILABLE
                         </option>
                     </select>
+
                 </div>
 
                 <div>
@@ -223,7 +262,9 @@ function SlotForm({
                         type="text"
                         value={trainerUserId}
                         onChange={(event) =>
-                            setTrainerUserId(event.target.value)
+                            setTrainerUserId(
+                                event.target.value
+                            )
                         }
                         placeholder="Enter trainer user ID"
                         required
@@ -264,8 +305,35 @@ function SlotForm({
                         </button>
                     )}
                 </div>
+
             </form>
         </div>
+    );
+}
+
+function SlotForm({
+                      editingSlot,
+                      onSaved,
+                      onCancelEdit,
+                  }: SlotFormProps) {
+
+    /*
+     * The key forces React to create a fresh form whenever
+     * the selected slot changes.
+     *
+     * This removes the need for useEffect + setState.
+     */
+
+    const formKey =
+        editingSlot?.slotId ?? "new-slot";
+
+    return (
+        <SlotFormFields
+            key={formKey}
+            editingSlot={editingSlot}
+            onSaved={onSaved}
+            onCancelEdit={onCancelEdit}
+        />
     );
 }
 
