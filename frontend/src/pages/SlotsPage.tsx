@@ -38,7 +38,7 @@ function SlotsPage() {
 
     useEffect(() => {
         loadSlots();
-    }, [loadSlots]);
+    }, []); // loadSlots is stable due to useCallback
 
     function handleEdit(slot: AvailabilitySlot) {
         setEditingSlot(slot);
