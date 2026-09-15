@@ -104,7 +104,7 @@ export function HomePage() {
             </div>
           </div>
 
-          {/* Live preview card — API data only, no mock numbers */}
+
           <div className="fn-hero-preview">
             <div className="fn-fitness-card">
               <div className="fn-card-top">
