@@ -616,73 +616,6 @@
 }
 
 
-/* =====================================================
-   HOW IT WORKS
-===================================================== */
-
-.fitnova-home .fn-how {
-    padding: 100px 0;
-
-    background: #f1f7f4;
-}
-
-.fitnova-home .fn-steps {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 35px;
-}
-
-.fitnova-home .fn-step {
-    width: 260px;
-
-    text-align: center;
-}
-
-.fitnova-home .fn-step-number {
-    width: 62px;
-    height: 62px;
-
-    margin: 0 auto 20px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background: #2f8f63;
-    color: #ffffff;
-
-    font-size: 12px;
-    font-weight: 800;
-}
-
-.fitnova-home .fn-step h3 {
-    margin: 0 0 10px;
-
-    color: #293630;
-
-    font-size: 17px;
-}
-
-.fitnova-home .fn-step p {
-    margin: 0;
-
-    color: #77827d;
-
-    font-size: 13px;
-    line-height: 1.7;
-}
-
-.fitnova-home .fn-step-arrow {
-    padding-top: 20px;
-
-    color: #8aa596;
-
-    font-size: 26px;
-}
-
 
 /* =====================================================
    FINAL CTA
@@ -967,4 +900,46 @@
         align-items: flex-start;
         gap: 9px;
     }
+}
+
+/* React Router Link variants of nav actions */
+.fitnova-home .fn-login-button,
+.fitnova-home .fn-nav-cta {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.fitnova-home a.fn-login-button:hover {
+  color: #2f8f63;
+}
+
+.fitnova-home a.fn-nav-cta:hover {
+  background: #267750;
+  color: #ffffff;
+}
+
+
+
+/* ---- Shared Layout shell: home uses full width under global navbar ---- */
+.fitnova-home--embedded {
+  min-height: auto;
+  width: 100%;
+}
+
+.main:has(> .fitnova-home--embedded) {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+}
+
+.fitnova-home--embedded .fn-hero-container,
+.fitnova-home--embedded .fn-section-container {
+  width: 94%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
 }
