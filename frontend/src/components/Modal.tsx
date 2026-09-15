@@ -1,88 +1,95 @@
 /** Phumelela Sakie (240040546) */
-import type { ReactNode } from "react";
+import type { ReactNode, MouseEvent, KeyboardEvent } from "react";
+import "./modal.css";
 
 interface ModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    title?: string;
-    children: ReactNode;
-    footer?: ReactNode;
-    size?: 'sm' | 'md' | 'lg' | 'xl';
-    closeButton?: boolean;
+  title: string;
+  subtitle?: string;
+  onClose: () => void;
+  children: ReactNode;
+  width?: number;
+  footer?: ReactNode;
 }
 
-const Modal: React.FC<ModalProps> = ({
-                                         isOpen,
-                                         onClose,
-                                         title,
-                                         children,
-                                         footer,
-                                         size = 'md',
-                                         closeButton = true,
-                                     }) => {
-    if (!isOpen) return null;
+export function Modal({
+  title,
+  subtitle,
+  onClose,
+  children,
+  width = 520,
+  footer,
+}: ModalProps) {
+  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
+  };
 
-    const sizeClasses = {
-        sm: 'max-w-sm',
-        md: 'max-w-md',
-        lg: 'max-w-lg',
-        xl: 'max-w-xl',
-    };
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape") onClose();
+  };
 
-    const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.target === e.currentTarget) {
-            onClose();
-        }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (e.key === 'Escape') {
-            onClose();
-        }
-    };
-
-    return (
-        <div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            onClick={handleBackdropClick}
-            onKeyDown={handleKeyDown}
-            role="presentation"
-        >
-            <div className={`bg-white rounded-lg shadow-lg w-full mx-4 ${sizeClasses[size]}`}>
-                {/* Header */}
-                <div className="flex justify-between items-center p-6 border-b border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-                    {closeButton && (
-                        <button
-                            onClick={onClose}
-                            className="text-gray-500 hover:text-gray-700 transition-colors"
-                            aria-label="Close modal"
-                        >
-                            <svg
-                                className="w-6 h-6"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
-                        </button>
-                    )}
-                </div>
-
-                {/* Body */}
-                <div className="p-6">{children}</div>
-
-                {/* Footer */}
-                {footer && <div className="p-6 border-t border-gray-200">{footer}</div>}
-            </div>
+  return (
+    <div
+      className="fn-modal-backdrop"
+      onClick={handleBackdropClick}
+      onKeyDown={handleKeyDown}
+      role="presentation"
+    >
+      <div
+        className="fn-modal"
+        style={{ maxWidth: width }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+      >
+        <div className="fn-modal-header">
+          <div>
+            <h2>{title}</h2>
+            {subtitle && <p className="fn-modal-subtitle">{subtitle}</p>}
+          </div>
+          <button
+            type="button"
+            className="fn-modal-close"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ×
+          </button>
         </div>
-    );
-};
+        <div className="fn-modal-body">{children}</div>
+        {footer && <div className="fn-modal-footer">{footer}</div>}
+      </div>
+    </div>
+  );
+}
+
+interface ConfirmDialogProps {
+  title: string;
+  message: string;
+  confirmLabel?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+export function ConfirmDialog({
+  title,
+  message,
+  confirmLabel = "Confirm",
+  onConfirm,
+  onCancel,
+}: ConfirmDialogProps) {
+  return (
+    <Modal title={title} onClose={onCancel} width={420}>
+      <p style={{ margin: "0 0 1.25rem", color: "var(--text)" }}>{message}</p>
+      <div className="toolbar" style={{ justifyContent: "flex-end", gap: "0.5rem" }}>
+        <button className="btn btn-ghost" type="button" onClick={onCancel}>
+          Cancel
+        </button>
+        <button className="btn btn-danger" type="button" onClick={onConfirm}>
+          {confirmLabel}
+        </button>
+      </div>
+    </Modal>
+  );
+}
 
 export default Modal;
