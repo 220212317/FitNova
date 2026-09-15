@@ -1,48 +1,84 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { bookingsApi, slotsApi, usersApi } from "../api/fitnova";
+import type { AvailabilitySlot, Booking } from "../types";
 import "./HomePage.css";
 
-const HomePage: React.FC = () => {
+export function HomePage() {
+  const [counts, setCounts] = useState({
+    people: 0,
+    slots: 0,
+    available: 0,
+    bookings: 0,
+  });
+  const [nextSlot, setNextSlot] = useState<AvailabilitySlot | null>(null);
+  const [recentBooking, setRecentBooking] = useState<Booking | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [users, slots, bookings] = await Promise.all([
+          usersApi.getAll().catch(() => []),
+          slotsApi.getAll().catch(() => []),
+          bookingsApi.getAll().catch(() => []),
+        ]);
+        if (cancelled) return;
+
+        const availableSlots = slots
+          .filter((s) => s.status === "AVAILABLE")
+          .sort((a, b) =>
+            `${a.date}${a.startTime}`.localeCompare(`${b.date}${b.startTime}`)
+          );
+
+        setCounts({
+          people: users.length,
+          slots: slots.length,
+          available: availableSlots.length,
+          bookings: bookings.length,
+        });
+        setNextSlot(availableSlots[0] ?? null);
+
+        const sortedBookings = [...bookings].sort((a, b) =>
+          (b.bookingDateTime ?? "").localeCompare(a.bookingDateTime ?? "")
+        );
+        setRecentBooking(sortedBookings[0] ?? null);
+        setApiError(false);
+      } catch {
+        if (!cancelled) setApiError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const monthLabel = (dateStr?: string) => {
+    if (!dateStr) return "";
+    const d = new Date(`${dateStr}T00:00:00`);
+    if (Number.isNaN(d.getTime())) return dateStr.slice(5, 7);
+    return d.toLocaleString(undefined, { month: "short" }).toUpperCase();
+  };
+
+  const dayLabel = (dateStr?: string) => {
+    if (!dateStr) return "—";
+    return dateStr.slice(8, 10) || "—";
+  };
+
+  const formatTime = (t?: string) => {
+    if (!t) return "";
+    return t.length >= 5 ? t.slice(0, 5) : t;
+  };
+
   return (
-    <div className="fitnova-home">
-
-      {/* ================= NAVIGATION ================= */}
-
-      <header className="fn-navbar">
-        <div className="fn-navbar-container">
-
-          <a href="/" className="fn-brand">
-            <span className="fn-brand-icon">F</span>
-            <span>FitNova</span>
-          </a>
-
-          <nav className="fn-nav-menu">
-            <a href="/">Home</a>
-            <a href="/booking">Booking</a>
-            <a href="/lookup">Lookup</a>
-            <a href="/slot">Slots</a>
-            <a href="/users">Users</a>
-          </nav>
-
-          <div className="fn-nav-actions">
-            <button className="fn-login-button">
-              Log In
-            </button>
-
-            <button className="fn-nav-cta">
-              Get Started
-            </button>
-          </div>
-
-        </div>
-      </header>
-
-
+    <div className="fitnova-home fitnova-home--embedded">
       {/* ================= HERO ================= */}
-
       <section className="fn-hero" id="home">
-
         <div className="fn-hero-container">
-
           <div className="fn-hero-content">
             <h1>
               Your fitness.
@@ -51,424 +87,228 @@ const HomePage: React.FC = () => {
             </h1>
 
             <p>
-              FitNova makes it simple to manage your fitness
-              journey. Find available slots, make bookings,
-              and keep your fitness activities organised
-              in one place.
+              FitNova makes it simple to manage your fitness journey. Find
+              available slots, make bookings, and keep your fitness activities
+              organised in one place.
             </p>
 
             <div className="fn-hero-buttons">
-
-              <a
-                href="/booking"
-                className="fn-primary-button"
-              >
+              <Link to="/bookings" className="fn-primary-button">
                 Book a Session
                 <span>→</span>
-              </a>
+              </Link>
 
-              <a
-                href="/lookup"
-                className="fn-outline-button"
-              >
+              <Link to="/slots" className="fn-outline-button">
                 View Available Slots
-              </a>
-
+              </Link>
             </div>
-
           </div>
 
-
-          {/* ================= SIMPLE FITNESS CARD ================= */}
-
+          {/* Live preview card — API data only, no mock numbers */}
           <div className="fn-hero-preview">
-
             <div className="fn-fitness-card">
-
               <div className="fn-card-top">
-                <div>
-                  <h3>Stay on track</h3>
-                </div>
 
-                <div className="fn-card-icon">
-                  ✓
-                </div>
               </div>
 
-
               <div className="fn-card-progress">
-
-                <div className="fn-progress-circle">
-                  <strong>75%</strong>
-                  <small>Progress</small>
+                <div
+                  className="fn-progress-circle"
+                  style={
+                    counts.slots > 0
+                      ? {
+                          background: `radial-gradient(circle, #ffffff 57%, transparent 58%), conic-gradient(#2f8f63 ${Math.round(
+                            (counts.available / counts.slots) * 100
+                          )}%, #dce9e2 0)`,
+                        }
+                      : undefined
+                  }
+                >
+                  <strong>
+                    {loading
+                      ? "…"
+                      : counts.slots === 0
+                        ? "—"
+                        : `${Math.round((counts.available / counts.slots) * 100)}%`}
+                  </strong>
+                  <small>Open slots</small>
                 </div>
 
                 <div className="fn-progress-info">
-
                   <div>
-                    <span>Sessions</span>
-                    <strong>8</strong>
+                    <span>People</span>
+                    <strong>{loading ? "…" : counts.people}</strong>
                   </div>
-
                   <div>
-                    <span>Completed</span>
-                    <strong>6</strong>
+                    <span>Slots</span>
+                    <strong>{loading ? "…" : counts.slots}</strong>
                   </div>
-
                   <div>
-                    <span>Upcoming</span>
-                    <strong>2</strong>
+                    <span>Bookings</span>
+                    <strong>{loading ? "…" : counts.bookings}</strong>
                   </div>
-
                 </div>
-
               </div>
-
 
               <div className="fn-upcoming">
-
-                <small>NEXT SESSION</small>
-
-                <div className="fn-session-row">
-
-                  <div className="fn-session-date">
-                    <strong>24</strong>
-                    <span>JUN</span>
+                <small>NEXT AVAILABLE</small>
+                {loading ? (
+                  <div className="fn-session-row">
+                    <div className="fn-session-date">
+                      <strong>—</strong>
+                      <span>…</span>
+                    </div>
+                    <div>
+                      <strong>Loading…</strong>
+                      <small>Fetching from FitNova API</small>
+                    </div>
                   </div>
-
-                  <div>
-                    <strong>Fitness Session</strong>
-                    <small>09:00 AM</small>
+                ) : nextSlot ? (
+                  <div className="fn-session-row">
+                    <div className="fn-session-date">
+                      <strong>{dayLabel(nextSlot.date)}</strong>
+                      <span>{monthLabel(nextSlot.date)}</span>
+                    </div>
+                    <div>
+                      <strong>
+                        {nextSlot.trainer
+                          ? `${nextSlot.trainer.firstName} ${nextSlot.trainer.lastName}`
+                          : "Open slot"}
+                      </strong>
+                      <small>
+                        {formatTime(nextSlot.startTime)}
+                        {nextSlot.endTime ? `–${formatTime(nextSlot.endTime)}` : ""}
+                      </small>
+                    </div>
+                    <span className="fn-booked">{nextSlot.status}</span>
                   </div>
-
-                  <span className="fn-booked">
-                    Booked
-                  </span>
-
-                </div>
-
+                ) : recentBooking ? (
+                  <div className="fn-session-row">
+                    <div className="fn-session-date">
+                      <strong>
+                        {recentBooking.bookingDateTime
+                          ? recentBooking.bookingDateTime.slice(8, 10)
+                          : "—"}
+                      </strong>
+                      <span>BK</span>
+                    </div>
+                    <div>
+                      <strong>
+                        {recentBooking.member
+                          ? `${recentBooking.member.firstName} ${recentBooking.member.lastName}`
+                          : "Recent booking"}
+                      </strong>
+                      <small>
+                        {recentBooking.bookingDateTime
+                          ?.replace("T", " ")
+                          .slice(0, 16) ?? "—"}
+                      </small>
+                    </div>
+                    <span className="fn-booked">{recentBooking.status}</span>
+                  </div>
+                ) : (
+                  <div className="fn-session-row">
+                    <div className="fn-session-date">
+                      <strong>—</strong>
+                      <span>N/A</span>
+                    </div>
+                    <div>
+                      <strong>
+                        {apiError ? "API unreachable" : "No slots yet"}
+                      </strong>
+                      <small>
+                        {apiError
+                          ? "Start the backend on port 8080"
+                          : "Publish availability to see it here"}
+                      </small>
+                    </div>
+                  </div>
+                )}
               </div>
-
             </div>
-
           </div>
-
         </div>
-
       </section>
 
-
-      {/* ================= QUICK FEATURES ================= */}
-
+      {/* ================= FEATURES ================= */}
       <section className="fn-features">
-
         <div className="fn-section-container">
-
           <div className="fn-center-heading">
-
-            <span className="fn-section-label"></span>
-
+            <span className="fn-section-label">FEATURES</span>
             <h2>
-              Everything you need
+              Everything you need to
               <br />
-              <strong>in one place.</strong>
+              <strong>run a fitness facility</strong>
             </h2>
-
             <p>
-              FitNova helps you manage your fitness activities
-              quickly and easily.
+              Members, trainers, availability, and conflict-free bookings — in
+              one place.
             </p>
-
           </div>
-
 
           <div className="fn-feature-grid">
-
-
             <div className="fn-feature-card">
-
-              <div className="fn-feature-icon">
-                📅
-              </div>
-
-              <h3>
-                Easy Booking
-              </h3>
-
+              <div className="fn-feature-icon">👤</div>
+              <h3>People</h3>
               <p>
-                Book fitness sessions quickly and
-                keep your appointments organised.
+                Register members and trainers with full profiles, roles, and
+                contact details.
               </p>
-
-              <a href="/booking">
-                Go to Booking →
-              </a>
-
+              <Link to="/people">Manage people →</Link>
             </div>
 
-
             <div className="fn-feature-card">
-
-              <div className="fn-feature-icon">
-                🔍
-              </div>
-
-              <h3>
-                Quick Lookup
-              </h3>
-
+              <div className="fn-feature-icon">📅</div>
+              <h3>Availability</h3>
               <p>
-                Find the information you need
-                without wasting time.
+                Trainers publish discrete time slots that members can book
+                against.
               </p>
-
-              <a href="/lookup">
-                Go to Lookup →
-              </a>
-
+              <Link to="/slots">View slots →</Link>
             </div>
 
-
             <div className="fn-feature-card">
-
-              <div className="fn-feature-icon">
-                🕐
-              </div>
-
-              <h3>
-                Available Slots
-              </h3>
-
+              <div className="fn-feature-icon">✓</div>
+              <h3>Bookings</h3>
               <p>
-                View available fitness slots and
-                choose a time that works for you.
+                Create, cancel, and track sessions with status and overlap
+                protection.
               </p>
-
-              <a href="/slot">
-                View Slots →
-              </a>
-
+              <Link to="/bookings">View bookings →</Link>
             </div>
 
-
             <div className="fn-feature-card">
-
-              <div className="fn-feature-icon">
-                👤
-              </div>
-
-              <h3>
-                User Management
-              </h3>
-
+              <div className="fn-feature-icon">☰</div>
+              <h3>Lookups</h3>
               <p>
-                Manage user information and keep
-                your FitNova profile organised.
+                Maintain gender, race, and role reference data used across
+                profiles.
               </p>
-
-              <a href="/users">
-                View Users →
-              </a>
-
+              <Link to="/lookups">Open lookups →</Link>
             </div>
-
           </div>
-
         </div>
-
-      </section>
-
-
-      {/* ================= HOW IT WORKS ================= */}
-
-      <section className="fn-how" id="how-it-works">
-
-        <div className="fn-section-container">
-
-          <div className="fn-center-heading">
-
-            <span className="fn-section-label">
-              HOW IT WORKS
-            </span>
-
-            <h2>
-              Fitness made
-              <br />
-              <strong>simple.</strong>
-            </h2>
-
-          </div>
-
-
-          <div className="fn-steps">
-
-
-            <div className="fn-step">
-
-              <div className="fn-step-number">
-                01
-              </div>
-
-              <h3>
-                Find a slot
-              </h3>
-
-              <p>
-                Check available fitness slots
-                that suit your schedule.
-              </p>
-
-            </div>
-
-
-            <div className="fn-step-arrow">
-              →
-            </div>
-
-
-            <div className="fn-step">
-
-              <div className="fn-step-number">
-                02
-              </div>
-
-              <h3>
-                Make a booking
-              </h3>
-
-              <p>
-                Select your preferred time and
-                make your booking.
-              </p>
-
-            </div>
-
-
-            <div className="fn-step-arrow">
-              →
-            </div>
-
-
-            <div className="fn-step">
-
-              <div className="fn-step-number">
-                03
-              </div>
-
-              <h3>
-                Stay consistent
-              </h3>
-
-              <p>
-                Keep track of your sessions and
-                continue working towards your goals.
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
       </section>
 
 
       {/* ================= CTA ================= */}
-
       <section className="fn-final-cta">
-
         <div>
-
-          <span className="fn-section-label">
-            GET STARTED
-          </span>
-
+          <span className="fn-section-label">GET STARTED</span>
           <h2>
             Ready to start
             <br />
             your <strong>fitness journey?</strong>
           </h2>
-
-          <p>
-            Manage your fitness sessions with FitNova.
-          </p>
-
-          <a
-            href="/booking"
-            className="fn-primary-button fn-large-button"
-          >
+          <p>Manage your fitness sessions with FitNova.</p>
+          <Link to="/bookings" className="fn-primary-button fn-large-button">
             Book a Session
             <span>→</span>
-          </a>
-
+          </Link>
         </div>
-
       </section>
-
-
-      {/* ================= FOOTER ================= */}
-
-      <footer className="fn-footer">
-
-        <div className="fn-footer-container">
-
-          <div className="fn-footer-brand">
-
-            <a href="/" className="fn-brand">
-              <span className="fn-brand-icon">F</span>
-              <span>FitNova</span>
-            </a>
-
-            <p>
-              Making fitness management simple,
-              organised and accessible.
-            </p>
-
-          </div>
-
-
-          <div className="fn-footer-column">
-
-            <h4>Pages</h4>
-
-            <a href="/">Home</a>
-            <a href="/booking">Booking</a>
-            <a href="/lookup">Lookup</a>
-            <a href="/slot">Slots</a>
-            <a href="/users">Users</a>
-
-          </div>
-
-
-          <div className="fn-footer-column">
-
-            <h4>FitNova</h4>
-
-            <a href="/booking">Get Started</a>
-            <a href="/slot">Available Slots</a>
-            <a href="/lookup">Lookup</a>
-
-          </div>
-
-        </div>
-
-
-        <div className="fn-footer-bottom">
-
-          <span>
-            © 2026 FitNova. All rights reserved.
-          </span>
-
-          <span>
-            Fitness made simple.
-          </span>
-
-        </div>
-
-      </footer>
-
     </div>
   );
-};
+}
 
 export default HomePage;
