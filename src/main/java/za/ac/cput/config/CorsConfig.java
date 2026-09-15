@@ -5,7 +5,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-
+/**
+ * Allows the React (Vite) frontend to call the FitNova REST API from the browser.
+ */
 @Configuration
 public class CorsConfig {
 
