@@ -1,117 +1,57 @@
-/** TODO — Lisakhanya Tshokolo (220239215) */
-import React from "react";
-import "./HomePage.css";
+import { useState } from "react";
+import "./Layout.css";
+import { NavLink, Outlet } from "react-router-dom";
+import { Dumbbell, LayoutDashboard, Users, CalendarClock, CalendarCheck, ListTree, Menu, X } from "lucide-react";
 
-interface LayoutProps {
-    children: React.ReactNode;
-}
+const NAV_ITEMS = [
+    { to: "/", label: "Home", icon: LayoutDashboard, end: true },
+    { to: "/people", label: "People", icon: Users },
+    { to: "/slots", label: "Availability", icon: CalendarClock },
+    { to: "/bookings", label: "Bookings", icon: CalendarCheck },
+    { to: "/lookups", label: "Lookups", icon: ListTree },
+];
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+export function Layout() {
+    const [menuOpen, setMenuOpen] = useState(false);
+
     return (
-        <div className="fitnova-home">
+        <div className="app-shell">
+            <header className="navbar">
+                <NavLink to="/" className="brand" onClick={() => setMenuOpen(false)}>
+          <span className="brand-mark">
+            <Dumbbell size={16} strokeWidth={2.5} />
+          </span>
+                    FitNova
+                </NavLink>
 
-            {/* ================= NAVIGATION ================= */}
+                <nav className={menuOpen ? "open" : ""} aria-label="Main">
+                    {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+                        <NavLink key={to} to={to} end={end} onClick={() => setMenuOpen(false)}>
+                            <Icon />
+                            {label}
+                        </NavLink>
+                    ))}
+                </nav>
 
-            <header className="fn-navbar">
-                <div className="fn-navbar-container">
+                <span className="live-pill">
+          <span className="live-dot" aria-hidden="true" />
+          Live data
+        </span>
 
-                    <a href="/" className="fn-brand">
-                        <span className="fn-brand-icon">F</span>
-                        <span>FitNova</span>
-                    </a>
-
-                    <nav className="fn-nav-menu">
-                        <a href="/">Home</a>
-                        <a href="/booking">Booking</a>
-                        <a href="/lookup">Lookup</a>
-                        <a href="/slot">Slots</a>
-                        <a href="/users">Users</a>
-                    </nav>
-
-                    <div className="fn-nav-actions">
-                        <button className="fn-login-button">
-                            Log In
-                        </button>
-
-                        <button className="fn-nav-cta">
-                            Get Started
-                        </button>
-                    </div>
-
-                </div>
+                <button
+                    className="nav-toggle"
+                    type="button"
+                    aria-label={menuOpen ? "Close menu" : "Open menu"}
+                    aria-expanded={menuOpen}
+                    onClick={() => setMenuOpen((o) => !o)}
+                >
+                    {menuOpen ? <X size={18} /> : <Menu size={18} />}
+                </button>
             </header>
-
-
-            {/* ================= PAGE CONTENT ================= */}
-
-            <main>
-                {children}
+            <main className="main">
+                <Outlet />
             </main>
-
-
-            {/* ================= FOOTER ================= */}
-
-            <footer className="fn-footer">
-
-                <div className="fn-footer-container">
-
-                    <div className="fn-footer-brand">
-
-                        <a href="/" className="fn-brand">
-                            <span className="fn-brand-icon">F</span>
-                            <span>FitNova</span>
-                        </a>
-
-                        <p>
-                            Making fitness management simple,
-                            organised and accessible.
-                        </p>
-
-                    </div>
-
-
-                    <div className="fn-footer-column">
-
-                        <h4>Pages</h4>
-
-                        <a href="/">Home</a>
-                        <a href="/booking">Booking</a>
-                        <a href="/lookup">Lookup</a>
-                        <a href="/slot">Slots</a>
-                        <a href="/users">Users</a>
-
-                    </div>
-
-
-                    <div className="fn-footer-column">
-
-                        <h4>FitNova</h4>
-
-                        <a href="/booking">Get Started</a>
-                        <a href="/slot">Available Slots</a>
-                        <a href="/lookup">Lookup</a>
-
-                    </div>
-
-                </div>
-
-
-                <div className="fn-footer-bottom">
-
-          <span>
-            © 2026 FitNova. All rights reserved.
-          </span>
-
-                    <span>
-            Fitness made simple.
-          </span>
-
-                </div>
-
-            </footer>
-
+            <footer className="app-footer">FitNova · CPUT ADP372S Work Integrated Learning</footer>
         </div>
     );
-};
-
-export default Layout;
+}
