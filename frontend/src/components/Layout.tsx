@@ -33,10 +33,6 @@ export function Layout() {
                     ))}
                 </nav>
 
-                <span className="live-pill">
-          <span className="live-dot" aria-hidden="true" />
-          Live data
-        </span>
 
                 <button
                     className="nav-toggle"
@@ -51,7 +47,6 @@ export function Layout() {
             <main className="main">
                 <Outlet />
             </main>
-            <footer className="app-footer">FitNova · CPUT ADP372S Work Integrated Learning</footer>
         </div>
     );
 }
