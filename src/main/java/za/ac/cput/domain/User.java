@@ -7,9 +7,7 @@ package za.ac.cput.domain;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -27,19 +25,22 @@ public class User {
     private String lastName;
     private LocalDate dateOfBirth;
 
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    // No PERSIST cascade: account/demographic/address/contact are created via their
+    // own endpoints first, then referenced here by ID. PERSIST would cause a
+    // second INSERT (duplicate key) because Jackson produces transient instances.
+    @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "account_id", referencedColumnName = "accountId")
     private Account account;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.MERGE, orphanRemoval = true)
     @JoinColumn(name = "demographic_id", referencedColumnName = "demography_id")
     private Demographic demographic;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.MERGE, orphanRemoval = true)
     @JoinColumn(name = "address_id", referencedColumnName = "addressId")
     private Address address;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.MERGE, orphanRemoval = true)
     @JoinColumn(name = "contact_id", referencedColumnName = "contactId")
     private Contact contact;
 
