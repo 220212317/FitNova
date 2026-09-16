@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import za.ac.cput.domain.Demographic;
 import za.ac.cput.repository.IDemographicRepository;
 import za.ac.cput.service.IDemographicService;
+import za.ac.cput.util.Helper;
 
 import java.util.List;
 
@@ -25,8 +26,15 @@ public class DemographicServiceImpl implements IDemographicService {
 
     @Override
     public Demographic create(Demographic demographic) {
-        if (demographic == null || demographic.getDemographyId() == null) {
+        if (demographic == null) {
             return null;
+        }
+        String id = demographic.getDemographyId();
+        if (Helper.isNullOrEmpty(id)) {
+            demographic = new Demographic.Builder()
+                    .copy(demographic)
+                    .setDemographyId(Helper.generateId())
+                    .build();
         }
         return repository.save(demographic);
     }
@@ -41,7 +49,7 @@ public class DemographicServiceImpl implements IDemographicService {
 
     @Override
     public Demographic update(Demographic demographic) {
-        if (demographic == null || demographic.getDemographyId() == null) {
+        if (demographic == null || Helper.isNullOrEmpty(demographic.getDemographyId())) {
             return null;
         }
         if (!repository.existsById(demographic.getDemographyId())) {
