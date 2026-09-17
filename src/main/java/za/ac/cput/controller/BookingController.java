@@ -9,10 +9,12 @@ import za.ac.cput.domain.enums.BookingStatus;
 import za.ac.cput.service.IBookingService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/booking")
 public class BookingController {
+
     private final IBookingService bookingService;
 
     @Autowired
@@ -21,10 +23,13 @@ public class BookingController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Booking> create(@RequestBody Booking booking) {
+    public ResponseEntity<?> create(@RequestBody Booking booking) {
         Booking created = bookingService.create(booking);
         if (created == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message",
+                    "Could not create booking. Need valid member userId, slot slotId, status, and bookingDateTime (yyyy-MM-dd'T'HH:mm:ss)."
+            ));
         }
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
@@ -39,10 +44,13 @@ public class BookingController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Booking> update(@RequestBody Booking booking) {
+    public ResponseEntity<?> update(@RequestBody Booking booking) {
         Booking updated = bookingService.update(booking);
         if (updated == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message",
+                    "Could not update booking. Confirm it exists and member/slot ids are valid."
+            ));
         }
         return ResponseEntity.ok(updated);
     }
@@ -58,25 +66,21 @@ public class BookingController {
 
     @GetMapping("/findByMember/{userId}")
     public ResponseEntity<List<Booking>> findByMember(@PathVariable String userId) {
-        List<Booking> bookings = bookingService.getBookingsByMember(userId);
-        return ResponseEntity.ok(bookings);
+        return ResponseEntity.ok(bookingService.getBookingsByMember(userId));
     }
 
     @GetMapping("/findBySlot/{slotId}")
     public ResponseEntity<List<Booking>> findBySlot(@PathVariable String slotId) {
-        List<Booking> bookings = bookingService.getBookingsBySlot(slotId);
-        return ResponseEntity.ok(bookings);
+        return ResponseEntity.ok(bookingService.getBookingsBySlot(slotId));
     }
 
     @GetMapping("/findByStatus/{status}")
     public ResponseEntity<List<Booking>> findByStatus(@PathVariable BookingStatus status) {
-        List<Booking> bookings = bookingService.getBookingsByStatus(status);
-        return ResponseEntity.ok(bookings);
+        return ResponseEntity.ok(bookingService.getBookingsByStatus(status));
     }
 
     @GetMapping("/getAll")
     public ResponseEntity<List<Booking>> getAll() {
-        List<Booking> bookings = bookingService.getAll();
-        return ResponseEntity.ok(bookings);
+        return ResponseEntity.ok(bookingService.getAll());
     }
 }
