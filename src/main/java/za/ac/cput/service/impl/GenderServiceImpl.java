@@ -1,10 +1,12 @@
 package za.ac.cput.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import za.ac.cput.domain.Gender;
 import za.ac.cput.repository.IGenderRepository;
 import za.ac.cput.service.IGenderService;
+import za.ac.cput.util.Helper;
 
 import java.util.List;
 
@@ -25,8 +27,18 @@ public class GenderServiceImpl implements IGenderService {
 
     @Override
     public Gender create(Gender gender) {
-        if (gender == null || gender.getGenderId() == null) {
+        if (gender == null) {
             return null;
+        }
+        if (Helper.isNullOrEmpty(gender.getDescription())) {
+            throw new IllegalArgumentException("Gender description is required.");
+        }
+        String id = gender.getGenderId();
+        if (Helper.isNullOrEmpty(id)) {
+            gender = new Gender.Builder()
+                    .copy(gender)
+                    .setGenderId(Helper.generateId())
+                    .build();
         }
         return repository.save(gender);
     }
@@ -41,11 +53,14 @@ public class GenderServiceImpl implements IGenderService {
 
     @Override
     public Gender update(Gender gender) {
-        if (gender == null || gender.getGenderId() == null) {
+        if (gender == null || Helper.isNullOrEmpty(gender.getGenderId())) {
             return null;
         }
         if (!repository.existsById(gender.getGenderId())) {
             return null;
+        }
+        if (Helper.isNullOrEmpty(gender.getDescription())) {
+            throw new IllegalArgumentException("Gender description is required.");
         }
         return repository.save(gender);
     }
@@ -55,8 +70,14 @@ public class GenderServiceImpl implements IGenderService {
         if (genderId == null || !repository.existsById(genderId)) {
             return false;
         }
-        repository.deleteById(genderId);
-        return true;
+        try {
+            repository.deleteById(genderId);
+            return true;
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalArgumentException(
+                    "Cannot delete this gender because it is still used by one or more demographic records. " +
+                            "Remove or reassign those profiles first.");
+        }
     }
 
     @Override
