@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import za.ac.cput.domain.Account;
 import za.ac.cput.repository.IAccountRepository;
 import za.ac.cput.service.IAccountService;
+import za.ac.cput.util.Helper;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,8 +27,27 @@ public class AccountServiceImpl implements IAccountService {
 
     @Override
     public Account create(Account account) {
-        if (account == null || account.getAccountId() == null) {
+        if (account == null) {
             return null;
+        }
+        if (Helper.isNullOrEmpty(account.getEmail()) || !Helper.isValidEmail(account.getEmail())) {
+            throw new IllegalArgumentException("A valid email address is required.");
+        }
+        if (Helper.isNullOrEmpty(account.getPassword())) {
+            throw new IllegalArgumentException("Password is required.");
+        }
+        String id = account.getAccountId();
+        if (Helper.isNullOrEmpty(id)) {
+            account = new Account.Builder()
+                    .copy(account)
+                    .setAccountId(Helper.generateId())
+                    .build();
+        }
+        if (account.getRegistrationDate() == null) {
+            account = new Account.Builder()
+                    .copy(account)
+                    .setRegistrationDate(LocalDate.now())
+                    .build();
         }
         return repository.save(account);
     }
