@@ -1,15 +1,14 @@
 package za.ac.cput.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import za.ac.cput.domain.enums.BookingStatus;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
- *
  * @author Avuyile Sitoyi
  * 240971051
  */
@@ -23,6 +22,7 @@ public class Booking {
     private String bookingId;
 
     @Column(name = "booking_date_time", nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime bookingDateTime;
 
     @Enumerated(EnumType.STRING)
@@ -31,16 +31,22 @@ public class Booking {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnoreProperties({"bookings", "availabilitySlots", "userRoles", "hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({
+            "account", "demographic", "address", "contact",
+            "nextOfKinContacts", "bookings", "availabilitySlots", "userRoles",
+            "hibernateLazyInitializer", "handler"
+    })
     private User member;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "slot_id", nullable = false)
-    @JsonIgnoreProperties({"bookings", "trainer", "hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({
+            "bookings", "trainer",
+            "hibernateLazyInitializer", "handler"
+    })
     private AvailabilitySlot slot;
 
     protected Booking() {
-
     }
 
     private Booking(Builder builder) {
@@ -94,8 +100,7 @@ public class Booking {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Booking)) return false;
-        Booking booking = (Booking) o;
+        if (!(o instanceof Booking booking)) return false;
         return Objects.equals(bookingId, booking.bookingId);
     }
 
@@ -110,13 +115,11 @@ public class Booking {
                 "bookingId='" + bookingId + '\'' +
                 ", bookingDateTime=" + bookingDateTime +
                 ", status=" + status +
-                ", member=" + (member != null ? member.getUserId() : null) +
-                ", slot=" + (slot != null ? slot.getSlotId() : null) +
                 '}';
     }
 
     public static class Builder {
-        private String bookingId = UUID.randomUUID().toString();
+        private String bookingId;
         private LocalDateTime bookingDateTime;
         private BookingStatus status;
         private User member;
@@ -146,7 +149,6 @@ public class Booking {
             this.slot = slot;
             return this;
         }
-
 
         public Builder copy(Booking booking) {
             this.bookingId = booking.bookingId;
