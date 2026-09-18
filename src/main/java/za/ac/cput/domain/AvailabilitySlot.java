@@ -1,7 +1,10 @@
 package za.ac.cput.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -28,14 +31,25 @@ public class AvailabilitySlot {
     @Id
     private String slotId;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime startTime;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime endTime;
 
     @Enumerated(EnumType.STRING)
     private SlotStatus status;
 
-    // Many AvailabilitySlots can belong to one User
+    // Many AvailabilitySlots can belong to one User.
+    // User carries a class-level @JsonIdentityInfo, which would otherwise
+    // serialize every trainer after the first occurrence in a response as a
+    // bare userId string instead of an object (e.g. readAll() with several
+    // slots for the same trainer). Overriding it here to None forces a full
+    // object every time, without touching User.java.
+    @JsonIdentityInfo(generator = ObjectIdGenerators.None.class)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "trainer_id", nullable = false)
     @JsonIgnoreProperties({
