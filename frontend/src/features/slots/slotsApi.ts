@@ -1,6 +1,7 @@
+import { api } from "../../api/client";
+import { ensureId } from "../../api/ids";
 import type { AvailabilitySlot } from "../../types";
-import api from "../../api/client";
-import { ensureId } from "../../api/client";
+
 export interface SlotFormData {
     date: string;
     startTime: string;
@@ -28,18 +29,33 @@ export function normalizeTime(time: string): string {
     }
 
     return cleanedTime;
-
 }
+
 export async function getAllSlots(): Promise<AvailabilitySlot[]> {
-    const response = await api.get<AvailabilitySlot[]>("/availability-slots/getAll");
-
-    return Array.isArray(response.data) ? response.data : [];
-
+    try {
+        const data = await api.get<AvailabilitySlot[] | { data?: AvailabilitySlot[] }>(
+            "/availability-slots/all"
+        );
+        if (Array.isArray(data)) return data;
+        if (Array.isArray(data?.data)) return data.data;
+        return [];
+    } catch {
+        try {
+            const data = await api.get<AvailabilitySlot[] | { data?: AvailabilitySlot[] }>(
+                "/availability-slots/getAll"
+            );
+            if (Array.isArray(data)) return data;
+            if (Array.isArray(data?.data)) return data.data;
+            return [];
+        } catch {
+            return [];
+        }
+    }
 }
-export async function createSlot(
-    formData: SlotFormData
-): Promise<AvailabilitySlot> {
+
+export async function createSlot(formData: SlotFormData): Promise<AvailabilitySlot> {
     const payload = {
+        slotId: ensureId(),
         date: formData.date,
         startTime: normalizeTime(formData.startTime),
         endTime: normalizeTime(formData.endTime),
@@ -49,20 +65,15 @@ export async function createSlot(
         },
     };
 
-    const response = await api.post<AvailabilitySlot>(
-        "/availability-slots/create",
-        payload
-    );
-
-    return response.data;
-
+    return api.post<AvailabilitySlot>("/availability-slots/create", payload);
 }
+
 export async function updateSlot(
     slotId: string,
     formData: SlotFormData
 ): Promise<AvailabilitySlot> {
     const payload = {
-        slotId: ensureId(slotId),
+        slotId,
         date: formData.date,
         startTime: normalizeTime(formData.startTime),
         endTime: normalizeTime(formData.endTime),
@@ -72,16 +83,9 @@ export async function updateSlot(
         },
     };
 
-    const response = await api.put<AvailabilitySlot>(
-        "/availability-slots/update",
-        payload
-    );
-
-    return response.data;
-
+    return api.put<AvailabilitySlot>("/availability-slots/update", payload);
 }
+
 export async function deleteSlot(slotId: string): Promise<void> {
-    await api.delete(
-        /availability-slots/delete/${ensureId(slotId)}
-);
+    await api.delete(`/availability-slots/delete/${encodeURIComponent(slotId)}`);
 }
