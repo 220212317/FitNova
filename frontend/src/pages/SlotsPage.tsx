@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { getAllSlots } from "../features/slots/slotsApi";
 import type { AvailabilitySlot } from "../types";
 
@@ -13,17 +12,20 @@ function SlotsPage() {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [toast, setToast] = useState("");
 
     useEffect(() => {
         let cancelled = false;
 
         async function fetchSlots() {
             try {
+                setLoading(true);
+                setError("");
+
                 const data = await getAllSlots();
 
                 if (!cancelled) {
                     setSlots(data);
-                    setLoading(false);
                 }
             } catch (err) {
                 if (!cancelled) {
@@ -32,6 +34,9 @@ function SlotsPage() {
                             ? err.message
                             : "Could not load availability slots."
                     );
+                }
+            } finally {
+                if (!cancelled) {
                     setLoading(false);
                 }
             }
@@ -62,18 +67,39 @@ function SlotsPage() {
         }
     }
 
-    function handleEdit(slot: AvailabilitySlot) {
-        setEditingSlot(slot);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+    function showToast(message: string) {
+        setToast(message);
+
+        window.setTimeout(() => {
+            setToast("");
+        }, 3000);
     }
 
-    function handleSaved() {
+    function handleEdit(slot: AvailabilitySlot) {
+        setError("");
+        setEditingSlot(slot);
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
+    }
+
+    async function handleSaved() {
         setEditingSlot(null);
-        handleRefresh();
+        await handleRefresh();
+
+        showToast("Availability slot saved successfully.");
     }
 
     function handleCancelEdit() {
         setEditingSlot(null);
+        setError("");
+    }
+
+    async function handleDeleted() {
+        await handleRefresh();
+        showToast("Availability slot deleted successfully.");
     }
 
     return (
@@ -85,6 +111,12 @@ function SlotsPage() {
                     Create, edit, view and delete trainer availability slots.
                 </p>
             </section>
+
+            {toast && (
+                <div role="status" aria-live="polite">
+                    {toast}
+                </div>
+            )}
 
             <section>
                 <SlotForm
@@ -106,9 +138,10 @@ function SlotsPage() {
                 </div>
 
                 {error && (
-                    <p role="alert">
+                    <div role="alert">
+                        <strong>Unable to load slots:</strong>{" "}
                         {error}
-                    </p>
+                    </div>
                 )}
 
                 {loading ? (
@@ -117,12 +150,12 @@ function SlotsPage() {
                     <SlotList
                         slots={slots}
                         onEdit={handleEdit}
-                        onDeleted={handleRefresh}
+                        onDeleted={handleDeleted}
                     />
                 )}
             </section>
         </main>
     );
-}
 
+}
 export default SlotsPage;

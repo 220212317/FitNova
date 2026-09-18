@@ -1,35 +1,12 @@
 import type { AvailabilitySlot } from "../../types";
-
+import api from "../../api/client";
+import { ensureId } from "../../api/client";
 export interface SlotFormData {
     date: string;
     startTime: string;
     endTime: string;
     status: string;
     trainerUserId: string;
-}
-
-const API_BASE_URL = "http://localhost:8080/availability-slots";
-
-async function getErrorMessage(response: Response): Promise<string> {
-    try {
-        const data = await response.json();
-
-        if (data?.message) {
-            return data.message;
-        }
-
-        if (data?.error) {
-            return data.error;
-        }
-
-        if (typeof data === "string") {
-            return data;
-        }
-
-        return `Request failed with status ${response.status}`;
-    } catch {
-        return `Request failed with status ${response.status}`;
-    }
 }
 
 export function normalizeTime(time: string): string {
@@ -51,32 +28,14 @@ export function normalizeTime(time: string): string {
     }
 
     return cleanedTime;
-}
 
+}
 export async function getAllSlots(): Promise<AvailabilitySlot[]> {
-    let response = await fetch(`${API_BASE_URL}/all`);
+    const response = await api.get<AvailabilitySlot[]>("/availability-slots/getAll");
 
-    if (!response.ok) {
-        response = await fetch(`${API_BASE_URL}/getAll`);
-    }
+    return Array.isArray(response.data) ? response.data : [];
 
-    if (!response.ok) {
-        throw new Error(await getErrorMessage(response));
-    }
-
-    const data = await response.json();
-
-    if (Array.isArray(data)) {
-        return data;
-    }
-
-    if (Array.isArray(data?.data)) {
-        return data.data;
-    }
-
-    return [];
 }
-
 export async function createSlot(
     formData: SlotFormData
 ): Promise<AvailabilitySlot> {
@@ -90,27 +49,20 @@ export async function createSlot(
         },
     };
 
-    const response = await fetch(`${API_BASE_URL}/create`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-    });
+    const response = await api.post<AvailabilitySlot>(
+        "/availability-slots/create",
+        payload
+    );
 
-    if (!response.ok) {
-        throw new Error(await getErrorMessage(response));
-    }
+    return response.data;
 
-    return response.json();
 }
-
 export async function updateSlot(
     slotId: string,
     formData: SlotFormData
 ): Promise<AvailabilitySlot> {
     const payload = {
-        slotId,
+        slotId: ensureId(slotId),
         date: formData.date,
         startTime: normalizeTime(formData.startTime),
         endTime: normalizeTime(formData.endTime),
@@ -120,27 +72,16 @@ export async function updateSlot(
         },
     };
 
-    const response = await fetch(`${API_BASE_URL}/update`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-    });
+    const response = await api.put<AvailabilitySlot>(
+        "/availability-slots/update",
+        payload
+    );
 
-    if (!response.ok) {
-        throw new Error(await getErrorMessage(response));
-    }
+    return response.data;
 
-    return response.json();
 }
-
 export async function deleteSlot(slotId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/delete/${slotId}`, {
-        method: "DELETE",
-    });
-
-    if (!response.ok) {
-        throw new Error(await getErrorMessage(response));
-    }
+    await api.delete(
+        /availability-slots/delete/${ensureId(slotId)}
+);
 }
