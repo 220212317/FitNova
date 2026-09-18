@@ -24,32 +24,32 @@ public class AvailabilitySlotServiceImpl implements IAvailabilitySlotService {
 
     @Override
     public AvailabilitySlot create(AvailabilitySlot availabilitySlot) {
-
-        if (!isValidSlot(availabilitySlot)) {
-            return null;
-        }
-
-        if (availabilitySlot.getTrainer() == null
+        if (!isValidSlot(availabilitySlot)
+                || availabilitySlot.getTrainer() == null
                 || availabilitySlot.getTrainer().getUserId() == null) {
             return null;
         }
 
         String trainerId = availabilitySlot.getTrainer().getUserId();
-
         User trainer = userRepository.findById(trainerId).orElse(null);
 
         if (trainer == null) {
             return null;
         }
 
-        availabilitySlot.setTrainer(trainer);
+        String slotId = availabilitySlot.getSlotId();
 
-        if (availabilitySlot.getSlotId() == null
-                || availabilitySlot.getSlotId().isBlank()) {
-            availabilitySlot.setSlotId(Helper.generateId());
+        if (slotId == null || slotId.isBlank()) {
+            slotId = Helper.generateId();
         }
 
-        return repository.save(availabilitySlot);
+        AvailabilitySlot normalizedSlot = new AvailabilitySlot.Builder()
+                .copy(availabilitySlot)
+                .setTrainer(trainer)
+                .setSlotId(slotId)
+                .build();
+
+        return repository.save(normalizedSlot);
     }
 
     @Override
@@ -64,7 +64,6 @@ public class AvailabilitySlotServiceImpl implements IAvailabilitySlotService {
 
     @Override
     public AvailabilitySlot update(AvailabilitySlot availabilitySlot) {
-
         if (!isValidSlot(availabilitySlot)) {
             return null;
         }
@@ -74,22 +73,27 @@ public class AvailabilitySlotServiceImpl implements IAvailabilitySlotService {
             return null;
         }
 
+        AvailabilitySlot normalizedSlot = availabilitySlot;
+
         if (availabilitySlot.getTrainer() != null
                 && availabilitySlot.getTrainer().getUserId() != null) {
 
             String trainerId = availabilitySlot.getTrainer().getUserId();
-
             User trainer = userRepository.findById(trainerId).orElse(null);
 
             if (trainer == null) {
                 return null;
             }
 
-            availabilitySlot.setTrainer(trainer);
+            normalizedSlot = new AvailabilitySlot.Builder()
+                    .copy(availabilitySlot)
+                    .setTrainer(trainer)
+                    .build();
         }
 
-        return repository.save(availabilitySlot);
+        return repository.save(normalizedSlot);
     }
+
 
     @Override
     public boolean delete(String slotId) {
