@@ -38,18 +38,28 @@ export function BookingsPage() {
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState<Booking | null>(null);
 
+    async function fetchBookingData() {
+        const [b, u, s] = await Promise.all([
+            bookingsApi.getAll(),
+            usersApi.getAll(),
+            slotsApi.getAll(),
+        ]);
+
+        return {
+            bookings: Array.isArray(b) ? b : [],
+            members: Array.isArray(u) ? u : [],
+            slots: Array.isArray(s) ? s : [],
+        };
+    }
+
     async function load() {
         setLoading(true);
         setError(null);
         try {
-            const [b, u, s] = await Promise.all([
-                bookingsApi.getAll(),
-                usersApi.getAll(),
-                slotsApi.getAll(),
-            ]);
-            setBookings(Array.isArray(b) ? b : []);
-            setMembers(Array.isArray(u) ? u : []);
-            setSlots(Array.isArray(s) ? s : []);
+            const data = await fetchBookingData();
+            setBookings(data.bookings);
+            setMembers(data.members);
+            setSlots(data.slots);
         } catch (e) {
             setError(e instanceof Error ? e.message : "Failed to load bookings");
         } finally {
@@ -57,8 +67,37 @@ export function BookingsPage() {
         }
     }
 
+    // Mount-time fetch uses a plain promise chain (.then/.catch/.finally),
+    // NOT a directly-invoked async function, because
+    // react-hooks/set-state-in-effect flags ANY effect body that
+    // synchronously calls a function which itself calls a state setter —
+    // even wrapped in void/await. All state updates below happen inside
+    // .then()/.catch()/.finally() callbacks, which the rule's own docs
+    // explicitly allow.
     useEffect(() => {
-        void load();
+        let cancelled = false;
+
+        fetchBookingData()
+            .then((data) => {
+                if (cancelled) return;
+                setBookings(data.bookings);
+                setMembers(data.members);
+                setSlots(data.slots);
+            })
+            .catch((e) => {
+                if (!cancelled) {
+                    setError(e instanceof Error ? e.message : "Failed to load bookings");
+                }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const filtered = useMemo(
