@@ -3,8 +3,13 @@ name: Java CI with Maven
 on:
   push:
     branches: [ main, master ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/**'
   pull_request:
     branches: [ main, master ]
+    paths:
+      - 'backend/**'
 
 jobs:
   build:
@@ -35,9 +40,13 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+          cache-dependency-path: 'backend/pom.xml'
+
       - name: Build and Test with Maven
         env:
           MYSQL_HOST: 127.0.0.1
           MYSQL_USER: root
           MYSQL_PASSWORD: root
+
+        working-directory: ./backend
         run: mvn -B clean verify
