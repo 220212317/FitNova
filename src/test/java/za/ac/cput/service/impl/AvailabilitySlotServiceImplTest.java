@@ -1,18 +1,14 @@
 package za.ac.cput.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-
-
-
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import za.ac.cput.domain.AvailabilitySlot;
 import za.ac.cput.domain.User;
 import za.ac.cput.domain.enums.SlotStatus;
 import za.ac.cput.repository.IAvailabilitySlotRepository;
+import za.ac.cput.repository.IUserRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -27,6 +23,9 @@ class AvailabilitySlotServiceImplTest {
     @Mock
     private IAvailabilitySlotRepository repository;
 
+    @Mock
+    private IUserRepository userRepository;
+
     private AvailabilitySlotServiceImpl service;
 
     private AvailabilitySlot slot;
@@ -38,6 +37,7 @@ class AvailabilitySlotServiceImplTest {
         MockitoAnnotations.openMocks(this);
 
         trainer = new User.Builder()
+                .setUserId("User001")
                 .setFirstName("Phumelela")
                 .setLastName("Sakie")
                 .setDateOfBirth(LocalDate.of(2005, 1, 15))
@@ -52,21 +52,33 @@ class AvailabilitySlotServiceImplTest {
                 .setTrainer(trainer)
                 .build();
 
-        service = new AvailabilitySlotServiceImpl(repository);
+        service = new AvailabilitySlotServiceImpl(
+                repository,
+                userRepository
+        );
     }
 
     @Test
     void create() {
 
-        when(repository.save(slot)).thenReturn(slot);
+        when(userRepository.findById(trainer.getUserId()))
+                .thenReturn(Optional.of(trainer));
+
+        when(repository.save(any(AvailabilitySlot.class)))
+                .thenReturn(slot);
 
         AvailabilitySlot created = service.create(slot);
 
         assertNotNull(created);
         assertEquals("SLOT001", created.getSlotId());
         assertEquals(SlotStatus.AVAILABLE, created.getStatus());
+        assertEquals(trainer, created.getTrainer());
 
-        verify(repository, times(1)).save(slot);
+        verify(userRepository, times(1))
+                .findById(trainer.getUserId());
+
+        verify(repository, times(1))
+                .save(any(AvailabilitySlot.class));
     }
 
     @Test
@@ -80,7 +92,8 @@ class AvailabilitySlotServiceImplTest {
         assertNotNull(found);
         assertEquals("SLOT001", found.getSlotId());
 
-        verify(repository, times(1)).findById("SLOT001");
+        verify(repository, times(1))
+                .findById("SLOT001");
     }
 
     @Test
@@ -95,20 +108,36 @@ class AvailabilitySlotServiceImplTest {
         assertEquals(1, slots.size());
         assertEquals("SLOT001", slots.get(0).getSlotId());
 
-        verify(repository, times(1)).findAll();
+        verify(repository, times(1))
+                .findAll();
     }
 
     @Test
     void update() {
 
-        when(repository.save(slot)).thenReturn(slot);
+        when(repository.existsById("SLOT001"))
+                .thenReturn(true);
+
+        when(userRepository.findById(trainer.getUserId()))
+                .thenReturn(Optional.of(trainer));
+
+        when(repository.save(any(AvailabilitySlot.class)))
+                .thenReturn(slot);
 
         AvailabilitySlot updated = service.update(slot);
 
         assertNotNull(updated);
         assertEquals("SLOT001", updated.getSlotId());
+        assertEquals(trainer, updated.getTrainer());
 
-        verify(repository, times(1)).save(slot);
+        verify(repository, times(1))
+                .existsById("SLOT001");
+
+        verify(userRepository, times(1))
+                .findById(trainer.getUserId());
+
+        verify(repository, times(1))
+                .save(any(AvailabilitySlot.class));
     }
 
     @Test
