@@ -29,20 +29,26 @@ export function LookupsPage() {
   const [deleteRace, setDeleteRace] = useState<Race | null>(null);
   const [deleteRole, setDeleteRole] = useState<UserRole | null>(null);
 
+  async function fetchLookups() {
+    const [g, r, ur, u] = await Promise.all([
+      lookupsApi.genders(),
+      lookupsApi.races(),
+      userRolesApi.getAll(),
+      usersApi.getAll(),
+    ]);
+
+    setGenders(Array.isArray(g) ? g : []);
+    setRaces(Array.isArray(r) ? r : []);
+    setRoles(Array.isArray(ur) ? ur : []);
+    setUsers(Array.isArray(u) ? u : []);
+  }
+
   async function load() {
     setLoading(true);
     setError(null);
+
     try {
-      const [g, r, ur, u] = await Promise.all([
-        lookupsApi.genders(),
-        lookupsApi.races(),
-        userRolesApi.getAll(),
-        usersApi.getAll(),
-      ]);
-      setGenders(Array.isArray(g) ? g : []);
-      setRaces(Array.isArray(r) ? r : []);
-      setRoles(Array.isArray(ur) ? ur : []);
-      setUsers(Array.isArray(u) ? u : []);
+      await fetchLookups();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load lookups");
     } finally {
@@ -51,7 +57,39 @@ export function LookupsPage() {
   }
 
   useEffect(() => {
-    void load();
+    let cancelled = false;
+
+    async function initialLoad() {
+      try {
+        const [g, r, ur, u] = await Promise.all([
+          lookupsApi.genders(),
+          lookupsApi.races(),
+          userRolesApi.getAll(),
+          usersApi.getAll(),
+        ]);
+
+        if (cancelled) return;
+
+        setGenders(Array.isArray(g) ? g : []);
+        setRaces(Array.isArray(r) ? r : []);
+        setRoles(Array.isArray(ur) ? ur : []);
+        setUsers(Array.isArray(u) ? u : []);
+      } catch (e) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "Failed to load lookups");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void initialLoad();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function addGender(e: FormEvent) {
