@@ -3,18 +3,16 @@
 import { deleteSlot } from "./slotsApi";
 
 import type { AvailabilitySlot } from "../../types";
-import {useMemo, useState} from "react";
+import { useMemo, useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
+
 interface SlotListProps {
     slots: AvailabilitySlot[];
     onEdit: (slot: AvailabilitySlot) => void;
     onDeleted: () => void;
 }
 
-function SlotList({
-                      slots,
-                      onEdit,
-                      onDeleted,
-                  }: SlotListProps) {
+function SlotList({ slots, onEdit, onDeleted }: SlotListProps) {
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [error, setError] = useState("");
@@ -24,9 +22,7 @@ function SlotList({
             return slots;
         }
 
-        return slots.filter(
-            (slot) => slot.status === statusFilter
-        );
+        return slots.filter((slot) => slot.status === statusFilter);
     }, [slots, statusFilter]);
 
     async function handleDelete(slot: AvailabilitySlot) {
@@ -77,107 +73,108 @@ function SlotList({
         return "Not assigned";
     }
 
+    function statusBadgeClass(status: string): string {
+        const s = status?.toLowerCase() ?? "";
+        if (s === "available") return "badge available";
+        if (s === "booked") return "badge booked";
+        if (s === "unavailable") return "badge unavailable";
+        return "badge";
+    }
+
     return (
         <div className="slot-list">
-            <div>
-                <h2>Availability Slots</h2>
+            <div className="slot-list-header">
+                <h2>Availability slots</h2>
 
-                <label htmlFor="status-filter">
-                    Filter by status:
-                </label>
-
-                <select
-                    id="status-filter"
-                    value={statusFilter}
-                    onChange={(event) =>
-                        setStatusFilter(event.target.value)
-                    }
-                >
-                    <option value="ALL">
-                        All
-                    </option>
-
-                    <option value="AVAILABLE">
-                        Available
-                    </option>
-
-                    <option value="BOOKED">
-                        Booked
-                    </option>
-
-                    <option value="UNAVAILABLE">
-                        Unavailable
-                    </option>
-                </select>
+                <div className="slot-filter">
+                    <label htmlFor="status-filter">Filter by status</label>
+                    <select
+                        id="status-filter"
+                        value={statusFilter}
+                        onChange={(event) =>
+                            setStatusFilter(event.target.value)
+                        }
+                    >
+                        <option value="ALL">All</option>
+                        <option value="AVAILABLE">Available</option>
+                        <option value="BOOKED">Booked</option>
+                        <option value="UNAVAILABLE">Unavailable</option>
+                    </select>
+                </div>
             </div>
 
             {error && (
-                <p role="alert">
+                <div className="alert alert-error" role="alert">
                     {error}
-                </p>
+                </div>
             )}
 
             {filteredSlots.length === 0 ? (
-                <p>
-                    No availability slots found.
-                </p>
+                <div className="fn-state">No availability slots found.</div>
             ) : (
-                <div>
+                <div className="slot-cards">
                     {filteredSlots.map((slot) => (
-                        <div
-                            key={slot.slotId}
-                            className="slot-card"
-                        >
-                            <h3>
-                                {slot.date}
-                            </h3>
+                        <article key={slot.slotId} className="slot-card">
+                            <h3 className="slot-card__date">{slot.date}</h3>
 
-                            <p>
-                                <strong>Time:</strong>{" "}
-                                {slot.startTime} - {slot.endTime}
+                            <p className="slot-card__row">
+                                <strong>Time</strong>
+                                <span>
+                                    {slot.startTime} – {slot.endTime}
+                                </span>
                             </p>
 
-                            <p>
-                                <strong>Status:</strong>{" "}
-                                {slot.status}
+                            <p className="slot-card__row">
+                                <strong>Status</strong>
+                                <span className={statusBadgeClass(slot.status)}>
+                                    {slot.status}
+                                </span>
                             </p>
 
-                            <p>
-                                <strong>Trainer:</strong>{" "}
-                                {getTrainerName(slot)}
+                            <p className="slot-card__row">
+                                <strong>Trainer</strong>
+                                <span>{getTrainerName(slot)}</span>
                             </p>
 
-                            <p>
-                                <strong>Trainer ID:</strong>{" "}
-                                {slot.trainer?.userId || "Not assigned"}
+                            <p className="slot-card__row">
+                                <strong>Trainer ID</strong>
+                                <span className="slot-card__id">
+                                    {slot.trainer?.userId || "Not assigned"}
+                                </span>
                             </p>
 
-                            <p>
-                                <strong>Slot ID:</strong>{" "}
-                                {slot.slotId}
+                            <p className="slot-card__row">
+                                <strong>Slot ID</strong>
+                                <span className="slot-card__id">
+                                    {slot.slotId}
+                                </span>
                             </p>
 
-                            <div>
+                            <div className="slot-card__actions">
                                 <button
+                                    className="btn-icon"
                                     type="button"
                                     onClick={() => onEdit(slot)}
+                                    title="Edit"
                                 >
+                                    <Pencil size={14} />
                                     Edit
                                 </button>
 
                                 <button
+                                    className="btn-icon danger"
                                     type="button"
                                     onClick={() => handleDelete(slot)}
-                                    disabled={
-                                        deletingId === slot.slotId
-                                    }
+                                    disabled={deletingId === slot.slotId}
+                                    title="Delete"
                                 >
+                                    <Trash2 size={14} />
                                     {deletingId === slot.slotId
                                         ? "Deleting..."
                                         : "Delete"}
                                 </button>
                             </div>
-                        </div>
+                        </article>
                     ))}
                 </div>
             )}
