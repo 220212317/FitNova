@@ -30,21 +30,14 @@ function SlotFormFields({
                             onSaved,
                             onCancelEdit,
                         }: SlotFormFieldsProps) {
-
-    const [date, setDate] = useState(
-        editingSlot?.date ?? ""
-    );
+    const [date, setDate] = useState(editingSlot?.date ?? "");
 
     const [startTime, setStartTime] = useState(
-        editingSlot?.startTime
-            ? editingSlot.startTime.substring(0, 5)
-            : ""
+        editingSlot?.startTime ? editingSlot.startTime.substring(0, 5) : ""
     );
 
     const [endTime, setEndTime] = useState(
-        editingSlot?.endTime
-            ? editingSlot.endTime.substring(0, 5)
-            : ""
+        editingSlot?.endTime ? editingSlot.endTime.substring(0, 5) : ""
     );
 
     const [status, setStatus] = useState(
@@ -100,9 +93,7 @@ function SlotFormFields({
         return "";
     }
 
-    async function handleSubmit(
-        event: FormEvent<HTMLFormElement>
-    ) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
         setError("");
@@ -127,25 +118,17 @@ function SlotFormFields({
             setLoading(true);
 
             if (isEditing && editingSlot) {
-                await updateSlot(
-                    editingSlot.slotId,
-                    formData
-                );
+                await updateSlot(editingSlot.slotId, formData);
 
-                setSuccess(
-                    "Availability slot updated successfully."
-                );
+                setSuccess("Availability slot updated successfully.");
             } else {
                 await createSlot(formData);
 
-                setSuccess(
-                    "Availability slot created successfully."
-                );
+                setSuccess("Availability slot created successfully.");
             }
 
             resetForm();
             onSaved();
-
         } catch (err) {
             setError(
                 err instanceof Error
@@ -165,8 +148,7 @@ function SlotFormFields({
     }
 
     return (
-        <div className="slot-form">
-
+        <div className="slot-form-panel">
             <h2>
                 {isEditing
                     ? "Edit Availability Slot"
@@ -174,117 +156,92 @@ function SlotFormFields({
             </h2>
 
             <form onSubmit={handleSubmit}>
+                <div className="slot-form-grid">
+                    <div className="fn-field">
+                        <label htmlFor="slot-date">Date</label>
+                        <input
+                            id="slot-date"
+                            type="date"
+                            value={date}
+                            onChange={(event) => setDate(event.target.value)}
+                            required
+                        />
+                    </div>
 
-                <div>
-                    <label htmlFor="slot-date">
-                        Date
-                    </label>
+                    <div className="fn-field">
+                        <label htmlFor="slot-start-time">Start Time</label>
+                        <input
+                            id="slot-start-time"
+                            type="time"
+                            value={startTime}
+                            onChange={(event) =>
+                                setStartTime(event.target.value)
+                            }
+                            required
+                        />
+                    </div>
 
-                    <input
-                        id="slot-date"
-                        type="date"
-                        value={date}
-                        onChange={(event) =>
-                            setDate(event.target.value)
-                        }
-                        required
-                    />
-                </div>
+                    <div className="fn-field">
+                        <label htmlFor="slot-end-time">End Time</label>
+                        <input
+                            id="slot-end-time"
+                            type="time"
+                            value={endTime}
+                            onChange={(event) => setEndTime(event.target.value)}
+                            required
+                        />
+                    </div>
 
-                <div>
-                    <label htmlFor="slot-start-time">
-                        Start Time
-                    </label>
+                    <div className="fn-field">
+                        <label htmlFor="slot-status">Status</label>
+                        <select
+                            id="slot-status"
+                            value={status}
+                            onChange={(event) =>
+                                setStatus(
+                                    event.target.value as
+                                        | "AVAILABLE"
+                                        | "BOOKED"
+                                        | "UNAVAILABLE"
+                                )
+                            }
+                        >
+                            <option value="AVAILABLE">AVAILABLE</option>
+                            <option value="BOOKED">BOOKED</option>
+                            <option value="UNAVAILABLE">UNAVAILABLE</option>
+                        </select>
+                    </div>
 
-                    <input
-                        id="slot-start-time"
-                        type="time"
-                        value={startTime}
-                        onChange={(event) =>
-                            setStartTime(event.target.value)
-                        }
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="slot-end-time">
-                        End Time
-                    </label>
-
-                    <input
-                        id="slot-end-time"
-                        type="time"
-                        value={endTime}
-                        onChange={(event) =>
-                            setEndTime(event.target.value)
-                        }
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="slot-status">
-                        Status
-                    </label>
-
-                    <select
-                        id="slot-status"
-                        value={status}
-                        onChange={(event) =>
-                            setStatus(
-                                event.target.value as "AVAILABLE" | "BOOKED" | "UNAVAILABLE"
-                            )
-                        }
-                    >
-                        <option value="AVAILABLE">
-                            AVAILABLE
-                        </option>
-
-                        <option value="BOOKED">
-                            BOOKED
-                        </option>
-
-                        <option value="UNAVAILABLE">
-                            UNAVAILABLE
-                        </option>
-                    </select>
-
-                </div>
-
-                <div>
-                    <label htmlFor="trainer-user-id">
-                        Trainer User ID
-                    </label>
-
-                    <input
-                        id="trainer-user-id"
-                        type="text"
-                        value={trainerUserId}
-                        onChange={(event) =>
-                            setTrainerUserId(
-                                event.target.value
-                            )
-                        }
-                        placeholder="Enter trainer user ID"
-                        required
-                    />
+                    <div className="fn-field fn-field--wide">
+                        <label htmlFor="trainer-user-id">Trainer User ID</label>
+                        <input
+                            id="trainer-user-id"
+                            type="text"
+                            value={trainerUserId}
+                            onChange={(event) =>
+                                setTrainerUserId(event.target.value)
+                            }
+                            placeholder="Enter trainer user ID"
+                            required
+                        />
+                    </div>
                 </div>
 
                 {error && (
-                    <p role="alert">
+                    <p className="slot-form-msg slot-form-msg--error" role="alert">
                         {error}
                     </p>
                 )}
 
                 {success && (
-                    <p role="status">
+                    <p className="slot-form-msg slot-form-msg--ok" role="status">
                         {success}
                     </p>
                 )}
 
-                <div>
+                <div className="slot-form-actions">
                     <button
+                        className="btn"
                         type="submit"
                         disabled={loading}
                     >
@@ -297,6 +254,7 @@ function SlotFormFields({
 
                     {isEditing && (
                         <button
+                            className="btn btn-ghost"
                             type="button"
                             onClick={handleCancel}
                             disabled={loading}
@@ -305,7 +263,6 @@ function SlotFormFields({
                         </button>
                     )}
                 </div>
-
             </form>
         </div>
     );
@@ -317,15 +274,8 @@ function SlotForm({
                       onCancelEdit,
                   }: SlotFormProps) {
 
-    /*
-     * The key forces React to create a fresh form whenever
-     * the selected slot changes.
-     *
-     * This removes the need for useEffect + setState.
-     */
 
-    const formKey =
-        editingSlot?.slotId ?? "new-slot";
+    const formKey = editingSlot?.slotId ?? "new-slot";
 
     return (
         <SlotFormFields
