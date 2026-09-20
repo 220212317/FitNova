@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { HomePage } from "./pages/HomePage";
 import { UsersPage } from "./pages/UsersPage";
-import { SlotsPage } from "./pages/SlotsPage";
+import  SlotsPage  from "./pages/SlotsPage";
 import { BookingsPage } from "./pages/BookingsPage";
 import { LookupsPage } from "./pages/LookupsPage";
 
