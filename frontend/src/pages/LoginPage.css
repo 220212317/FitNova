@@ -1,0 +1,5 @@
+/* TODO: login page styles */
+.login-page {
+  display: flex;
+  min-height: 100vh;
+}
