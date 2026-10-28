@@ -1,0 +1,6 @@
+/* TODO: role dashboard styles */
+.dash {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
