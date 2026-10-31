@@ -39,7 +39,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-
           cache-dependency-path: 'backend/pom.xml'
 
       - name: Build and Test with Maven
@@ -47,6 +46,6 @@ jobs:
           MYSQL_HOST: 127.0.0.1
           MYSQL_USER: root
           MYSQL_PASSWORD: root
-
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         working-directory: ./backend
         run: mvn -B clean verify
