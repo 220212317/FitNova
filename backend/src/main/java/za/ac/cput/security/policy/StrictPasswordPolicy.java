@@ -10,11 +10,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
- * Hardened policy for trainer and admin accounts.
- * At least 8 characters, with an upper-case letter, a lower-case letter,
- * a digit and a symbol.
- */
 @Component
 public class StrictPasswordPolicy implements PasswordPolicy {
 
@@ -80,7 +75,6 @@ public class StrictPasswordPolicy implements PasswordPolicy {
         return false;
     }
 
-    // A symbol is any character that is not a letter, not a digit and not a space.
     private boolean hasSymbol(String password) {
         for (int i = 0; i < password.length(); i++) {
             char character = password.charAt(i);

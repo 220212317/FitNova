@@ -1,40 +1,53 @@
-package za.ac.cput.security.policy;
-
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
 /*
  * StandardPasswordPolicyTest.java
- * Author: TODO name and student number
+ * Author: Collins Shibambo
+ * 230093183
  */
+package za.ac.cput.security.policy;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 class StandardPasswordPolicyTest {
+
+    private final StandardPasswordPolicy policy = new StandardPasswordPolicy();
+
     @Test
-    @Disabled("TODO: implement")
     void acceptsPasswordWithLetterAndDigit() {
-        // TODO
+        assertTrue(policy.isValid("password1"));
+        assertTrue(policy.violations("password1").isEmpty());
     }
 
     @Test
-    @Disabled("TODO: implement")
     void rejectsNullPassword() {
-        // TODO
+        assertFalse(policy.isValid(null));
+        assertEquals(1, policy.violations(null).size());
     }
 
     @Test
-    @Disabled("TODO: implement")
     void rejectsPasswordShorterThanEightCharacters() {
-        // TODO
+        assertFalse(policy.isValid("pass1"));
+        assertThrows(IllegalArgumentException.class, () -> policy.enforce("pass1"));
     }
 
     @Test
-    @Disabled("TODO: implement")
     void rejectsPasswordWithoutDigit() {
-        // TODO
+        assertFalse(policy.isValid("passwordonly"));
     }
 
     @Test
-    @Disabled("TODO: implement")
     void rejectsPasswordWithoutLetter() {
-        // TODO
+        assertFalse(policy.isValid("12345678"));
+    }
+
+    @Test
+    void acceptsPasswordOfExactlyEightCharacters() {
+        assertTrue(policy.isValid("passwor1"));
+    }
+
+    @Test
+    void reportsPolicyName() {
+        assertEquals("standard", policy.name());
     }
 }

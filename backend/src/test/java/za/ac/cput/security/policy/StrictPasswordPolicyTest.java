@@ -1,52 +1,68 @@
-package za.ac.cput.security.policy;
-
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
 /*
  * StrictPasswordPolicyTest.java
- * Author: TODO name and student number
+ * Author: Collins Shibambo
+ * 230093183
  */
+package za.ac.cput.security.policy;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 class StrictPasswordPolicyTest {
+
+    private final StrictPasswordPolicy policy = new StrictPasswordPolicy();
+
     @Test
-    @Disabled("TODO: implement")
     void acceptsStrongPassword() {
-        // TODO
+        assertTrue(policy.isValid("Str0ng!Pass"));
+        assertTrue(policy.violations("Str0ng!Pass").isEmpty());
     }
 
     @Test
-    @Disabled("TODO: implement")
     void rejectsNullPassword() {
-        // TODO
+        assertFalse(policy.isValid(null));
+        assertEquals(1, policy.violations(null).size());
     }
 
     @Test
-    @Disabled("TODO: implement")
-    void rejectsPasswordShorterThanTwelveCharacters() {
-        // TODO
+    void rejectsPasswordShorterThanEightCharacters() {
+        assertFalse(policy.isValid("Ab1!xyz"));
+        assertThrows(IllegalArgumentException.class, () -> policy.enforce("Ab1!xyz"));
     }
 
     @Test
-    @Disabled("TODO: implement")
     void rejectsPasswordWithoutUpperCase() {
-        // TODO
+        assertFalse(policy.isValid("str0ng!pass"));
     }
 
     @Test
-    @Disabled("TODO: implement")
     void rejectsPasswordWithoutLowerCase() {
-        // TODO
+        assertFalse(policy.isValid("STR0NG!PASS"));
     }
 
     @Test
-    @Disabled("TODO: implement")
     void rejectsPasswordWithoutDigit() {
-        // TODO
+        assertFalse(policy.isValid("Strong!Pass"));
     }
 
     @Test
-    @Disabled("TODO: implement")
     void rejectsPasswordWithoutSymbol() {
-        // TODO
+        assertFalse(policy.isValid("Str0ngPass1"));
+    }
+
+    @Test
+    void acceptsPasswordOfExactlyEightCharacters() {
+        assertTrue(policy.isValid("Ab1!defg"));
+    }
+
+    @Test
+    void rejectsPasswordAcceptedByStandardPolicy() {
+        assertFalse(policy.isValid("password1"));
+    }
+
+    @Test
+    void reportsPolicyName() {
+        assertEquals("strict", policy.name());
     }
 }

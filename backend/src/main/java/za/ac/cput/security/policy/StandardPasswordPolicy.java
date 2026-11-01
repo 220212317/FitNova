@@ -10,10 +10,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
- * Baseline policy for member accounts.
- * At least 8 characters, with at least one letter and one digit.
- */
 @Component
 public class StandardPasswordPolicy implements PasswordPolicy {
 

@@ -10,12 +10,6 @@ import za.ac.cput.domain.enums.RoleType;
 
 import java.util.List;
 
-/*
- * Chooses the password policy that applies to an account.
- * Members get the standard policy. Trainers and admins hold privileged
- * accounts, so they get the strict policy. An unknown role is treated as
- * privileged so that it can never get the weaker policy by mistake.
- */
 @Component
 public class PasswordPolicySelector {
 
@@ -28,7 +22,6 @@ public class PasswordPolicySelector {
         this.strictPolicy = strictPolicy;
     }
 
-    // Policy for a single role.
     public PasswordPolicy policyFor(RoleType role) {
         if (isPrivileged(role)) {
             return strictPolicy;
@@ -36,9 +29,6 @@ public class PasswordPolicySelector {
         return standardPolicy;
     }
 
-    // Policy for an account that holds more than one role.
-    // The strongest policy wins, so a user who is both a member and an
-    // admin is held to the admin rules.
     public PasswordPolicy policyFor(List<RoleType> roles) {
         if (roles == null || roles.isEmpty()) {
             return strictPolicy;
