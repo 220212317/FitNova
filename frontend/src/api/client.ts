@@ -1,5 +1,7 @@
 /** Athi Sintiya (220212317) */
 
+import { clearStoredSession, readStoredSession } from "../auth/storage";
+
 const API_BASE =
     (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/$/, "") ||
     (import.meta.env.DEV ? "/FitNova" : "http://localhost:8080/FitNova");
@@ -26,6 +28,10 @@ async function request<T>(
         "Content-Type": "application/json",
         ...(options.headers || {}),
     };
+    const accessToken = readStoredSession()?.accessToken;
+    if (accessToken) {
+        (headers as Record<string, string>).Authorization = `Bearer ${accessToken}`;
+    }
 
     let res: Response;
     try {
@@ -60,6 +66,10 @@ async function request<T>(
                 : typeof data === "string" && data.trim()
                     ? data
                     : res.statusText || `Request failed (${res.status})`;
+        if (res.status === 401 && accessToken) {
+            clearStoredSession();
+            window.dispatchEvent(new Event("fitnova:unauthorized"));
+        }
         throw new ApiError(res.status, msg, data);
     }
 
