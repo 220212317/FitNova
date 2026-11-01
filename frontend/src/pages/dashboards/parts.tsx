@@ -27,12 +27,8 @@ export function CountUp({ value, duration = 700 }: CountUpProps) {
 
     useEffect(() => {
         const target = Number.isFinite(value) ? value : 0;
-        if (target === 0) {
-            setShown(0);
-            return;
-        }
-
         const start = performance.now();
+
         const tick = (now: number) => {
             const progress = Math.min(1, (now - start) / duration);
             const eased = 1 - Math.pow(1 - progress, 3);
@@ -81,7 +77,6 @@ export interface StatCardsProps {
     loading?: boolean;
 }
 
-/** A row of headline numbers. */
 export function StatCards({ cards, loading = false }: StatCardsProps) {
     if (loading) {
         return (
@@ -126,12 +121,12 @@ export interface NextHeroProps {
 }
 
 export function NextHero({
-                             slot,
-                             heading = "Next available",
-                             emptyMessage = "Nothing scheduled yet.",
-                             loading = false,
-                             action,
-                         }: NextHeroProps) {
+    slot,
+    heading = "Next available",
+    emptyMessage = "Nothing scheduled yet.",
+    loading = false,
+    action,
+}: NextHeroProps) {
     if (loading) {
         return (
             <div className="next-hero">
@@ -187,12 +182,12 @@ export interface SessionsPanelProps {
 }
 
 export function SessionsPanel({
-                                  title,
-                                  bookings,
-                                  loading = false,
-                                  emptyMessage = "No sessions to show.",
-                                  limit = 5,
-                              }: SessionsPanelProps) {
+    title,
+    bookings,
+    loading = false,
+    emptyMessage = "No sessions to show.",
+    limit = 5,
+}: SessionsPanelProps) {
     const shown = bookings.slice(0, limit);
     const remaining = bookings.length - shown.length;
 
@@ -249,11 +244,11 @@ export interface WeeklyPanelProps {
 }
 
 export function WeeklyPanel({
-                                title = "This week",
-                                slots,
-                                loading = false,
-                                emptyMessage = "No slots scheduled.",
-                            }: WeeklyPanelProps) {
+    title = "This week",
+    slots,
+    loading = false,
+    emptyMessage = "No slots scheduled.",
+}: WeeklyPanelProps) {
     const byDate = new Map<string, AvailabilitySlot[]>();
     for (const slot of slots) {
         const key = slot.date ?? "Unscheduled";
@@ -312,10 +307,10 @@ export interface StatusPanelProps {
 }
 
 export function StatusPanel({
-                                title = "Breakdown",
-                                rows,
-                                loading = false,
-                            }: StatusPanelProps) {
+    title = "Breakdown",
+    rows,
+    loading = false,
+}: StatusPanelProps) {
     const total = rows.reduce((sum, row) => sum + row.value, 0);
 
     return (
@@ -370,11 +365,11 @@ export interface TargetsPanelProps {
 }
 
 export function TargetsPanel({
-                                 title = "Targets",
-                                 targets,
-                                 loading = false,
-                                 emptyMessage = "No targets set.",
-                             }: TargetsPanelProps) {
+    title = "Targets",
+    targets,
+    loading = false,
+    emptyMessage = "No targets set.",
+}: TargetsPanelProps) {
     return (
         <section className="card panel">
             <h2 className="panel-title">{title}</h2>

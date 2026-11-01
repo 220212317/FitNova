@@ -1,7 +1,7 @@
 /** gymData.ts
  *  Author: Inga Plati (230126634)
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usersApi, slotsApi, bookingsApi } from "../../api/fitnova";
 import type {
     AvailabilitySlot,
@@ -88,10 +88,27 @@ export interface GymData {
     bookings: Booking[];
 }
 
-const EMPTY: GymData = { users: [], slots: [], bookings: [] };
+export interface GymState extends GymData {
+    loading: boolean;
+    error: string | null;
+}
 
-let cache: GymData | null = null;
-let inFlight: Promise<GymData> | null = null;
+const EMPTY: GymState = {
+    users: [],
+    slots: [],
+    bookings: [],
+    loading: true,
+    error: null,
+};
+
+let state: GymState = EMPTY;
+let inFlight: Promise<void> | null = null;
+const listeners = new Set<() => void>();
+
+function publish(next: GymState): void {
+    state = next;
+    listeners.forEach((listener) => listener());
+}
 
 async function fetchAll(): Promise<GymData> {
     const [users, slots, bookings] = await Promise.all([
@@ -106,14 +123,25 @@ async function fetchAll(): Promise<GymData> {
     };
 }
 
-function loadOnce(force = false): Promise<GymData> {
-    if (!force && cache) return Promise.resolve(cache);
-    if (!force && inFlight) return inFlight;
+function load(force = false): Promise<void> {
+    if (inFlight) return inFlight;
+    if (!force && !state.loading && state.error === null) {
+        return Promise.resolve();
+    }
+
+    publish({ ...state, loading: true, error: null });
 
     inFlight = fetchAll()
         .then((data) => {
-            cache = data;
-            return data;
+            publish({ ...data, loading: false, error: null });
+        })
+        .catch((e: unknown) => {
+            publish({
+                ...state,
+                loading: false,
+                error:
+                    e instanceof Error ? e.message : "Failed to load dashboard data",
+            });
         })
         .finally(() => {
             inFlight = null;
@@ -123,50 +151,29 @@ function loadOnce(force = false): Promise<GymData> {
 }
 
 export function invalidateGymData(): void {
-    cache = null;
+    state = EMPTY;
     inFlight = null;
 }
 
-export interface UseGymData extends GymData {
-    loading: boolean;
-    error: string | null;
+export interface UseGymData extends GymState {
     refresh: () => Promise<void>;
 }
 
 export function useGymData(): UseGymData {
-    const [data, setData] = useState<GymData>(cache ?? EMPTY);
-    const [loading, setLoading] = useState(!cache);
-    const [error, setError] = useState<string | null>(null);
-    const alive = useRef(true);
-
-    const run = useCallback(async (force: boolean) => {
-        setLoading(true);
-        setError(null);
-        try {
-            const next = await loadOnce(force);
-            if (alive.current) setData(next);
-        } catch (e) {
-            if (alive.current) {
-                setError(
-                    e instanceof Error ? e.message : "Failed to load dashboard data"
-                );
-            }
-        } finally {
-            if (alive.current) setLoading(false);
-        }
-    }, []);
+    const [snapshot, setSnapshot] = useState<GymState>(state);
 
     useEffect(() => {
-        alive.current = true;
-        void run(false);
+        const listener = () => setSnapshot(state);
+        listeners.add(listener);
+        void load(false);
         return () => {
-            alive.current = false;
+            listeners.delete(listener);
         };
-    }, [run]);
+    }, []);
 
     const refresh = useCallback(async () => {
-        await run(true);
-    }, [run]);
+        await load(true);
+    }, []);
 
-    return { ...data, loading, error, refresh };
+    return { ...snapshot, refresh };
 }
