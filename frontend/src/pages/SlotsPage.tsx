@@ -1,11 +1,16 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+import { useAuth } from "../auth/AuthContext";
 import { getAllSlots } from "../features/slots/slotsApi";
+
 import type { AvailabilitySlot } from "../types";
 
 import SlotForm from "../features/slots/SlotForm";
 import SlotList from "../features/slots/SlotList";
 
 function SlotsPage() {
+    const { user } = useAuth();
+
     const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
     const [editingSlot, setEditingSlot] =
         useState<AvailabilitySlot | null>(null);
@@ -14,49 +19,26 @@ function SlotsPage() {
     const [error, setError] = useState("");
     const [toast, setToast] = useState("");
 
-    useEffect(() => {
-        let cancelled = false;
-
-        async function fetchSlots() {
-            try {
-                setLoading(true);
-                setError("");
-
-                const data = await getAllSlots();
-
-                if (!cancelled) {
-                    setSlots(data);
-                }
-            } catch (err) {
-                if (!cancelled) {
-                    setError(
-                        err instanceof Error
-                            ? err.message
-                            : "Could not load availability slots."
-                    );
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            }
+    const handleRefresh = useCallback(async () => {
+        if (!user || user.role !== "TRAINER") {
+            setSlots([]);
+            setLoading(false);
+            return;
         }
 
-        fetchSlots();
-
-        return () => {
-            cancelled = true;
-        };
-    }, []);
-
-    async function handleRefresh() {
         try {
             setLoading(true);
             setError("");
 
             const data = await getAllSlots();
-            setSlots(data);
-        } catch (err) {
+
+            // Only display slots belonging to the logged-in trainer.
+            const ownSlots = data.filter(
+                (slot) => slot.trainer?.userId === user.userId
+            );
+
+            setSlots(ownSlots);
+        } catch (err: unknown) {
             setError(
                 err instanceof Error
                     ? err.message
@@ -65,7 +47,11 @@ function SlotsPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [user]);
+
+    useEffect(() => {
+        handleRefresh();
+    }, [handleRefresh]);
 
     function showToast(message: string) {
         setToast(message);
@@ -76,6 +62,16 @@ function SlotsPage() {
     }
 
     function handleEdit(slot: AvailabilitySlot) {
+        if (slot.trainer?.userId !== user?.userId) {
+            setError("You cannot edit another trainer's availability.");
+            return;
+        }
+
+        if (slot.status === "BOOKED") {
+            setError("Booked availability cannot be edited.");
+            return;
+        }
+
         setError("");
         setEditingSlot(slot);
 
@@ -88,7 +84,6 @@ function SlotsPage() {
     async function handleSaved() {
         setEditingSlot(null);
         await handleRefresh();
-
         showToast("Availability slot saved successfully.");
     }
 
@@ -102,13 +97,25 @@ function SlotsPage() {
         showToast("Availability slot deleted successfully.");
     }
 
-    return (
-        <main>
-            <section>
+    if (!user || user.role !== "TRAINER") {
+        return (
+            <main>
                 <h1>Availability Slots</h1>
 
+                <div role="alert">
+                    Only authenticated trainers can manage availability.
+                </div>
+            </main>
+        );
+    }
+
+    return (
+        <main className="slots-page">
+            <section>
+                <h1>My Availability Slots</h1>
+
                 <p>
-                    Create, edit, view and delete trainer availability slots.
+                    Create, edit, view and manage your trainer availability.
                 </p>
             </section>
 
@@ -139,13 +146,12 @@ function SlotsPage() {
 
                 {error && (
                     <div role="alert">
-                        <strong>Unable to load slots:</strong>{" "}
-                        {error}
+                        <strong>Availability error:</strong> {error}
                     </div>
                 )}
 
                 {loading ? (
-                    <p>Loading availability slots...</p>
+                    <p>Loading your availability slots...</p>
                 ) : (
                     <SlotList
                         slots={slots}
@@ -156,6 +162,6 @@ function SlotsPage() {
             </section>
         </main>
     );
-
 }
+
 export default SlotsPage;
