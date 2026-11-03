@@ -1,10 +1,9 @@
-/** TODO — Phumelela Sakie (240040546) */
-
-import { deleteSlot } from "./slotsApi";
-
-import type { AvailabilitySlot } from "../../types";
 import { useMemo, useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
+
+import type { AvailabilitySlot } from "../../types";
+import { useAuth } from "../../auth/AuthContext";
+import { deleteSlot } from "./slotsApi";
 
 interface SlotListProps {
     slots: AvailabilitySlot[];
@@ -13,19 +12,44 @@ interface SlotListProps {
 }
 
 function SlotList({ slots, onEdit, onDeleted }: SlotListProps) {
+    const { user } = useAuth();
+
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+
+    const trainerSlots = useMemo(() => {
+        if (!user || user.role !== "TRAINER") {
+            return [];
+        }
+
+        return slots.filter(
+            (slot) => slot.trainer?.userId === user.userId
+        );
+    }, [slots, user]);
 
     const filteredSlots = useMemo(() => {
         if (statusFilter === "ALL") {
-            return slots;
+            return trainerSlots;
         }
 
-        return slots.filter((slot) => slot.status === statusFilter);
-    }, [slots, statusFilter]);
+        return trainerSlots.filter(
+            (slot) => slot.status === statusFilter
+        );
+    }, [trainerSlots, statusFilter]);
 
     async function handleDelete(slot: AvailabilitySlot) {
+        if (slot.trainer?.userId !== user?.userId) {
+            setError("You cannot delete another trainer's availability.");
+            return;
+        }
+
+        if (slot.status === "BOOKED") {
+            setError("Booked slots cannot be deleted.");
+            return;
+        }
+
         const confirmed = window.confirm(
             `Are you sure you want to delete the availability slot on ${slot.date} from ${slot.startTime} to ${slot.endTime}?`
         );
@@ -36,16 +60,18 @@ function SlotList({ slots, onEdit, onDeleted }: SlotListProps) {
 
         try {
             setError("");
+            setSuccess("");
             setDeletingId(slot.slotId);
 
             await deleteSlot(slot.slotId);
 
+            setSuccess("Availability slot deleted successfully.");
             onDeleted();
-        } catch (err) {
+        } catch (err: unknown) {
             setError(
                 err instanceof Error
                     ? err.message
-                    : "Unable to delete availability slot."
+                    : "Unable to delete availability slot. Please try again."
             );
         } finally {
             setDeletingId(null);
@@ -59,35 +85,49 @@ function SlotList({ slots, onEdit, onDeleted }: SlotListProps) {
 
         const firstName = slot.trainer.firstName || "";
         const lastName = slot.trainer.lastName || "";
-
         const fullName = `${firstName} ${lastName}`.trim();
 
-        if (fullName) {
-            return fullName;
-        }
-
-        if (slot.trainer.userId) {
-            return slot.trainer.userId;
-        }
-
-        return "Not assigned";
+        return fullName || slot.trainer.userId || "Not assigned";
     }
 
     function statusBadgeClass(status: string): string {
-        const s = status?.toLowerCase() ?? "";
-        if (s === "available") return "badge available";
-        if (s === "booked") return "badge booked";
-        if (s === "unavailable") return "badge unavailable";
+        const currentStatus = status?.toLowerCase() ?? "";
+
+        if (currentStatus === "available") {
+            return "badge available";
+        }
+
+        if (currentStatus === "booked") {
+            return "badge booked";
+        }
+
+        if (currentStatus === "unavailable") {
+            return "badge unavailable";
+        }
+
         return "badge";
+    }
+
+    if (!user || user.role !== "TRAINER") {
+        return (
+            <div className="slot-list">
+                <div className="alert alert-error" role="alert">
+                    Only authenticated trainers can view availability slots.
+                </div>
+            </div>
+        );
     }
 
     return (
         <div className="slot-list">
             <div className="slot-list-header">
-                <h2>Availability slots</h2>
+                <h2>My Availability Slots</h2>
 
                 <div className="slot-filter">
-                    <label htmlFor="status-filter">Filter by status</label>
+                    <label htmlFor="status-filter">
+                        Filter by status
+                    </label>
+
                     <select
                         id="status-filter"
                         value={statusFilter}
@@ -109,73 +149,97 @@ function SlotList({ slots, onEdit, onDeleted }: SlotListProps) {
                 </div>
             )}
 
+            {success && (
+                <div className="alert alert-success" role="status">
+                    {success}
+                </div>
+            )}
+
             {filteredSlots.length === 0 ? (
-                <div className="fn-state">No availability slots found.</div>
+                <div className="fn-state">
+                    {trainerSlots.length === 0
+                        ? "You have not created any availability slots yet."
+                        : "No availability slots match this status filter."}
+                </div>
             ) : (
                 <div className="slot-cards">
-                    {filteredSlots.map((slot) => (
-                        <article key={slot.slotId} className="slot-card">
-                            <h3 className="slot-card__date">{slot.date}</h3>
+                    {filteredSlots.map((slot) => {
+                        const isBooked = slot.status === "BOOKED";
+                        const isDeleting = deletingId === slot.slotId;
 
-                            <p className="slot-card__row">
-                                <strong>Time</strong>
-                                <span>
-                                    {slot.startTime} – {slot.endTime}
-                                </span>
-                            </p>
+                        return (
+                            <article
+                                key={slot.slotId}
+                                className="slot-card"
+                            >
+                                <h3 className="slot-card__date">
+                                    {slot.date}
+                                </h3>
 
-                            <p className="slot-card__row">
-                                <strong>Status</strong>
-                                <span className={statusBadgeClass(slot.status)}>
-                                    {slot.status}
-                                </span>
-                            </p>
+                                <p className="slot-card__row">
+                                    <strong>Time</strong>
+                                    <span>
+                                        {slot.startTime} – {slot.endTime}
+                                    </span>
+                                </p>
 
-                            <p className="slot-card__row">
-                                <strong>Trainer</strong>
-                                <span>{getTrainerName(slot)}</span>
-                            </p>
+                                <p className="slot-card__row">
+                                    <strong>Status</strong>
+                                    <span className={statusBadgeClass(slot.status)}>
+                                        {slot.status}
+                                    </span>
+                                </p>
 
-                            <p className="slot-card__row">
-                                <strong>Trainer ID</strong>
-                                <span className="slot-card__id">
-                                    {slot.trainer?.userId || "Not assigned"}
-                                </span>
-                            </p>
+                                <p className="slot-card__row">
+                                    <strong>Trainer</strong>
+                                    <span>{getTrainerName(slot)}</span>
+                                </p>
 
-                            <p className="slot-card__row">
-                                <strong>Slot ID</strong>
-                                <span className="slot-card__id">
-                                    {slot.slotId}
-                                </span>
-                            </p>
+                                <p className="slot-card__row">
+                                    <strong>Slot ID</strong>
+                                    <span className="slot-card__id">
+                                        {slot.slotId}
+                                    </span>
+                                </p>
 
-                            <div className="slot-card__actions">
-                                <button
-                                    className="btn-icon"
-                                    type="button"
-                                    onClick={() => onEdit(slot)}
-                                    title="Edit"
-                                >
-                                    <Pencil size={14} />
-                                    Edit
-                                </button>
+                                <div className="slot-card__actions">
+                                    {!isBooked && (
+                                        <button
+                                            className="btn-icon"
+                                            type="button"
+                                            onClick={() => onEdit(slot)}
+                                            title="Edit availability"
+                                        >
+                                            <Pencil size={14} />
+                                            Edit
+                                        </button>
+                                    )}
 
-                                <button
-                                    className="btn-icon danger"
-                                    type="button"
-                                    onClick={() => handleDelete(slot)}
-                                    disabled={deletingId === slot.slotId}
-                                    title="Delete"
-                                >
-                                    <Trash2 size={14} />
-                                    {deletingId === slot.slotId
-                                        ? "Deleting..."
-                                        : "Delete"}
-                                </button>
-                            </div>
-                        </article>
-                    ))}
+                                    <button
+                                        className="btn-icon danger"
+                                        type="button"
+                                        onClick={() => handleDelete(slot)}
+                                        disabled={isBooked || isDeleting}
+                                        title={
+                                            isBooked
+                                                ? "Booked slots cannot be deleted"
+                                                : "Delete availability"
+                                        }
+                                    >
+                                        <Trash2 size={14} />
+                                        {isDeleting ? "Deleting..." : "Delete"}
+                                    </button>
+                                </div>
+
+                                {isBooked && (
+                                    <small>
+                                        This slot is booked and cannot be edited
+                                        or deleted.
+                                    </small>
+                                )}
+                            </article>
+                        );
+                    })}
                 </div>
             )}
         </div>

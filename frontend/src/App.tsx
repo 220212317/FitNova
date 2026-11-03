@@ -10,6 +10,7 @@ import { LookupsPage } from "./pages/LookupsPage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import DashboardRouter from "./pages/dashboards/DashboardRouter";
+import ProfilePage from "./pages/ProfilePage";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -37,6 +38,7 @@ export default function App() {
             <Route path="bookings" element={<BookingsPage />} />
             <Route path="lookups" element={<LookupsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/member/profile" element={<ProfilePage />} />
           </Route>
         </Routes>
       </BrowserRouter>

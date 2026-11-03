@@ -1,21 +1,19 @@
 package za.ac.cput.controller;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import za.ac.cput.domain.AvailabilitySlot;
 import za.ac.cput.service.IAvailabilitySlotService;
 
 import java.util.List;
 import java.util.Map;
 
-/*
-
-Controller for AvailabilitySlot
-Author: Phumelela Sakie (240040546)
-*/
 @RestController
 @RequestMapping("/availability-slots")
 public class AvailabilitySlotController {
+
     private final IAvailabilitySlotService service;
 
     public AvailabilitySlotController(IAvailabilitySlotService service) {
@@ -26,61 +24,80 @@ public class AvailabilitySlotController {
     public ResponseEntity<?> create(
             @RequestBody AvailabilitySlot availabilitySlot) {
 
-        AvailabilitySlot created = service.create(availabilitySlot);
+        try {
+            AvailabilitySlot created = service.create(availabilitySlot);
 
-        if (created == null) {
-            return ResponseEntity.badRequest().body(
-                    Map.of("message",
-                            "Could not create slot. Check date, start/end time, status, and that the trainer userId exists.")
-            );
+            if (created == null) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("message",
+                                "Could not create slot. Check the date, time range and availability status. The slot may also overlap an existing slot.")
+                );
+            }
+
+            return new ResponseEntity<>(created, HttpStatus.CREATED);
+
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", e.getMessage()));
         }
-
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @GetMapping("/read/{slotId}")
     public ResponseEntity<AvailabilitySlot> read(
             @PathVariable String slotId) {
 
-        AvailabilitySlot availabilitySlot = service.read(slotId);
+        AvailabilitySlot slot = service.read(slotId);
 
-        if (availabilitySlot == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (slot == null) {
+            return ResponseEntity.notFound().build();
         }
 
-        return new ResponseEntity<>(availabilitySlot, HttpStatus.OK);
+        return ResponseEntity.ok(slot);
     }
 
     @GetMapping({"/all", "/getAll"})
     public ResponseEntity<List<AvailabilitySlot>> readAll() {
-        return new ResponseEntity<>(service.readAll(), HttpStatus.OK);
+        return ResponseEntity.ok(service.readAll());
     }
 
     @PutMapping("/update")
     public ResponseEntity<?> update(
             @RequestBody AvailabilitySlot availabilitySlot) {
 
-        AvailabilitySlot updated = service.update(availabilitySlot);
+        try {
+            AvailabilitySlot updated = service.update(availabilitySlot);
 
-        if (updated == null) {
-            return ResponseEntity.badRequest().body(
-                    Map.of("message",
-                            "Could not update slot. Check that the slot exists, date, start/end time, status, and trainer userId are valid.")
-            );
+            if (updated == null) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("message",
+                                "Could not update slot. Check its details and make sure it has no confirmed or completed bookings.")
+                );
+            }
+
+            return ResponseEntity.ok(updated);
+
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", e.getMessage()));
         }
-
-        return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{slotId}")
-    public ResponseEntity<Void> delete(
-            @PathVariable String slotId) {
+    public ResponseEntity<?> delete(@PathVariable String slotId) {
 
-        if (!service.delete(slotId)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        try {
+            if (!service.delete(slotId)) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("message",
+                                "Could not delete slot. It may not exist or may have a confirmed or completed booking.")
+                );
+            }
+
+            return ResponseEntity.noContent().build();
+
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", e.getMessage()));
         }
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
 }

@@ -1,9 +1,8 @@
-/** TODO — Phumelela Sakie (240040546) */
-
 import { useState } from "react";
 import type { FormEvent } from "react";
 
 import type { AvailabilitySlot } from "../../types";
+import { useAuth } from "../../auth/AuthContext";
 
 import {
     createSlot,
@@ -25,27 +24,40 @@ interface SlotFormFieldsProps {
     onCancelEdit: () => void;
 }
 
+function getLocalDate(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
 function SlotFormFields({
                             editingSlot,
                             onSaved,
                             onCancelEdit,
                         }: SlotFormFieldsProps) {
+    const { user } = useAuth();
+
     const [date, setDate] = useState(editingSlot?.date ?? "");
 
     const [startTime, setStartTime] = useState(
-        editingSlot?.startTime ? editingSlot.startTime.substring(0, 5) : ""
+        editingSlot?.startTime
+            ? editingSlot.startTime.substring(0, 5)
+            : ""
     );
 
     const [endTime, setEndTime] = useState(
-        editingSlot?.endTime ? editingSlot.endTime.substring(0, 5) : ""
+        editingSlot?.endTime
+            ? editingSlot.endTime.substring(0, 5)
+            : ""
     );
 
-    const [status, setStatus] = useState(
-        editingSlot?.status ?? "AVAILABLE"
-    );
-
-    const [trainerUserId, setTrainerUserId] = useState(
-        editingSlot?.trainer?.userId ?? ""
+    const [status, setStatus] = useState<"AVAILABLE" | "UNAVAILABLE">(
+        editingSlot?.status === "UNAVAILABLE"
+            ? "UNAVAILABLE"
+            : "AVAILABLE"
     );
 
     const [loading, setLoading] = useState(false);
@@ -53,40 +65,89 @@ function SlotFormFields({
     const [success, setSuccess] = useState("");
 
     const isEditing = editingSlot !== null;
+    const isBooked = editingSlot?.status === "BOOKED";
+
+    if (!user || user.role !== "TRAINER") {
+        return (
+            <div className="slot-form-panel">
+                <p className="slot-form-msg slot-form-msg--error" role="alert">
+                    Only authenticated trainers can manage availability.
+                </p>
+            </div>
+        );
+    }
+
+    if (
+        editingSlot &&
+        editingSlot.trainer?.userId !== user.userId
+    ) {
+        return (
+            <div className="slot-form-panel">
+                <p className="slot-form-msg slot-form-msg--error" role="alert">
+                    You cannot edit another trainer's availability.
+                </p>
+            </div>
+        );
+    }
+
+    if (isBooked) {
+        return (
+            <div className="slot-form-panel">
+                <h2>Booked Availability</h2>
+
+                <p className="slot-form-msg slot-form-msg--error" role="alert">
+                    This slot is booked and cannot be edited.
+                </p>
+
+                <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={onCancelEdit}
+                >
+                    Close
+                </button>
+            </div>
+        );
+    }
 
     function resetForm() {
         setDate("");
         setStartTime("");
         setEndTime("");
         setStatus("AVAILABLE");
-        setTrainerUserId("");
     }
 
     function validateForm(): string {
-        if (!date) {
-            return "Date is required.";
-        }
-
-        if (!startTime) {
-            return "Start time is required.";
-        }
-
-        if (!endTime) {
-            return "End time is required.";
+        if (!date || !startTime || !endTime) {
+            return "Date, start time and end time are required.";
         }
 
         if (!status) {
-            return "Status is required.";
-        }
-
-        if (!trainerUserId.trim()) {
-            return "Trainer is required.";
+            return "Please select a slot status.";
         }
 
         const normalizedStart = normalizeTime(startTime);
         const normalizedEnd = normalizeTime(endTime);
 
         if (normalizedEnd <= normalizedStart) {
+            return "End time must be after start time.";
+        }
+
+        const startDateTime = new Date(`${date}T${startTime}:00`);
+        const endDateTime = new Date(`${date}T${endTime}:00`);
+
+        if (
+            Number.isNaN(startDateTime.getTime()) ||
+            Number.isNaN(endDateTime.getTime())
+        ) {
+            return "Please enter a valid date and time.";
+        }
+
+        if (startDateTime <= new Date()) {
+            return "Availability must start in the future.";
+        }
+
+        if (endDateTime <= startDateTime) {
             return "End time must be after start time.";
         }
 
@@ -111,7 +172,6 @@ function SlotFormFields({
             startTime,
             endTime,
             status,
-            trainerUserId: trainerUserId.trim(),
         };
 
         try {
@@ -119,21 +179,19 @@ function SlotFormFields({
 
             if (isEditing && editingSlot) {
                 await updateSlot(editingSlot.slotId, formData);
-
                 setSuccess("Availability slot updated successfully.");
             } else {
                 await createSlot(formData);
-
                 setSuccess("Availability slot created successfully.");
             }
 
             resetForm();
             onSaved();
-        } catch (err) {
+        } catch (err: unknown) {
             setError(
                 err instanceof Error
                     ? err.message
-                    : "Unable to save availability slot."
+                    : "Unable to save availability slot. Please try again."
             );
         } finally {
             setLoading(false);
@@ -162,6 +220,7 @@ function SlotFormFields({
                         <input
                             id="slot-date"
                             type="date"
+                            min={getLocalDate()}
                             value={date}
                             onChange={(event) => setDate(event.target.value)}
                             required
@@ -174,9 +233,7 @@ function SlotFormFields({
                             id="slot-start-time"
                             type="time"
                             value={startTime}
-                            onChange={(event) =>
-                                setStartTime(event.target.value)
-                            }
+                            onChange={(event) => setStartTime(event.target.value)}
                             required
                         />
                     </div>
@@ -186,6 +243,7 @@ function SlotFormFields({
                         <input
                             id="slot-end-time"
                             type="time"
+                            min={startTime || undefined}
                             value={endTime}
                             onChange={(event) => setEndTime(event.target.value)}
                             required
@@ -201,40 +259,45 @@ function SlotFormFields({
                                 setStatus(
                                     event.target.value as
                                         | "AVAILABLE"
-                                        | "BOOKED"
                                         | "UNAVAILABLE"
                                 )
                             }
                         >
                             <option value="AVAILABLE">AVAILABLE</option>
-                            <option value="BOOKED">BOOKED</option>
                             <option value="UNAVAILABLE">UNAVAILABLE</option>
                         </select>
                     </div>
 
                     <div className="fn-field fn-field--wide">
-                        <label htmlFor="trainer-user-id">Trainer User ID</label>
+                        <label htmlFor="slot-trainer">Trainer</label>
                         <input
-                            id="trainer-user-id"
+                            id="slot-trainer"
                             type="text"
-                            value={trainerUserId}
-                            onChange={(event) =>
-                                setTrainerUserId(event.target.value)
-                            }
-                            placeholder="Enter trainer user ID"
-                            required
+                            value={user.email}
+                            readOnly
+                            disabled
                         />
+                        <small>
+                            Availability will be linked to your logged-in
+                            trainer account.
+                        </small>
                     </div>
                 </div>
 
                 {error && (
-                    <p className="slot-form-msg slot-form-msg--error" role="alert">
+                    <p
+                        className="slot-form-msg slot-form-msg--error"
+                        role="alert"
+                    >
                         {error}
                     </p>
                 )}
 
                 {success && (
-                    <p className="slot-form-msg slot-form-msg--ok" role="status">
+                    <p
+                        className="slot-form-msg slot-form-msg--ok"
+                        role="status"
+                    >
                         {success}
                     </p>
                 )}
@@ -273,8 +336,6 @@ function SlotForm({
                       onSaved,
                       onCancelEdit,
                   }: SlotFormProps) {
-
-
     const formKey = editingSlot?.slotId ?? "new-slot";
 
     return (
