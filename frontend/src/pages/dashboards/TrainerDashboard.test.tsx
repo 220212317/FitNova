@@ -16,7 +16,7 @@ import {
   panel,
   statHint,
 } from "./dashboardTestUtils";
-
+vi.setConfig({ testTimeout: 30000, hookTimeout: 30000 });
 const mocks = vi.hoisted(() => ({
   useAuth: vi.fn(),
   useGymData: vi.fn(),
