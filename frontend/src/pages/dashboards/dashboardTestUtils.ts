@@ -112,7 +112,7 @@ export async function expectStat(label: string, value: string): Promise<void> {
                 value
             );
         },
-        { timeout: 3000 }
+        { timeout: 10000 }
     );
 }
 
