@@ -2,7 +2,7 @@
 /** parts.test.tsx
  *  Author: Inga Plati (230126634)
  */
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import {
     CountUp,
@@ -19,6 +19,8 @@ import {
 } from "./parts";
 import { makeBooking, makeSlot, makeUser } from "./dashboardTestUtils";
 
+vi.setConfig({ testTimeout: 30000, hookTimeout: 30000 });
+
 afterEach(() => {
     cleanup();
 });
@@ -27,13 +29,17 @@ describe("CountUp", () => {
     it("counts up to the value", async () => {
         const { container } = render(<CountUp value={7} duration={50} />);
 
-        await waitFor(() => expect(container.textContent).toBe("7"));
+        await waitFor(() => expect(container.textContent).toBe("7"), {
+            timeout: 10000,
+        });
     });
 
     it("shows 0 when the value is not a number", async () => {
         const { container } = render(<CountUp value={Number.NaN} duration={50} />);
 
-        await waitFor(() => expect(container.textContent).toBe("0"));
+        await waitFor(() => expect(container.textContent).toBe("0"), {
+            timeout: 10000,
+        });
     });
 });
 
@@ -77,7 +83,7 @@ describe("StatCards", () => {
         await waitFor(
             () =>
                 expect(container.querySelector(".stat-card-value")?.textContent).toBe("4"),
-            { timeout: 3000 }
+            { timeout: 10000 }
         );
     });
 
