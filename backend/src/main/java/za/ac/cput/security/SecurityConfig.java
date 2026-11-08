@@ -11,6 +11,11 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -87,6 +92,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/gender/**", "/race/**", "/demographic/**").authenticated()
                         .requestMatchers("/gender/**", "/race/**", "/demographic/**").hasAuthority("lookup:manage")
 
+                        // Gym resources: everyone signed in can read; only admins write.
+                        .requestMatchers(HttpMethod.GET, "/resource/**").authenticated()
+                        .requestMatchers("/resource/**").hasAuthority("resource:manage")
+
+                        // Admins oversee the platform but never book sessions themselves.
+                        .requestMatchers(HttpMethod.POST, "/booking/create").access(notAdmin())
+
                         .requestMatchers(HttpMethod.GET, "/availability-slots/**").authenticated()
                         .requestMatchers("/availability-slots/**").hasAuthority("slot:manage")
 
@@ -108,6 +120,18 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthFilter(tokens, users), UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    /** Signed-in users who do not hold the ADMIN role. Anonymous callers are denied (-> 401). */
+    private static AuthorizationManager<RequestAuthorizationContext> notAdmin() {
+        return (authentication, context) -> {
+            Authentication auth = authentication.get();
+            boolean allowed = auth != null
+                    && auth.isAuthenticated()
+                    && !(auth instanceof AnonymousAuthenticationToken)
+                    && auth.getAuthorities().stream().noneMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+            return new AuthorizationDecision(allowed);
+        };
     }
 
     /** 401: no usable token. */

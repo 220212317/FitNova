@@ -8,7 +8,9 @@ import type {
     Contact,
     Demographic,
     Gender,
+    GymResource,
     NextOfKinContact,
+    Profile,
     Race,
     User,
     UserRole,
@@ -16,6 +18,8 @@ import type {
 
 export const usersApi = {
     getAll: () => api.get<User[]>("/user/getAll").catch(() => [] as User[]),
+    /** Same as getAll but lets errors (e.g. 403) reach the caller. Used by admin screens. */
+    getAllStrict: () => api.get<User[]>("/user/getAll"),
     getById: (id: string) => api.get<User>(`/user/read/${id}`),
     create: (user: User) =>
         api.post<User>("/user/create", {
@@ -172,4 +176,58 @@ export const lookupsApi = {
         }),
     updateRace: (race: Race) => api.put<Race>("/race/update", race),
     deleteRace: (id: string) => api.delete(`/race/delete/${id}`),
+};
+
+/** Admin-only endpoints (SecurityConfig: /admin/** requires ROLE_ADMIN) */
+export const adminApi = {
+  /** POST /admin/roles/{userId}/assign  body: { role: "TRAINER" | "ADMIN" } */
+  assignRole: (userId: string, role: "TRAINER" | "ADMIN" | "MEMBER") =>
+    api.post<string>(`/admin/roles/${encodeURIComponent(userId)}/assign`, { role }),
+
+  /** PUT /admin/roles/{userId}  body: { role } - makes `role` the user's only role. */
+  setRole: (userId: string, role: "TRAINER" | "ADMIN" | "MEMBER") =>
+    api.put<string>(`/admin/roles/${encodeURIComponent(userId)}`, { role }),
+
+  /** DELETE /admin/roles/{userId}/revoke  body: { role } */
+  revokeRole: (userId: string, role: "TRAINER" | "ADMIN" | "MEMBER") =>
+    api.deleteWithBody<string>(`/admin/roles/${encodeURIComponent(userId)}/revoke`, { role }),
+
+  /**
+   * POST /admin/staff/create?role=TRAINER|ADMIN
+   * Creates a new staff account (not a public self-signup).
+   */
+  createStaff: (
+    body: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      password: string;
+      dateOfBirth: string;
+    },
+    role: "TRAINER" | "ADMIN"
+  ) =>
+    api.post<Record<string, unknown>>(
+      `/admin/staff/create?role=${encodeURIComponent(role)}`,
+      body
+    ),
+};
+
+/** Reading: any signed-in user. Create / update / delete: ADMIN (resource:manage). */
+export const resourcesApi = {
+    getAll: () => api.get<GymResource[]>("/resource/getAll"),
+    create: (resource: GymResource) =>
+        api.post<GymResource>("/resource/create", {
+            ...resource,
+            resourceId: ensureId(resource.resourceId),
+        }),
+    update: (resource: GymResource) =>
+        api.put<GymResource>("/resource/update", resource),
+    delete: (id: string) => api.delete(`/resource/delete/${encodeURIComponent(id)}`),
+};
+
+export const profileApi = {
+    get: () => api.get<Profile>("/profile/me"),
+    update: (profile: Partial<Profile>) => api.put<Profile>("/profile/me", profile),
+    /** The password confirms the deletion. */
+    delete: (password: string) => api.deleteWithBody<void>("/profile/me", { password }),
 };

@@ -4,6 +4,9 @@ import jakarta.persistence.EntityManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
+import za.ac.cput.security.adapter.AuthenticatedUser;
 import org.springframework.web.bind.annotation.*;
 import za.ac.cput.domain.enums.RoleType;
 import za.ac.cput.service.IUserRoleService;
@@ -33,6 +36,39 @@ public class AdminRoleController {
          * Request body for role assignment and revocation.
          */
         public record RoleRequest(RoleType role) {
+        }
+
+        /**
+         * Changes a user's role: the given role becomes their only role.
+         *
+         * PUT /admin/roles/{userId}   body: { "role": "TRAINER" }
+         */
+        @PutMapping("/{userId}")
+        @Transactional
+        public ResponseEntity<String> setRole(
+                @PathVariable String userId,
+                @RequestBody RoleRequest request,
+                @AuthenticationPrincipal AuthenticatedUser currentUser
+        ) {
+
+            if (request == null || request.role() == null) {
+                return ResponseEntity.badRequest()
+                        .body("A valid role is required.");
+            }
+
+            if (currentUser != null && userId.equals(currentUser.getUserId())) {
+                throw new IllegalStateException("You cannot change your own role.");
+            }
+
+            commandInvoker.execute(new SetRoleCommand(
+                    userRoleService,
+                    entityManager,
+                    userId,
+                    request.role()
+            ));
+
+            return ResponseEntity.ok(
+                    "User " + userId + " is now " + request.role());
         }
 
         /**

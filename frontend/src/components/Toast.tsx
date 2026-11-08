@@ -1,38 +1,57 @@
-/** Phumelela Sakie (240040546) */
-import { useEffect } from "react";
-import "./toast.css";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
-interface ToastProps {
-  message: string | null;
-  onDismiss: () => void;
-  duration?: number;
+type ToastKind = "success" | "error" | "info";
+
+interface ToastItem {
+  id: number;
+  message: string;
+  kind: ToastKind;
 }
 
-/** Simple one-shot toast used by pages (message + auto-dismiss). */
-export function Toast({ message, onDismiss, duration = 3500 }: ToastProps) {
-  useEffect(() => {
-    if (!message) return;
-    const t = window.setTimeout(onDismiss, duration);
-    return () => window.clearTimeout(t);
-  }, [message, duration, onDismiss]);
+interface ToastContextValue {
+  toast: (message: string, kind?: ToastKind) => void;
+}
 
-  if (!message) return null;
+const ToastContext = createContext<ToastContextValue | undefined>(undefined);
+
+let nextId = 1;
+
+export function ToastProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<ToastItem[]>([]);
+
+  const toast = useCallback((message: string, kind: ToastKind = "info") => {
+    const id = nextId++;
+    setItems((prev) => [...prev, { id, message, kind }]);
+    window.setTimeout(() => {
+      setItems((prev) => prev.filter((t) => t.id !== id));
+    }, 3800);
+  }, []);
+
+  const value = useMemo(() => ({ toast }), [toast]);
 
   return (
-    <div className="fn-toast-stack" aria-live="polite">
-      <div className="fn-toast fn-toast--success" role="status">
-        <span>{message}</span>
-        <button
-          type="button"
-          className="fn-toast-close"
-          onClick={onDismiss}
-          aria-label="Close"
-        >
-          ×
-        </button>
+    <ToastContext.Provider value={value}>
+      {children}
+      <div className="toast-stack" aria-live="polite">
+        {items.map((t) => (
+          <div key={t.id} className={`toast toast-${t.kind}`}>
+            {t.message}
+          </div>
+        ))}
       </div>
-    </div>
+    </ToastContext.Provider>
   );
 }
 
-export default Toast;
+export function useToast() {
+  const ctx = useContext(ToastContext);
+  if (!ctx) throw new Error("useToast must be used within ToastProvider");
+  return ctx;
+}

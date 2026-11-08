@@ -41,13 +41,15 @@ public class RolePermissionTree {
             PermissionGroup adminPermissions =
                     new PermissionGroup("ADMIN_PERMISSIONS");
 
+            // Admins oversee the platform; they do not book sessions themselves,
+            // so there is no booking:create here.
             adminPermissions.add(new PermissionLeaf("member:read"));
             adminPermissions.add(new PermissionLeaf("booking:read"));
-            adminPermissions.add(new PermissionLeaf("booking:create"));
             adminPermissions.add(new PermissionLeaf("profile:read"));
             adminPermissions.add(new PermissionLeaf("slot:manage"));
             adminPermissions.add(new PermissionLeaf("lookup:manage"));
             adminPermissions.add(new PermissionLeaf("user:manage"));
+            adminPermissions.add(new PermissionLeaf("resource:manage"));
 
             rolePermissions.put(RoleType.MEMBER, memberPermissions);
             rolePermissions.put(RoleType.TRAINER, trainerPermissions);

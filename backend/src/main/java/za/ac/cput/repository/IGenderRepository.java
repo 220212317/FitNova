@@ -9,4 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import za.ac.cput.domain.Gender;
 
 public interface IGenderRepository extends JpaRepository<Gender, String> {
+    java.util.Optional<Gender> findFirstByDescriptionIgnoreCase(String description);
 }

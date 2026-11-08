@@ -1,5 +1,5 @@
-/* TODO: global theme tokens */
+/* Theme values now live in tokens.css. Kept for legacy var names. */
 :root {
-  --bg-primary: #07110c;
-  --bg-secondary: #0b1711;
+  --bg-primary: var(--bg-app);
+  --bg-secondary: var(--bg-surface);
 }
