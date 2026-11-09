@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useToast } from "../../components/Toast";
+import { useState } from "react";
+import { useToast } from "../../components/ToastContextContextContextContext";
 import { adminApi } from "../../api/fitnova";
 
 interface StoredApp {
@@ -21,15 +21,16 @@ const STORAGE_KEY = "fitnova_trainer_applications";
  */
 export function AdminApplicationsPage() {
   const { toast } = useToast();
-  const [apps, setApps] = useState<StoredApp[]>([]);
 
-  const reload = () => {
-    setApps(JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]") as StoredApp[]);
-  };
-
-  useEffect(() => {
-    reload();
-  }, []);
+  const [apps, setApps] = useState<StoredApp[]>(() => {
+    try {
+      return JSON.parse(
+          localStorage.getItem(STORAGE_KEY) || "[]"
+      ) as StoredApp[];
+    } catch {
+      return [];
+    }
+  });
 
   const persist = (next: StoredApp[]) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
@@ -41,11 +42,14 @@ export function AdminApplicationsPage() {
       toast("Application has no userId — cannot assign role.", "error");
       return;
     }
+
     try {
       await adminApi.assignRole(app.userId, "TRAINER");
       persist(
-          apps.map((a) =>
-              a.applicationId === app.applicationId ? { ...a, status: "APPROVED" } : a
+          apps.map((item) =>
+              item.applicationId === app.applicationId
+                  ? { ...item, status: "APPROVED" }
+                  : item
           )
       );
       toast("TRAINER role granted via /admin/roles/.../assign.", "success");
@@ -56,8 +60,10 @@ export function AdminApplicationsPage() {
 
   const reject = (app: StoredApp) => {
     persist(
-        apps.map((a) =>
-            a.applicationId === app.applicationId ? { ...a, status: "REJECTED" } : a
+        apps.map((item) =>
+            item.applicationId === app.applicationId
+                ? { ...item, status: "REJECTED" }
+                : item
         )
     );
     toast("Application rejected.", "info");
@@ -67,46 +73,75 @@ export function AdminApplicationsPage() {
       <div>
         <h1 className="page-title">Trainer applications</h1>
         <p className="page-sub">
-          Member applications (stored locally until a dedicated backend API exists). Approve calls the
-          real admin role-assign endpoint.
+          Member applications (stored locally until a dedicated backend API
+          exists). Approve calls the real admin role-assign endpoint.
         </p>
 
         {apps.length === 0 ? (
             <div className="card empty">No applications submitted yet.</div>
         ) : (
             <div className="grid-2">
-              {apps.map((a) => (
-                  <article key={a.applicationId} className="card">
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem" }}>
-                      <strong>{a.email || a.userId || "Applicant"}</strong>
+              {apps.map((app) => (
+                  <article key={app.applicationId} className="card">
+                    <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: "0.5rem",
+                        }}
+                    >
+                      <strong>{app.email || app.userId || "Applicant"}</strong>
                       <span
                           className={`badge badge-${
-                              a.status === "PENDING" ? "pending" : a.status === "APPROVED" ? "accepted" : "rejected"
+                              app.status === "PENDING"
+                                  ? "pending"
+                                  : app.status === "APPROVED"
+                                      ? "accepted"
+                                      : "rejected"
                           }`}
                       >
-                  {a.status}
+                  {app.status}
                 </span>
                     </div>
-                    <p style={{ fontSize: "0.8rem", color: "var(--fn-muted)", margin: "0.35rem 0 0.75rem" }}>
-                      Submitted {new Date(a.submittedAt).toLocaleString()}
+
+                    <p
+                        style={{
+                          fontSize: "0.8rem",
+                          color: "var(--fn-muted)",
+                          margin: "0.35rem 0 0.75rem",
+                        }}
+                    >
+                      Submitted {new Date(app.submittedAt).toLocaleString()}
                     </p>
+
                     <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>
-                      <strong>Motivation:</strong> {a.motivation}
+                      <strong>Motivation:</strong> {app.motivation}
                     </p>
+
                     <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>
-                      <strong>Experience:</strong> {a.experience}
+                      <strong>Experience:</strong> {app.experience}
                     </p>
-                    {a.certifications && (
+
+                    {app.certifications && (
                         <p style={{ fontSize: "0.9rem", marginBottom: "0.75rem" }}>
-                          <strong>Certifications:</strong> {a.certifications}
+                          <strong>Certifications:</strong> {app.certifications}
                         </p>
                     )}
-                    {a.status === "PENDING" && (
+
+                    {app.status === "PENDING" && (
                         <div style={{ display: "flex", gap: "0.5rem" }}>
-                          <button type="button" className="btn" onClick={() => void approve(a)}>
+                          <button
+                              type="button"
+                              className="btn"
+                              onClick={() => void approve(app)}
+                          >
                             Approve &amp; grant trainer
                           </button>
-                          <button type="button" className="btn btn-outline" onClick={() => reject(a)}>
+                          <button
+                              type="button"
+                              className="btn btn-outline"
+                              onClick={() => reject(app)}
+                          >
                             Reject
                           </button>
                         </div>
