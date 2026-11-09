@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { useState, type FormEvent } from "react";
-import { useToast } from "../../components/Toast";
+import { useToast } from "../../components/ToastContextContextContext";
 import { useAuth } from "../../auth/AuthContext";
 
 /** Local persistence until backend trainer-application endpoints exist */
