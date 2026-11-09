@@ -78,6 +78,12 @@ export interface User {
   userRoles?: UserRole[];
 }
 
+export interface TrainerSummary {
+  userId: string;
+  firstName: string;
+  lastName: string;
+}
+
 /** Backend AvailabilitySlot — no title/notes fields */
 export interface AvailabilitySlot {
   slotId: string;

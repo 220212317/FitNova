@@ -11,6 +11,7 @@ import SignUpPage from "./pages/auth/SignUpPage";
 
 // --- Dashboards ---
 import DashboardRouter from "./pages/dashboards/DashboardRouter";
+import TrainersPage from "./pages/TrainersPage";
 
 // --- Member ---
 import ProfilePage from "./pages/member/ProfilePage";
@@ -88,6 +89,7 @@ export default function App() {
                             <Route path="/book" element={<RequireRole roles={["MEMBER"]}><BookSessionsPage /></RequireRole>} />
                             <Route path="/my-bookings" element={<RequireRole roles={["MEMBER"]}><MyBookingsPage /></RequireRole>} />
                             <Route path="/my-progress" element={<RequireRole roles={["MEMBER"]}><ProgressPage /></RequireRole>} />
+                            <Route path="/trainers" element={<RequireRole roles={["MEMBER"]}><TrainersPage /></RequireRole>} />
                             <Route path="/apply-trainer" element={<RequireRole roles={["MEMBER"]}><ApplyTrainerPage /></RequireRole>} />
 
                             {/* --- TRAINER HUB --- */}

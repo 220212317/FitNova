@@ -17,6 +17,7 @@ import {
   User,
   BadgeCheck,
   Activity,
+  UserRoundSearch,
 } from "lucide-react";
 import { useAuth, type UserRole } from "../auth/AuthContext";
 import "./AppShell.css";
@@ -35,6 +36,7 @@ const NAV: NavItem[] = [
   { to: "/book", label: "Book session", icon: CalendarPlus, roles: ["MEMBER"] },
   { to: "/my-bookings", label: "My bookings", icon: CalendarCheck, roles: ["MEMBER"] },
   { to: "/my-progress", label: "My Progress", icon: Activity, roles: ["MEMBER"] },
+  { to: "/trainers", label: "Trainers", icon: UserRoundSearch, roles: ["MEMBER"] },
   {
     to: "/app/resources",
     label: "Resources",
