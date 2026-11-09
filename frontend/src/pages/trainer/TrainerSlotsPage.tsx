@@ -1,15 +1,17 @@
-import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
+import {
+  useEffect,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+} from "react";
 import { slotsApi } from "../../api/fitnova";
 import { useAuth } from "../../auth/AuthContext";
-import { useToast } from "../../components/Toast";
+import { useToast } from "../../components/ToastContextContextContextContext";
 import type { AvailabilitySlot } from "../../types";
 import { formatDate, formatTime, statusBadgeClass } from "../../lib/format";
 import { ensureId } from "../../api/ids";
 
-/**
- * Trainer-only "My slots" page. Admins use /admin/slots (read-only, all trainers).
- * Backend AvailabilitySlotServiceImpl only lets primary role TRAINER create slots.
- */
+
 export function TrainerSlotsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -24,25 +26,42 @@ export function TrainerSlotsPage() {
     setLoading(true);
     try {
       const all = await slotsApi.getAll().catch(() => [] as AvailabilitySlot[]);
-      setSlots(all.filter((s) => s.trainer?.userId === user?.userId));
+      setSlots(all.filter((slot) => slot.trainer?.userId === user?.userId));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    void load();
+    let cancelled = false;
+
+    const fetchSlots = async () => {
+      try {
+        const all = await slotsApi.getAll().catch(() => [] as AvailabilitySlot[]);
+        if (!cancelled) {
+          setSlots(all.filter((slot) => slot.trainer?.userId === user?.userId));
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    void fetchSlots();
+    return () => {
+      cancelled = true;
+    };
   }, [user?.userId, user?.role]);
 
   const createSlot = async (e: FormEvent) => {
     e.preventDefault();
+
     if (!date || !startTime || !endTime) {
       toast("Date and times are required.", "error");
       return;
     }
+
     setSaving(true);
     try {
-      // Times as HH:mm — Jackson maps to LocalTime
       const slot: AvailabilitySlot = {
         slotId: ensureId(""),
         date,
@@ -50,6 +69,7 @@ export function TrainerSlotsPage() {
         endTime: endTime.length === 5 ? `${endTime}:00` : endTime,
         status: "AVAILABLE",
       };
+
       await slotsApi.create(slot);
       toast("Slot created (AVAILABLE).", "success");
       await load();
@@ -61,69 +81,116 @@ export function TrainerSlotsPage() {
   };
 
   return (
-    <div>
-      <h1 className="page-title">My slots</h1>
-      <p className="page-sub">
-        Publish availability. Status starts as AVAILABLE; a confirmed booking moves it to BOOKED.
-      </p>
+      <div>
+        <h1 className="page-title">My slots</h1>
+        <p className="page-sub">
+          Publish availability. Status starts as AVAILABLE; a confirmed booking moves
+          it to BOOKED.
+        </p>
 
-      <form className="card" onSubmit={createSlot} style={{ marginBottom: "1.25rem" }}>
-        <h2 style={{ fontSize: "1rem", marginBottom: "0.85rem" }}>New availability</h2>
-        <div className="grid-2" style={{ marginBottom: "0.75rem" }}>
-          <div>
-            <label style={{ fontSize: "0.8rem", color: "var(--fn-muted)" }}>Date</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
-          </div>
-          <div />
-          <div>
-            <label style={{ fontSize: "0.8rem", color: "var(--fn-muted)" }}>Start</label>
-            <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} style={inputStyle} />
-          </div>
-          <div>
-            <label style={{ fontSize: "0.8rem", color: "var(--fn-muted)" }}>End</label>
-            <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} style={inputStyle} />
-          </div>
-        </div>
-        <button type="submit" className="btn" disabled={saving}>
-          {saving ? "Saving…" : "Create available slot"}
-        </button>
-      </form>
+        <form
+            className="card"
+            onSubmit={createSlot}
+            style={{ marginBottom: "1.25rem" }}
+        >
+          <h2 style={{ fontSize: "1rem", marginBottom: "0.85rem" }}>
+            New availability
+          </h2>
 
-      {loading ? (
-        <div className="skeleton" style={{ height: 100 }} />
-      ) : slots.length === 0 ? (
-        <div className="card empty">No slots yet.</div>
-      ) : (
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.92rem" }}>
-            <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid var(--fn-border)" }}>
-                <th style={{ padding: "0.85rem 1rem" }}>Date</th>
-                <th style={{ padding: "0.85rem 1rem" }}>Time</th>
-                <th style={{ padding: "0.85rem 1rem" }}>Trainer</th>
-                <th style={{ padding: "0.85rem 1rem" }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {slots.map((s) => (
-                <tr key={s.slotId} style={{ borderBottom: "1px solid var(--fn-border)" }}>
-                  <td style={{ padding: "0.85rem 1rem" }}>{formatDate(s.date)}</td>
-                  <td style={{ padding: "0.85rem 1rem" }}>
-                    {formatTime(s.startTime)}–{formatTime(s.endTime)}
-                  </td>
-                  <td style={{ padding: "0.85rem 1rem" }}>
-                    {s.trainer ? `${s.trainer.firstName} ${s.trainer.lastName}` : "—"}
-                  </td>
-                  <td style={{ padding: "0.85rem 1rem" }}>
-                    <span className={statusBadgeClass(s.status)}>{s.status}</span>
-                  </td>
+          <div className="grid-2" style={{ marginBottom: "0.75rem" }}>
+            <div>
+              <label style={{ fontSize: "0.8rem", color: "var(--fn-muted)" }}>
+                Date
+              </label>
+              <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  style={inputStyle}
+              />
+            </div>
+
+            <div />
+
+            <div>
+              <label style={{ fontSize: "0.8rem", color: "var(--fn-muted)" }}>
+                Start
+              </label>
+              <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  style={inputStyle}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontSize: "0.8rem", color: "var(--fn-muted)" }}>
+                End
+              </label>
+              <input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  style={inputStyle}
+              />
+            </div>
+          </div>
+
+          <button type="submit" className="btn" disabled={saving}>
+            {saving ? "Saving…" : "Create available slot"}
+          </button>
+        </form>
+
+        {loading ? (
+            <div className="skeleton" style={{ height: 100 }} />
+        ) : slots.length === 0 ? (
+            <div className="card empty">No slots yet.</div>
+        ) : (
+            <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.92rem" }}>
+                <thead>
+                <tr
+                    style={{
+                      textAlign: "left",
+                      borderBottom: "1px solid var(--fn-border)",
+                    }}
+                >
+                  <th style={{ padding: "0.85rem 1rem" }}>Date</th>
+                  <th style={{ padding: "0.85rem 1rem" }}>Time</th>
+                  <th style={{ padding: "0.85rem 1rem" }}>Trainer</th>
+                  <th style={{ padding: "0.85rem 1rem" }}>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+                </thead>
+                <tbody>
+                {slots.map((slot) => (
+                    <tr
+                        key={slot.slotId}
+                        style={{ borderBottom: "1px solid var(--fn-border)" }}
+                    >
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                        {formatDate(slot.date)}
+                      </td>
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                        {formatTime(slot.startTime)}–{formatTime(slot.endTime)}
+                      </td>
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                        {slot.trainer
+                            ? `${slot.trainer.firstName} ${slot.trainer.lastName}`
+                            : "—"}
+                      </td>
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                    <span className={statusBadgeClass(slot.status)}>
+                      {slot.status}
+                    </span>
+                      </td>
+                    </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
+        )}
+      </div>
   );
 }
 

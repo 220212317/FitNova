@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-
 import { useAuth } from "../../auth/AuthContext";
 import { getAllSlots } from "../features/slots/slotsApi";
-
 import type { AvailabilitySlot } from "../../types";
-
 import SlotForm from "../features/slots/SlotForm";
 import SlotList from "../features/slots/SlotList";
 
@@ -12,9 +9,7 @@ function SlotsPage() {
     const { user } = useAuth();
 
     const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
-    const [editingSlot, setEditingSlot] =
-        useState<AvailabilitySlot | null>(null);
-
+    const [editingSlot, setEditingSlot] = useState<AvailabilitySlot | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [toast, setToast] = useState("");
@@ -32,7 +27,6 @@ function SlotsPage() {
 
             const data = await getAllSlots();
 
-            // Only display slots belonging to the logged-in trainer.
             const ownSlots = data.filter(
                 (slot) => slot.trainer?.userId === user.userId
             );
@@ -50,8 +44,40 @@ function SlotsPage() {
     }, [user]);
 
     useEffect(() => {
-        handleRefresh();
-    }, [handleRefresh]);
+        if (!user || user.role !== "TRAINER") return;
+
+        let cancelled = false;
+
+        const fetchSlots = async () => {
+            try {
+                setLoading(true);
+                setError("");
+
+                const data = await getAllSlots();
+                if (!cancelled) {
+                    const ownSlots = data.filter(
+                        (slot) => slot.trainer?.userId === user.userId
+                    );
+                    setSlots(ownSlots);
+                }
+            } catch (err: unknown) {
+                if (!cancelled) {
+                    setError(
+                        err instanceof Error
+                            ? err.message
+                            : "Could not load availability slots."
+                    );
+                }
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        };
+
+        void fetchSlots();
+        return () => {
+            cancelled = true;
+        };
+    }, [user]);
 
     function showToast(message: string) {
         setToast(message);
@@ -101,7 +127,6 @@ function SlotsPage() {
         return (
             <main>
                 <h1>Availability Slots</h1>
-
                 <div role="alert">
                     Only authenticated trainers can manage availability.
                 </div>
@@ -113,10 +138,7 @@ function SlotsPage() {
         <main className="slots-page">
             <section>
                 <h1>My Availability Slots</h1>
-
-                <p>
-                    Create, edit, view and manage your trainer availability.
-                </p>
+                <p>Create, edit, view and manage your trainer availability.</p>
             </section>
 
             {toast && (
@@ -135,11 +157,7 @@ function SlotsPage() {
 
             <section>
                 <div>
-                    <button
-                        type="button"
-                        onClick={handleRefresh}
-                        disabled={loading}
-                    >
+                    <button type="button" onClick={handleRefresh} disabled={loading}>
                         {loading ? "Loading..." : "Refresh Slots"}
                     </button>
                 </div>
@@ -153,11 +171,7 @@ function SlotsPage() {
                 {loading ? (
                     <p>Loading your availability slots...</p>
                 ) : (
-                    <SlotList
-                        slots={slots}
-                        onEdit={handleEdit}
-                        onDeleted={handleDeleted}
-                    />
+                    <SlotList slots={slots} onEdit={handleEdit} onDeleted={handleDeleted} />
                 )}
             </section>
         </main>
