@@ -4,8 +4,11 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import ProfilePage from "./ProfilePage";
 
-vi.mock("../auth/AuthContext", () => ({
-  useAuth: () => ({ user: { userId: "u1", email: "member@fitnova.test", role: "MEMBER", roles: ["MEMBER"] }, logout: vi.fn() }),
+vi.mock("../../auth/AuthContext", () => ({
+  useAuth: () => ({
+    user: { userId: "u1", email: "member@fitnova.test", role: "MEMBER", roles: ["MEMBER"] },
+    logout: vi.fn(),
+  }),
 }));
 
 const profile = {
