@@ -1,38 +1,35 @@
-/** Phumelela Sakie (240040546) */
-import { useEffect } from "react";
-import "./toast.css";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { ToastContext, type ToastKind } from "./ToastContext";
 
-interface ToastProps {
-  message: string | null;
-  onDismiss: () => void;
-  duration?: number;
+interface ToastItem {
+  id: number;
+  message: string;
+  kind: ToastKind;
 }
 
-/** Simple one-shot toast used by pages (message + auto-dismiss). */
-export function Toast({ message, onDismiss, duration = 3500 }: ToastProps) {
-  useEffect(() => {
-    if (!message) return;
-    const t = window.setTimeout(onDismiss, duration);
-    return () => window.clearTimeout(t);
-  }, [message, duration, onDismiss]);
+export function ToastProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<ToastItem[]>([]);
 
-  if (!message) return null;
+  const toast = useCallback((message: string, kind: ToastKind = "info") => {
+    const id = Date.now() + Math.random();
+    setItems((prev) => [...prev, { id, message, kind }]);
+    window.setTimeout(() => {
+      setItems((prev) => prev.filter((item) => item.id !== id));
+    }, 3800);
+  }, []);
+
+  const value = useMemo(() => ({ toast }), [toast]);
 
   return (
-    <div className="fn-toast-stack" aria-live="polite">
-      <div className="fn-toast fn-toast--success" role="status">
-        <span>{message}</span>
-        <button
-          type="button"
-          className="fn-toast-close"
-          onClick={onDismiss}
-          aria-label="Close"
-        >
-          ×
-        </button>
-      </div>
-    </div>
+      <ToastContext.Provider value={value}>
+        {children}
+        <div className="toast-stack" aria-live="polite">
+          {items.map((item) => (
+              <div key={item.id} className={`toast toast-${item.kind}`}>
+                {item.message}
+              </div>
+          ))}
+        </div>
+      </ToastContext.Provider>
   );
 }
-
-export default Toast;

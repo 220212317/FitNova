@@ -37,6 +37,12 @@ public class GlobalExceptionHandler {
         return body(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
     }
 
+    /** Business-rule conflicts (e.g. "cannot delete your own account", "user already has role"). */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
+        return body(HttpStatus.CONFLICT, ex.getMessage(), null);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
         ex.printStackTrace();

@@ -1,5 +1,209 @@
-/* TODO: AppShell layout styles */
-.app-shell {
+.shell {
   display: flex;
   min-height: 100vh;
+  background: transparent;
+}
+
+.sidebar {
+  width: 260px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--fn-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 0.9rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 40;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.6rem 1.25rem;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--fn-primary), var(--fn-primary-dim));
+  color: var(--brand-contrast);
+  display: grid;
+  place-items: center;
+}
+
+.sidebar-brand strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.sidebar-brand small {
+  color: var(--fn-muted);
+  text-transform: capitalize;
+  font-size: 0.75rem;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  color: var(--fn-muted);
+  font-weight: 500;
+  font-size: 0.92rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-item:hover {
+  background: var(--fn-surface-2);
+  color: var(--fn-text);
+}
+
+.nav-item.active {
+  background: var(--brand-soft);
+  color: var(--fn-primary);
+}
+
+.sidebar-foot {
+  border-top: 1px solid var(--fn-border);
+  padding-top: 1rem;
+  margin-top: 0.75rem;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.4rem 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--fn-surface-2);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--fn-primary);
+}
+
+.user-chip strong {
+  display: block;
+  font-size: 0.82rem;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-chip small {
+  color: var(--fn-muted);
+  font-size: 0.72rem;
+}
+
+.logout-btn {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.shell-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--fn-border);
+  background: var(--fn-surface);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.menu-btn {
+  background: transparent;
+  border: none;
+  color: var(--fn-text);
+  cursor: pointer;
+  padding: 0.35rem;
+}
+
+.topbar-brand {
+  font-weight: 700;
+}
+
+.topbar-right {
+  margin-left: auto;
+}
+
+.role-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--fn-primary);
+}
+
+.content {
+  padding: 1.5rem clamp(1rem, 3vw, 2rem);
+  flex: 1;
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-105%);
+    transition: transform 0.25s ease;
+    box-shadow: var(--fn-shadow);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: var(--bg-overlay);
+    z-index: 35;
+  }
+
+  .topbar {
+    display: flex;
+  }
 }

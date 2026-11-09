@@ -1,18 +1,24 @@
 package za.ac.cput.service.impl;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import za.ac.cput.domain.AvailabilitySlot;
 import za.ac.cput.domain.User;
 import za.ac.cput.domain.enums.SlotStatus;
 import za.ac.cput.repository.IAvailabilitySlotRepository;
 import za.ac.cput.repository.IUserRepository;
+import za.ac.cput.security.adapter.AuthenticatedUser;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,6 +32,7 @@ class AvailabilitySlotServiceImplTest {
     @Mock
     private IUserRepository userRepository;
 
+    private AutoCloseable mocks;
     private AvailabilitySlotServiceImpl service;
 
     private AvailabilitySlot slot;
@@ -34,7 +41,7 @@ class AvailabilitySlotServiceImplTest {
     @BeforeEach
     void setUp() {
 
-        MockitoAnnotations.openMocks(this);
+        mocks = MockitoAnnotations.openMocks(this);
 
         trainer = new User.Builder()
                 .setUserId("User001")
@@ -45,7 +52,7 @@ class AvailabilitySlotServiceImplTest {
 
         slot = new AvailabilitySlot.Builder()
                 .setSlotId("SLOT001")
-                .setDate(LocalDate.of(2026, 8, 21))
+                .setDate(LocalDate.now().plusDays(7))
                 .setStartTime(LocalTime.of(9, 0))
                 .setEndTime(LocalTime.of(10, 0))
                 .setStatus(SlotStatus.AVAILABLE)
@@ -56,6 +63,24 @@ class AvailabilitySlotServiceImplTest {
                 repository,
                 userRepository
         );
+
+        AuthenticatedUser authenticatedTrainer = new AuthenticatedUser.Builder()
+                .setUserId(trainer.getUserId())
+                .setEmail("trainer@example.com")
+                .setDisplayName("Phumelela Sakie")
+                .setAuthorities(List.of(new SimpleGrantedAuthority("ROLE_TRAINER")))
+                .build();
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        authenticatedTrainer, "test", authenticatedTrainer.getAuthorities()));
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        SecurityContextHolder.clearContext();
+        if (mocks != null) {
+            mocks.close();
+        }
     }
 
     @Test
@@ -63,7 +88,8 @@ class AvailabilitySlotServiceImplTest {
 
         when(userRepository.findById(trainer.getUserId()))
                 .thenReturn(Optional.of(trainer));
-
+        when(repository.findByTrainer_UserId(trainer.getUserId()))
+                .thenReturn(List.of());
         when(repository.save(any(AvailabilitySlot.class)))
                 .thenReturn(slot);
 
@@ -115,12 +141,10 @@ class AvailabilitySlotServiceImplTest {
     @Test
     void update() {
 
-        when(repository.existsById("SLOT001"))
-                .thenReturn(true);
-
-        when(userRepository.findById(trainer.getUserId()))
-                .thenReturn(Optional.of(trainer));
-
+        when(repository.findById("SLOT001"))
+                .thenReturn(Optional.of(slot));
+        when(repository.findByTrainer_UserId(trainer.getUserId()))
+                .thenReturn(List.of());
         when(repository.save(any(AvailabilitySlot.class)))
                 .thenReturn(slot);
 
@@ -131,11 +155,7 @@ class AvailabilitySlotServiceImplTest {
         assertEquals(trainer, updated.getTrainer());
 
         verify(repository, times(1))
-                .existsById("SLOT001");
-
-        verify(userRepository, times(1))
-                .findById(trainer.getUserId());
-
+                .findById("SLOT001");
         verify(repository, times(1))
                 .save(any(AvailabilitySlot.class));
     }
@@ -143,14 +163,14 @@ class AvailabilitySlotServiceImplTest {
     @Test
     void delete() {
 
-        when(repository.existsById("SLOT001"))
-                .thenReturn(true);
+        when(repository.findById("SLOT001"))
+                .thenReturn(Optional.of(slot));
 
         boolean deleted = service.delete("SLOT001");
 
         assertTrue(deleted);
 
         verify(repository, times(1))
-                .deleteById("SLOT001");
+                .delete(slot);
     }
 }

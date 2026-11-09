@@ -26,6 +26,18 @@ class UserServiceImplTest {
     @Mock
     private IUserRepository userRepository;
 
+    @Mock
+    private za.ac.cput.repository.IUserRoleRepository userRoleRepository;
+
+    @Mock
+    private za.ac.cput.repository.IBookingRepository bookingRepository;
+
+    @Mock
+    private za.ac.cput.repository.IAvailabilitySlotRepository slotRepository;
+
+    @Mock
+    private za.ac.cput.repository.IAccountRepository accountRepository;
+
     @InjectMocks
     private UserServiceImpl userService;
 
