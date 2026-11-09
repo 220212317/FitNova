@@ -8,7 +8,7 @@ import {
 import { resourcesApi } from "../../api/fitnova";
 import { useAuth } from "../../auth/AuthContext";
 import { ConfirmDialog, Modal } from "../../components/Modal";
-import { useToast } from "../../components/ToastContextContextContextContext";
+import { useToast } from "../../components/ToastContext";
 import { ensureId } from "../../api/ids";
 import type { GymResource, GymResourceCategory } from "../../types";
 
