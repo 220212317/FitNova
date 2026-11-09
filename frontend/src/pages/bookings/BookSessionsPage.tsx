@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { bookingsApi, slotsApi } from "../../api/fitnova";
 import { useAuth } from "../../auth/AuthContext";
-import { useToast } from "../../components/ToastContextContextContextContext";
+import { useToast } from "../../components/ToastContext";
 import type { AvailabilitySlot, Booking } from "../../types";
 import {
   formatDate,
