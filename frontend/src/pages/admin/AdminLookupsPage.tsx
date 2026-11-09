@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { useEffect, useState, type FormEvent } from "react";
 import { lookupsApi } from "../../api/fitnova";
 import { ConfirmDialog } from "../../components/Modal";
-import { useToast } from "../../components/Toast";
+import { useToast } from "../../components/ToastContextContextContextContext";
 import type { Gender, Race } from "../../types";
 import { ensureId } from "../../api/ids";
 
@@ -21,7 +21,14 @@ interface LookupCardProps {
 }
 
 /** One lookup list (gender / race) with add, rename and delete. */
-function LookupCard({ title, noun, items, onCreate, onUpdate, onDelete }: LookupCardProps) {
+function LookupCard({
+                      title,
+                      noun,
+                      items,
+                      onCreate,
+                      onUpdate,
+                      onDelete,
+                    }: LookupCardProps) {
   const [newValue, setNewValue] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -32,6 +39,7 @@ function LookupCard({ title, noun, items, onCreate, onUpdate, onDelete }: Lookup
     e.preventDefault();
     const value = newValue.trim();
     if (!value) return;
+
     setBusy(true);
     try {
       await onCreate(value);
@@ -49,10 +57,12 @@ function LookupCard({ title, noun, items, onCreate, onUpdate, onDelete }: Lookup
   const saveEdit = async (item: LookupItem) => {
     const value = editValue.trim();
     if (!value) return;
+
     if (value === item.description) {
       setEditingId(null);
       return;
     }
+
     setBusy(true);
     try {
       await onUpdate({ id: item.id, description: value });
@@ -65,6 +75,7 @@ function LookupCard({ title, noun, items, onCreate, onUpdate, onDelete }: Lookup
   const confirmDelete = async () => {
     if (!deleting) return;
     const target = deleting;
+
     setBusy(true);
     try {
       await onDelete(target);
@@ -93,27 +104,52 @@ function LookupCard({ title, noun, items, onCreate, onUpdate, onDelete }: Lookup
                           }}
                           style={inputStyle}
                       />
-                      <button type="button" className="btn" style={smallBtn} disabled={busy} onClick={() => void saveEdit(item)}>
+                      <button
+                          type="button"
+                          className="btn"
+                          style={smallBtn}
+                          disabled={busy}
+                          onClick={() => void saveEdit(item)}
+                      >
                         Save
                       </button>
-                      <button type="button" className="btn btn-ghost" style={smallBtn} onClick={() => setEditingId(null)}>
+                      <button
+                          type="button"
+                          className="btn btn-ghost"
+                          style={smallBtn}
+                          onClick={() => setEditingId(null)}
+                      >
                         Cancel
                       </button>
                     </>
                 ) : (
                     <>
                       <span style={{ flex: 1 }}>{item.description}</span>
-                      <button type="button" className="btn btn-outline" style={smallBtn} disabled={busy} onClick={() => startEdit(item)}>
+                      <button
+                          type="button"
+                          className="btn btn-outline"
+                          style={smallBtn}
+                          disabled={busy}
+                          onClick={() => startEdit(item)}
+                      >
                         Edit
                       </button>
-                      <button type="button" className="btn btn-danger" style={smallBtn} disabled={busy} onClick={() => setDeleting(item)}>
+                      <button
+                          type="button"
+                          className="btn btn-danger"
+                          style={smallBtn}
+                          disabled={busy}
+                          onClick={() => setDeleting(item)}
+                      >
                         Delete
                       </button>
                     </>
                 )}
               </li>
           ))}
-          {items.length === 0 && <li style={{ color: "var(--fn-muted)" }}>No entries yet.</li>}
+          {items.length === 0 && (
+              <li style={{ color: "var(--fn-muted)" }}>No entries yet.</li>
+          )}
         </ul>
 
         <form onSubmit={add} style={{ display: "flex", gap: "0.5rem" }}>
@@ -124,7 +160,11 @@ function LookupCard({ title, noun, items, onCreate, onUpdate, onDelete }: Lookup
               aria-label={`New ${noun}`}
               style={inputStyle}
           />
-          <button type="submit" className="btn" disabled={busy || !newValue.trim()}>
+          <button
+              type="submit"
+              className="btn"
+              disabled={busy || !newValue.trim()}
+          >
             Add
           </button>
         </form>
@@ -148,8 +188,7 @@ export function AdminLookupsPage() {
   const [races, setRaces] = useState<Race[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    setLoading(true);
+  const fetchLookups = async () => {
     try {
       const [g, r] = await Promise.all([
         lookupsApi.genders().catch(() => [] as Gender[]),
@@ -162,8 +201,13 @@ export function AdminLookupsPage() {
     }
   };
 
+  const load = async () => {
+    setLoading(true);
+    await fetchLookups();
+  };
+
   useEffect(() => {
-    void load();
+    void fetchLookups();
   }, []);
 
   /** Runs an API call, toasts the outcome and refreshes the lists. */
@@ -180,7 +224,9 @@ export function AdminLookupsPage() {
   return (
       <div>
         <h1 className="page-title">Lookups</h1>
-        <p className="page-sub">Admin-only reference data used across member profiles.</p>
+        <p className="page-sub">
+          Admin-only reference data used across member profiles.
+        </p>
 
         {loading ? (
             <div className="skeleton" style={{ height: 100 }} />
@@ -189,35 +235,64 @@ export function AdminLookupsPage() {
               <LookupCard
                   title="Genders"
                   noun="gender"
-                  items={genders.map((g) => ({ id: g.genderId, description: g.description }))}
+                  items={genders.map((g) => ({
+                    id: g.genderId,
+                    description: g.description,
+                  }))}
                   onCreate={(description) =>
                       run(
-                          () => lookupsApi.createGender({ genderId: ensureId(""), description }),
+                          () =>
+                              lookupsApi.createGender({
+                                genderId: ensureId(""),
+                                description,
+                              }),
                           "Gender added."
                       )
                   }
                   onUpdate={(item) =>
                       run(
-                          () => lookupsApi.updateGender({ genderId: item.id, description: item.description }),
+                          () =>
+                              lookupsApi.updateGender({
+                                genderId: item.id,
+                                description: item.description,
+                              }),
                           "Gender updated."
                       )
                   }
-                  onDelete={(item) => run(() => lookupsApi.deleteGender(item.id), "Gender deleted.")}
+                  onDelete={(item) =>
+                      run(() => lookupsApi.deleteGender(item.id), "Gender deleted.")
+                  }
               />
               <LookupCard
                   title="Races"
                   noun="race"
-                  items={races.map((r) => ({ id: r.raceId, description: r.description }))}
+                  items={races.map((r) => ({
+                    id: r.raceId,
+                    description: r.description,
+                  }))}
                   onCreate={(description) =>
-                      run(() => lookupsApi.createRace({ raceId: ensureId(""), description }), "Race added.")
+                      run(
+                          () =>
+                              lookupsApi.createRace({
+                                raceId: ensureId(""),
+                                description,
+                              }),
+                          "Race added."
+                      )
                   }
                   onUpdate={(item) =>
                       run(
-                          () => lookupsApi.updateRace({ raceId: item.id, description: item.description }),
+                          () =>
+                              lookupsApi.updateRace({
+                                raceId: item.id,
+                                description: item.description,
+                              }),
                           "Race updated."
                       )
                   }
-                  onDelete={(item) => run(() => lookupsApi.deleteRace(item.id), "Race deleted.")}
+                  onDelete={(item) =>
+                      run(() => lookupsApi.deleteRace(item.id), "Race deleted.")
+                  }
               />
             </div>
         )}
@@ -234,7 +309,10 @@ const row: CSSProperties = {
   fontSize: "0.92rem",
 };
 
-const smallBtn: CSSProperties = { padding: "0.3rem 0.7rem", fontSize: "0.8rem" };
+const smallBtn: CSSProperties = {
+  padding: "0.3rem 0.7rem",
+  fontSize: "0.8rem",
+};
 
 const inputStyle: CSSProperties = {
   flex: 1,
