@@ -105,19 +105,16 @@ export function LandingPage({ section }: Props) {
   useEffect(() => {
     const hash = section ?? location.hash?.replace("#", "");
 
-    // If the hash is "home" or empty, scroll to the top
     if (!hash || hash === "home") {
       window.scrollTo({ top: 0, behavior: "smooth" });
-      setActiveSection("home");
-    } else {
-      const el = document.getElementById(hash);
-      if (el) {
-        // Offset for the fixed navbar (approx 82px)
-        const yOffset = -90;
-        const y = el.getBoundingClientRect().top + window.scrollY + yOffset;
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }
-      setActiveSection(hash);
+      return;
+    }
+
+    const el = document.getElementById(hash);
+    if (el) {
+      const yOffset = -90;
+      const y = el.getBoundingClientRect().top + window.scrollY + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
     }
   }, [section, location.hash]);
 
