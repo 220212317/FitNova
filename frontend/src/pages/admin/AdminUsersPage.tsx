@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { adminApi, usersApi } from "../../api/fitnova";
 import { useAuth } from "../../auth/AuthContext";
 import { ConfirmDialog } from "../../components/Modal";
-import { useToast } from "../../components/Toast";
+import { useToast } from "../../components/ToastContextContextContextContext";
 import type { User, RoleType } from "../../types";
 
 const ROLES: RoleType[] = ["MEMBER", "TRAINER", "ADMIN"];
@@ -17,12 +17,14 @@ export function AdminUsersPage() {
   const [busy, setBusy] = useState<string | null>(null);
 
   const [deleting, setDeleting] = useState<User | null>(null);
-  const [roleChange, setRoleChange] = useState<{ user: User; role: RoleType } | null>(null);
+  const [roleChange, setRoleChange] = useState<{
+    user: User;
+    role: RoleType;
+  } | null>(null);
 
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleType | "ALL">("ALL");
 
-  // Create staff form
   const [showStaff, setShowStaff] = useState(false);
   const [staffRole, setStaffRole] = useState<"TRAINER" | "ADMIN">("TRAINER");
   const [firstName, setFirstName] = useState("");
@@ -32,11 +34,10 @@ export function AdminUsersPage() {
   const [dob, setDob] = useState("");
   const [creating, setCreating] = useState(false);
 
-  const load = async () => {
-    setLoading(true);
-    setError(null);
+  const fetchUsers = async () => {
     try {
       setUsers(await usersApi.getAllStrict());
+      setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load users.");
     } finally {
@@ -44,36 +45,61 @@ export function AdminUsersPage() {
     }
   };
 
+  const load = async () => {
+    setLoading(true);
+    await fetchUsers();
+  };
+
   useEffect(() => {
-    void load();
+    let cancelled = false;
+
+    usersApi
+        .getAllStrict()
+        .then((data) => {
+          if (cancelled) return;
+          setUsers(data);
+          setError(null);
+        })
+        .catch((error: unknown) => {
+          if (cancelled) return;
+          setError(
+              error instanceof Error ? error.message : "Could not load users."
+          );
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const primaryRole = (u: User): RoleType => {
-    const roles = u.userRoles?.map((r) => r.roleId) ?? [];
+  const primaryRole = (user: User): RoleType => {
+    const roles = user.userRoles?.map((r) => r.roleId) ?? [];
     if (roles.includes("ADMIN")) return "ADMIN";
     if (roles.includes("TRAINER")) return "TRAINER";
     return "MEMBER";
   };
 
-  const isMe = (u: User) => String(me?.userId) === u.userId;
+  const isMe = (user: User) => String(me?.userId) === user.userId;
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
     return users
-      .filter((u) => roleFilter === "ALL" || primaryRole(u) === roleFilter)
-      .filter((u) => {
-        if (!q) return true;
-        return (
-          `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
-          (u.account?.email ?? "").toLowerCase().includes(q)
+        .filter((user) => roleFilter === "ALL" || primaryRole(user) === roleFilter)
+        .filter((user) => {
+          if (!q) return true;
+          return (
+              `${user.firstName} ${user.lastName}`.toLowerCase().includes(q) ||
+              (user.account?.email ?? "").toLowerCase().includes(q)
+          );
+        })
+        .sort((a, b) =>
+            `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`)
         );
-      })
-      .sort((a, b) =>
-        `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`)
-      );
   }, [users, query, roleFilter]);
 
-  /** Backend: PUT /admin/roles/{userId} { role } — the chosen role becomes their only role. */
   const confirmRoleChange = async () => {
     if (!roleChange) return;
     const { user: target, role } = roleChange;
@@ -91,10 +117,10 @@ export function AdminUsersPage() {
     }
   };
 
-  /** Backend: DELETE /user/delete/{userId} (needs user:manage, which ADMIN has) */
   const confirmDelete = async () => {
     if (!deleting) return;
     const target = deleting;
+
     setBusy(target.userId);
     try {
       await usersApi.delete(target.userId);
@@ -114,14 +140,14 @@ export function AdminUsersPage() {
     setCreating(true);
     try {
       await adminApi.createStaff(
-        {
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
-          email: email.trim(),
-          password,
-          dateOfBirth: dob,
-        },
-        staffRole
+          {
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            email: email.trim(),
+            password,
+            dateOfBirth: dob,
+          },
+          staffRole
       );
       toast(`${staffRole} account created.`, "success");
       setShowStaff(false);
@@ -139,158 +165,252 @@ export function AdminUsersPage() {
   };
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
-        <div>
-          <h1 className="page-title">Users</h1>
-          <p className="page-sub">
-            See everyone on the platform, change their role, remove accounts, or create staff accounts.
-          </p>
-        </div>
-        <button type="button" className="btn" onClick={() => setShowStaff((v) => !v)}>
-          {showStaff ? "Close" : "Create staff"}
-        </button>
-      </div>
-
-      {showStaff && (
-        <form className="card" onSubmit={createStaff} style={{ marginBottom: "1.25rem", maxWidth: 520 }}>
-          <h2 style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>New trainer / admin</h2>
-          <div className="grid-2">
-            <input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required style={inp} />
-            <input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} required style={inp} />
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={inp} />
-            <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} required style={inp} />
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required style={inp} />
-            <select value={staffRole} onChange={(e) => setStaffRole(e.target.value as "TRAINER" | "ADMIN")} style={inp}>
-              <option value="TRAINER">TRAINER</option>
-              <option value="ADMIN">ADMIN</option>
-            </select>
-          </div>
-          <button type="submit" className="btn" style={{ marginTop: "0.85rem" }} disabled={creating}>
-            {creating ? "Creating…" : "Create account"}
-          </button>
-        </form>
-      )}
-
-      <div className="card" style={{ marginBottom: "1rem", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-        <input
-          aria-label="Search users"
-          placeholder="Search by name or email"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          style={{ ...inp, flex: 1, minWidth: 220, width: "auto" }}
-        />
-        <select
-          aria-label="Filter by role"
-          value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value as RoleType | "ALL")}
-          style={{ ...inp, width: "auto" }}
+      <div>
+        <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "1rem",
+              flexWrap: "wrap",
+            }}
         >
-          <option value="ALL">All roles</option>
-          {ROLES.map((r) => (
-            <option key={r} value={r}>
-              {r}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {loading ? (
-        <div className="skeleton" style={{ height: 120 }} />
-      ) : error ? (
-        <div className="card empty">
-          <p style={{ marginBottom: "0.75rem" }}>{error}</p>
-          <button type="button" className="btn btn-outline" onClick={() => void load()}>
-            Try again
+          <div>
+            <h1 className="page-title">Users</h1>
+            <p className="page-sub">
+              See everyone on the platform, change their role, remove accounts, or
+              create staff accounts.
+            </p>
+          </div>
+          <button
+              type="button"
+              className="btn"
+              onClick={() => setShowStaff((value) => !value)}
+          >
+            {showStaff ? "Close" : "Create staff"}
           </button>
         </div>
-      ) : visible.length === 0 ? (
-        <div className="card empty">No users match.</div>
-      ) : (
-        <div className="card" style={{ padding: 0, overflow: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
-            <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid var(--fn-border)" }}>
-                <th style={cell}>Name</th>
-                <th style={cell}>Email</th>
-                <th style={cell}>Role</th>
-                <th style={cell}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((u) => {
-                const role = primaryRole(u);
-                const self = isMe(u);
-                return (
-                  <tr key={u.userId} style={{ borderBottom: "1px solid var(--fn-border)" }}>
-                    <td style={cell}>
-                      {u.firstName} {u.lastName}
-                      {self && <span style={{ color: "var(--fn-muted)" }}> (you)</span>}
-                    </td>
-                    <td style={cell}>{u.account?.email ?? "—"}</td>
-                    <td style={cell}>
-                      <select
-                        aria-label={`Role for ${u.firstName} ${u.lastName}`}
-                        value={role}
-                        disabled={busy === u.userId || self}
-                        title={self ? "You can't change your own role" : "Change role"}
-                        onChange={(e) => {
-                          const next = e.target.value as RoleType;
-                          if (next !== role) setRoleChange({ user: u, role: next });
-                        }}
-                        style={{ ...inp, width: "auto", padding: "0.35rem 0.6rem" }}
-                      >
-                        {ROLES.map((r) => (
-                          <option key={r} value={r}>
-                            {r}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td style={cell}>
-                      <button
-                        type="button"
-                        className="btn btn-danger"
-                        style={{ padding: "0.35rem 0.8rem", fontSize: "0.8rem" }}
-                        disabled={busy === u.userId || self}
-                        title={self ? "You can't delete your own account here" : "Delete user"}
-                        onClick={() => setDeleting(u)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+
+        {showStaff && (
+            <form
+                className="card"
+                onSubmit={createStaff}
+                style={{ marginBottom: "1.25rem", maxWidth: 520 }}
+            >
+              <h2 style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>
+                New trainer / admin
+              </h2>
+              <div className="grid-2">
+                <input
+                    placeholder="First name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                    style={inp}
+                />
+                <input
+                    placeholder="Last name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                    style={inp}
+                />
+                <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    style={inp}
+                />
+                <input
+                    type="date"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    required
+                    style={inp}
+                />
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    style={inp}
+                />
+                <select
+                    value={staffRole}
+                    onChange={(e) =>
+                        setStaffRole(e.target.value as "TRAINER" | "ADMIN")
+                    }
+                    style={inp}
+                >
+                  <option value="TRAINER">TRAINER</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
+              </div>
+              <button
+                  type="submit"
+                  className="btn"
+                  style={{ marginTop: "0.85rem" }}
+                  disabled={creating}
+              >
+                {creating ? "Creating…" : "Create account"}
+              </button>
+            </form>
+        )}
+
+        <div
+            className="card"
+            style={{
+              marginBottom: "1rem",
+              display: "flex",
+              gap: "0.75rem",
+              flexWrap: "wrap",
+            }}
+        >
+          <input
+              aria-label="Search users"
+              placeholder="Search by name or email"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              style={{ ...inp, flex: 1, minWidth: 220, width: "auto" }}
+          />
+          <select
+              aria-label="Filter by role"
+              value={roleFilter}
+              onChange={(e) =>
+                  setRoleFilter(e.target.value as RoleType | "ALL")
+              }
+              style={{ ...inp, width: "auto" }}
+          >
+            <option value="ALL">All roles</option>
+            {ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+            ))}
+          </select>
         </div>
-      )}
 
-      {roleChange && (
-        <ConfirmDialog
-          title="Change role"
-          message={`Make ${roleChange.user.firstName} ${roleChange.user.lastName} a ${roleChange.role}? ${
-            roleChange.role === "ADMIN"
-              ? "Admins can manage users, lookups and resources, and cannot book sessions. "
-              : ""
-          }Their previous role is replaced.`}
-          confirmLabel="Change role"
-          onConfirm={() => void confirmRoleChange()}
-          onCancel={() => setRoleChange(null)}
-        />
-      )}
+        {loading ? (
+            <div className="skeleton" style={{ height: 120 }} />
+        ) : error ? (
+            <div className="card empty">
+              <p style={{ marginBottom: "0.75rem" }}>{error}</p>
+              <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => void load()}
+              >
+                Try again
+              </button>
+            </div>
+        ) : visible.length === 0 ? (
+            <div className="card empty">No users match.</div>
+        ) : (
+            <div className="card" style={{ padding: 0, overflow: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
+                <thead>
+                <tr
+                    style={{
+                      textAlign: "left",
+                      borderBottom: "1px solid var(--fn-border)",
+                    }}
+                >
+                  <th style={cell}>Name</th>
+                  <th style={cell}>Email</th>
+                  <th style={cell}>Role</th>
+                  <th style={cell}>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {visible.map((user) => {
+                  const role = primaryRole(user);
+                  const self = isMe(user);
 
-      {deleting && (
-        <ConfirmDialog
-          title="Delete user"
-          message={`Delete ${deleting.firstName} ${deleting.lastName}? Their roles, bookings and account are removed. This cannot be undone.`}
-          confirmLabel="Delete"
-          onConfirm={() => void confirmDelete()}
-          onCancel={() => setDeleting(null)}
-        />
-      )}
-    </div>
+                  return (
+                      <tr
+                          key={user.userId}
+                          style={{ borderBottom: "1px solid var(--fn-border)" }}
+                      >
+                        <td style={cell}>
+                          {user.firstName} {user.lastName}
+                          {self && (
+                              <span style={{ color: "var(--fn-muted)" }}> (you)</span>
+                          )}
+                        </td>
+                        <td style={cell}>{user.account?.email ?? "—"}</td>
+                        <td style={cell}>
+                          <select
+                              aria-label={`Role for ${user.firstName} ${user.lastName}`}
+                              value={role}
+                              disabled={busy === user.userId || self}
+                              title={
+                                self
+                                    ? "You can't change your own role"
+                                    : "Change role"
+                              }
+                              onChange={(e) => {
+                                const next = e.target.value as RoleType;
+                                if (next !== role) setRoleChange({ user, role: next });
+                              }}
+                              style={{ ...inp, width: "auto", padding: "0.35rem 0.6rem" }}
+                          >
+                            {ROLES.map((r) => (
+                                <option key={r} value={r}>
+                                  {r}
+                                </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td style={cell}>
+                          <button
+                              type="button"
+                              className="btn btn-danger"
+                              style={{ padding: "0.35rem 0.8rem", fontSize: "0.8rem" }}
+                              disabled={busy === user.userId || self}
+                              title={
+                                self
+                                    ? "You can't delete your own account here"
+                                    : "Delete user"
+                              }
+                              onClick={() => setDeleting(user)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                  );
+                })}
+                </tbody>
+              </table>
+            </div>
+        )}
+
+        {roleChange && (
+            <ConfirmDialog
+                title="Change role"
+                message={`Make ${roleChange.user.firstName} ${roleChange.user.lastName} a ${roleChange.role}? ${
+                    roleChange.role === "ADMIN"
+                        ? "Admins can manage users, lookups and resources, and cannot book sessions. "
+                        : ""
+                }Their previous role is replaced.`}
+                confirmLabel="Change role"
+                onConfirm={() => void confirmRoleChange()}
+                onCancel={() => setRoleChange(null)}
+            />
+        )}
+
+        {deleting && (
+            <ConfirmDialog
+                title="Delete user"
+                message={`Delete ${deleting.firstName} ${deleting.lastName}? Their roles, bookings and account are removed. This cannot be undone.`}
+                confirmLabel="Delete"
+                onConfirm={() => void confirmDelete()}
+                onCancel={() => setDeleting(null)}
+            />
+        )}
+      </div>
   );
 }
 
