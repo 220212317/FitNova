@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useToast } from "../../components/ToastContextContextContextContext";
+import { useToast } from "../../components/ToastContext";
 import { adminApi } from "../../api/fitnova";
 
 interface StoredApp {

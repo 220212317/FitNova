@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { adminApi, usersApi } from "../../api/fitnova";
 import { useAuth } from "../../auth/AuthContext";
 import { ConfirmDialog } from "../../components/Modal";
-import { useToast } from "../../components/ToastContextContextContextContext";
+import { useToast } from "../../components/ToastContext";
 import type { User, RoleType } from "../../types";
 
 const ROLES: RoleType[] = ["MEMBER", "TRAINER", "ADMIN"];
