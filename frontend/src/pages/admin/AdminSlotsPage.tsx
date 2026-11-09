@@ -15,11 +15,10 @@ export function AdminSlotsPage() {
   const [trainerId, setTrainerId] = useState("ALL");
   const [upcomingOnly, setUpcomingOnly] = useState(true);
 
-  const load = async () => {
-    setLoading(true);
-    setError(null);
+  const fetchSlots = async () => {
     try {
       setSlots(await slotsApi.getAll());
+      setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load slots.");
     } finally {
@@ -27,15 +26,44 @@ export function AdminSlotsPage() {
     }
   };
 
+  const load = async () => {
+    setLoading(true);
+    await fetchSlots();
+  };
+
   useEffect(() => {
-    void load();
+    let cancelled = false;
+
+    slotsApi
+        .getAll()
+        .then((data) => {
+          if (cancelled) return;
+          setSlots(data);
+          setError(null);
+        })
+        .catch((error: unknown) => {
+          if (cancelled) return;
+          setError(
+              error instanceof Error ? error.message : "Could not load slots."
+          );
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const trainers = useMemo(() => {
     const map = new Map<string, string>();
-    for (const s of slots) {
-      if (s.trainer?.userId) {
-        map.set(s.trainer.userId, `${s.trainer.firstName} ${s.trainer.lastName}`.trim());
+    for (const slot of slots) {
+      if (slot.trainer?.userId) {
+        map.set(
+            slot.trainer.userId,
+            `${slot.trainer.firstName} ${slot.trainer.lastName}`.trim()
+        );
       }
     }
     return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
@@ -43,29 +71,34 @@ export function AdminSlotsPage() {
 
   const visible = useMemo(() => {
     const now = new Date();
+
     return slots
-        .filter((s) => status === "ALL" || s.status === status)
-        .filter((s) => trainerId === "ALL" || s.trainer?.userId === trainerId)
-        .filter((s) => {
+        .filter((slot) => status === "ALL" || slot.status === status)
+        .filter((slot) => trainerId === "ALL" || slot.trainer?.userId === trainerId)
+        .filter((slot) => {
           if (!upcomingOnly) return true;
-          return new Date(`${s.date}T${s.endTime || "23:59:59"}`) >= now;
+          return new Date(`${slot.date}T${slot.endTime || "23:59:59"}`) >= now;
         })
         .sort((a, b) =>
             `${a.date}T${a.startTime}`.localeCompare(`${b.date}T${b.startTime}`)
         );
   }, [slots, status, trainerId, upcomingOnly]);
 
-  const count = (st: SlotStatus) => slots.filter((s) => s.status === st).length;
+  const count = (slotStatus: SlotStatus) =>
+      slots.filter((slot) => slot.status === slotStatus).length;
 
   return (
       <div>
         <h1 className="page-title">Slots</h1>
         <p className="page-sub">
-          Every trainer&apos;s availability across the gym. Trainers publish slots and members book
-          them; admins can only view them here.
+          Every trainer&apos;s availability across the gym. Trainers publish slots
+          and members book them; admins can only view them here.
         </p>
 
-        <div className="stat-row" style={{ marginBottom: "1.25rem" }}>
+        <div
+            className="stat-row"
+            style={{ marginBottom: "1.25rem" }}
+        >
           <div className="stat-card">
             <span>Total</span>
             <strong>{loading ? "…" : slots.length}</strong>
@@ -84,7 +117,16 @@ export function AdminSlotsPage() {
           </div>
         </div>
 
-        <div className="card" style={{ marginBottom: "1rem", display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center" }}>
+        <div
+            className="card"
+            style={{
+              marginBottom: "1rem",
+              display: "flex",
+              gap: "0.75rem",
+              flexWrap: "wrap",
+              alignItems: "center",
+            }}
+        >
           <select
               aria-label="Filter by status"
               value={status}
@@ -96,6 +138,7 @@ export function AdminSlotsPage() {
             <option value="BOOKED">Booked</option>
             <option value="UNAVAILABLE">Unavailable</option>
           </select>
+
           <select
               aria-label="Filter by trainer"
               value={trainerId}
@@ -109,7 +152,15 @@ export function AdminSlotsPage() {
                 </option>
             ))}
           </select>
-          <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.9rem" }}>
+
+          <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                fontSize: "0.9rem",
+              }}
+          >
             <input
                 type="checkbox"
                 checked={upcomingOnly}
@@ -134,7 +185,12 @@ export function AdminSlotsPage() {
             <div className="card" style={{ padding: 0, overflow: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.92rem" }}>
                 <thead>
-                <tr style={{ textAlign: "left", borderBottom: "1px solid var(--fn-border)" }}>
+                <tr
+                    style={{
+                      textAlign: "left",
+                      borderBottom: "1px solid var(--fn-border)",
+                    }}
+                >
                   <th style={cell}>Date</th>
                   <th style={cell}>Time</th>
                   <th style={cell}>Trainer</th>
@@ -142,17 +198,24 @@ export function AdminSlotsPage() {
                 </tr>
                 </thead>
                 <tbody>
-                {visible.map((s) => (
-                    <tr key={s.slotId} style={{ borderBottom: "1px solid var(--fn-border)" }}>
-                      <td style={cell}>{formatDate(s.date)}</td>
+                {visible.map((slot) => (
+                    <tr
+                        key={slot.slotId}
+                        style={{ borderBottom: "1px solid var(--fn-border)" }}
+                    >
+                      <td style={cell}>{formatDate(slot.date)}</td>
                       <td style={cell}>
-                        {formatTime(s.startTime)}–{formatTime(s.endTime)}
+                        {formatTime(slot.startTime)}–{formatTime(slot.endTime)}
                       </td>
                       <td style={cell}>
-                        {s.trainer ? `${s.trainer.firstName} ${s.trainer.lastName}` : "—"}
+                        {slot.trainer
+                            ? `${slot.trainer.firstName} ${slot.trainer.lastName}`
+                            : "—"}
                       </td>
                       <td style={cell}>
-                        <span className={statusBadgeClass(s.status)}>{s.status}</span>
+                    <span className={statusBadgeClass(slot.status)}>
+                      {slot.status}
+                    </span>
                       </td>
                     </tr>
                 ))}
