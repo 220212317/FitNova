@@ -1,13 +1,14 @@
 import { useState } from "react";
 import "./Layout.css";
 import { NavLink, Outlet } from "react-router-dom";
-import { Dumbbell, LayoutDashboard, Users, CalendarClock, CalendarCheck, ListTree, Menu, X } from "lucide-react";
+import { Dumbbell, LayoutDashboard, Users, CalendarClock, CalendarCheck, ListTree, Menu, UserRoundSearch, X } from "lucide-react";
 
 const NAV_ITEMS = [
     { to: "/", label: "Home", icon: LayoutDashboard, end: true },
     { to: "/people", label: "People", icon: Users },
     { to: "/slots", label: "Availability", icon: CalendarClock },
     { to: "/bookings", label: "Bookings", icon: CalendarCheck },
+    { to: "/trainers", label: "Trainers", icon: UserRoundSearch },
     { to: "/lookups", label: "Lookups", icon: ListTree },
 ];
 

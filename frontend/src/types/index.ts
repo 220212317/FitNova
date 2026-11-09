@@ -73,6 +73,12 @@ export interface User {
     userRoles?: UserRole[];
 }
 
+export interface TrainerSummary {
+    userId: string;
+    firstName: string;
+    lastName: string;
+}
+
 export interface AvailabilitySlot {
     slotId: string;
     date: string;

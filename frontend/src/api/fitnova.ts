@@ -10,9 +10,14 @@ import type {
     Gender,
     NextOfKinContact,
     Race,
+    TrainerSummary,
     User,
     UserRole,
 } from "../types";
+
+export const trainersApi = {
+    getAll: () => api.get<TrainerSummary[]>("/trainers"),
+};
 
 export const usersApi = {
     getAll: () => api.get<User[]>("/user/getAll").catch(() => [] as User[]),

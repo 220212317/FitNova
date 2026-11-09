@@ -10,6 +10,7 @@ import { LookupsPage } from "./pages/LookupsPage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import DashboardRouter from "./pages/dashboards/DashboardRouter";
+import TrainersPage from "./pages/TrainersPage";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="people" element={<UsersPage />} />
             <Route path="slots" element={<SlotsPage />} />
             <Route path="bookings" element={<BookingsPage />} />
+            <Route path="trainers" element={<RequireAuth><TrainersPage /></RequireAuth>} />
             <Route path="lookups" element={<LookupsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

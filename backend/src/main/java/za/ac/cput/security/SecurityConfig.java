@@ -90,6 +90,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/availability-slots/**").authenticated()
                         .requestMatchers("/availability-slots/**").hasAuthority("slot:manage")
 
+                        .requestMatchers(HttpMethod.GET, "/trainers", "/trainers/**")
+                        .hasAuthority("profile:read")
+
                         .requestMatchers("/booking/getAll", "/booking/findBySlot/**", "/booking/findByStatus/**")
                         .hasAuthority("member:read")
                         .requestMatchers("/user/getAll", "/user/searchByLastName/**", "/user/findByName/**")
