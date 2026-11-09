@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { bookingsApi, slotsApi } from "../../api/fitnova";
 import { useAuth } from "../../auth/AuthContext";
-import { useToast } from "../../components/Toast";
+import { useToast } from "../../components/ToastContextContextContextContext";
 import type { Booking } from "../../types";
 import { formatDate, formatTime, statusBadgeClass } from "../../lib/format";
 
@@ -12,43 +12,52 @@ export function MyBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const load = async () => {
-    setLoading(true);
+  const fetchBookings = useCallback(async (userId?: string) => {
     try {
       let list: Booking[] = [];
-      if (user?.userId) {
+
+      if (userId) {
         try {
-          list = await bookingsApi.byMember(user.userId);
+          list = await bookingsApi.byMember(userId);
         } catch {
           const all = await bookingsApi.getAll().catch(() => [] as Booking[]);
-          list = all.filter((b) => b.member?.userId === user.userId);
+          list = all.filter((booking) => booking.member?.userId === userId);
         }
       }
+
       list.sort((a, b) =>
-        (b.bookingDateTime ?? "").localeCompare(a.bookingDateTime ?? "")
+          (b.bookingDateTime ?? "").localeCompare(a.bookingDateTime ?? "")
       );
       setBookings(list);
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const load = async () => {
+    setLoading(true);
+    await fetchBookings(user?.userId);
   };
 
   useEffect(() => {
-    void load();
-  }, [user?.userId]);
+    void fetchBookings(user?.userId);
+  }, [fetchBookings, user?.userId]);
 
-  const cancel = async (b: Booking) => {
-    if (b.status !== "CONFIRMED") return;
-    setBusyId(b.bookingId);
+  const cancel = async (booking: Booking) => {
+    if (booking.status !== "CONFIRMED") return;
+
+    setBusyId(booking.bookingId);
     try {
-      await bookingsApi.update({ ...b, status: "CANCELLED" });
-      if (b.slot?.slotId) {
+      await bookingsApi.update({ ...booking, status: "CANCELLED" });
+
+      if (booking.slot?.slotId) {
         try {
-          await slotsApi.update({ ...b.slot, status: "AVAILABLE" });
+          await slotsApi.update({ ...booking.slot, status: "AVAILABLE" });
         } catch {
-          /* may require trainer privileges */
+          // may require trainer privileges
         }
       }
+
       toast("Booking cancelled. Slot should be available again.", "success");
       await load();
     } catch (e) {
@@ -59,64 +68,83 @@ export function MyBookingsPage() {
   };
 
   return (
-    <div>
-      <h1 className="page-title">My bookings</h1>
-      <p className="page-sub">
-        Confirmed sessions you have booked. Cancel before the session starts to free the slot.
-      </p>
+      <div>
+        <h1 className="page-title">My bookings</h1>
+        <p className="page-sub">
+          Confirmed sessions you have booked. Cancel before the session starts to
+          free the slot.
+        </p>
 
-      {loading ? (
-        <div className="skeleton" style={{ height: 100 }} />
-      ) : bookings.length === 0 ? (
-        <div className="card empty">No bookings yet. Open Book session to reserve a slot.</div>
-      ) : (
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.92rem" }}>
-            <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid var(--fn-border)" }}>
-                <th style={{ padding: "0.85rem 1rem" }}>Date</th>
-                <th style={{ padding: "0.85rem 1rem" }}>Time</th>
-                <th style={{ padding: "0.85rem 1rem" }}>Trainer</th>
-                <th style={{ padding: "0.85rem 1rem" }}>Status</th>
-                <th style={{ padding: "0.85rem 1rem" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map((b) => (
-                <tr key={b.bookingId} style={{ borderBottom: "1px solid var(--fn-border)" }}>
-                  <td style={{ padding: "0.85rem 1rem" }}>{formatDate(b.slot?.date)}</td>
-                  <td style={{ padding: "0.85rem 1rem" }}>
-                    {formatTime(b.slot?.startTime)}–{formatTime(b.slot?.endTime)}
-                  </td>
-                  <td style={{ padding: "0.85rem 1rem" }}>
-                    {b.slot?.trainer
-                      ? `${b.slot.trainer.firstName} ${b.slot.trainer.lastName}`
-                      : "—"}
-                  </td>
-                  <td style={{ padding: "0.85rem 1rem" }}>
-                    <span className={statusBadgeClass(b.status)}>{b.status}</span>
-                  </td>
-                  <td style={{ padding: "0.85rem 1rem" }}>
-                    {b.status === "CONFIRMED" ? (
-                      <button
-                        type="button"
-                        className="btn btn-outline"
-                        style={{ padding: "0.35rem 0.75rem", fontSize: "0.8rem" }}
-                        disabled={busyId === b.bookingId}
-                        onClick={() => void cancel(b)}
-                      >
-                        Cancel
-                      </button>
-                    ) : (
-                      <span style={{ color: "var(--fn-muted)" }}>—</span>
-                    )}
-                  </td>
+        {loading ? (
+            <div className="skeleton" style={{ height: 100 }} />
+        ) : bookings.length === 0 ? (
+            <div className="card empty">
+              No bookings yet. Open Book session to reserve a slot.
+            </div>
+        ) : (
+            <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.92rem" }}>
+                <thead>
+                <tr
+                    style={{
+                      textAlign: "left",
+                      borderBottom: "1px solid var(--fn-border)",
+                    }}
+                >
+                  <th style={{ padding: "0.85rem 1rem" }}>Date</th>
+                  <th style={{ padding: "0.85rem 1rem" }}>Time</th>
+                  <th style={{ padding: "0.85rem 1rem" }}>Trainer</th>
+                  <th style={{ padding: "0.85rem 1rem" }}>Status</th>
+                  <th style={{ padding: "0.85rem 1rem" }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+                </thead>
+                <tbody>
+                {bookings.map((booking) => (
+                    <tr
+                        key={booking.bookingId}
+                        style={{ borderBottom: "1px solid var(--fn-border)" }}
+                    >
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                        {formatDate(booking.slot?.date)}
+                      </td>
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                        {formatTime(booking.slot?.startTime)}–
+                        {formatTime(booking.slot?.endTime)}
+                      </td>
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                        {booking.slot?.trainer
+                            ? `${booking.slot.trainer.firstName} ${booking.slot.trainer.lastName}`
+                            : "—"}
+                      </td>
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                    <span className={statusBadgeClass(booking.status)}>
+                      {booking.status}
+                    </span>
+                      </td>
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                        {booking.status === "CONFIRMED" ? (
+                            <button
+                                type="button"
+                                className="btn btn-outline"
+                                style={{
+                                  padding: "0.35rem 0.75rem",
+                                  fontSize: "0.8rem",
+                                }}
+                                disabled={busyId === booking.bookingId}
+                                onClick={() => void cancel(booking)}
+                            >
+                              Cancel
+                            </button>
+                        ) : (
+                            <span style={{ color: "var(--fn-muted)" }}>—</span>
+                        )}
+                      </td>
+                    </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
+        )}
+      </div>
   );
 }
