@@ -100,7 +100,7 @@ class AdminStaffControllerTest {
     void createStaffCreatesTrainer() {
         stubAccountAndUserSaves();
 
-        ResponseEntity<Map<String, Object>> response = controller.create(request("Tr@iner123"), RoleType.TRAINER);
+        ResponseEntity<Map<String, Object>> response = controller.create(request("Test-trainer-1!"), RoleType.TRAINER);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("Thandi", response.getBody().get("firstName"));
@@ -116,7 +116,7 @@ class AdminStaffControllerTest {
     void createStaffCreatesAdmin() {
         stubAccountAndUserSaves();
 
-        controller.create(request("Adm1n!Pass"), RoleType.ADMIN);
+        controller.create(request("Test-admin-1!"), RoleType.ADMIN);
 
         ArgumentCaptor<UserRole> captor = ArgumentCaptor.forClass(UserRole.class);
         verify(userRoles).save(captor.capture());
@@ -125,14 +125,14 @@ class AdminStaffControllerTest {
 
     @Test
     void createStaffAppliesStrictPasswordPolicy() {
-        assertThrows(IllegalArgumentException.class, () -> controller.create(request("Passw0rd"), RoleType.TRAINER));
-        assertThrows(IllegalArgumentException.class, () -> controller.create(request("Passw0rd"), RoleType.ADMIN));
+        assertThrows(IllegalArgumentException.class, () -> controller.create(request("Testpass1"), RoleType.TRAINER));
+        assertThrows(IllegalArgumentException.class, () -> controller.create(request("Testpass1"), RoleType.ADMIN));
         verify(accounts, never()).save(any(Account.class));
     }
 
     @Test
     void createStaffRejectsMemberRole() {
-        assertThrows(IllegalArgumentException.class, () -> controller.create(request("Tr@iner123"), RoleType.MEMBER));
+        assertThrows(IllegalArgumentException.class, () -> controller.create(request("Test-trainer-1!"), RoleType.MEMBER));
         verify(accounts, never()).save(any(Account.class));
     }
 }

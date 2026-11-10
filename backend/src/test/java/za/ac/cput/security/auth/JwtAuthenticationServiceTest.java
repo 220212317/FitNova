@@ -28,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class JwtAuthenticationServiceTest {
 
     private static final String EMAIL = "collins@fitnova.co.za";
-    private static final String PASSWORD = "Str0ng!Pass";
-    private static final String STORED_HASH = "hashed:Str0ng!Pass";
+    private static final String PASSWORD = "test-login-1";
+    private static final String STORED_HASH = "hashed:test-login-1";
 
     private AccessTokenService accessTokens;
     private RefreshTokenService refreshTokens;
@@ -66,7 +66,7 @@ class JwtAuthenticationServiceTest {
     @Test
     void loginRejectsWrongPassword() {
         assertThrows(BadCredentialsException.class,
-                () -> service.login(new LoginRequest(EMAIL, "WrongPassword1!")));
+                () -> service.login(new LoginRequest(EMAIL, "test-wrong-1")));
     }
 
     @Test
@@ -74,7 +74,7 @@ class JwtAuthenticationServiceTest {
         BadCredentialsException unknown = assertThrows(BadCredentialsException.class,
                 () -> service.login(new LoginRequest("nobody@fitnova.co.za", PASSWORD)));
         BadCredentialsException wrongPassword = assertThrows(BadCredentialsException.class,
-                () -> service.login(new LoginRequest(EMAIL, "WrongPassword1!")));
+                () -> service.login(new LoginRequest(EMAIL, "test-wrong-1")));
 
         assertEquals(wrongPassword.getMessage(), unknown.getMessage());
     }

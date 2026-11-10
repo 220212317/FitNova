@@ -92,7 +92,7 @@ class RegistrationServiceTest {
 
     private RegisterRequest profileRequest(String streetName, String city, String province, String postalCode,
                                            String gender, String cellphone, RegisterRequest.NextOfKin kin) {
-        return new RegisterRequest("Collins", "Shibambo", EMAIL, "Passw0rd1",
+        return new RegisterRequest("Collins", "Shibambo", EMAIL, "test-member-1",
                 LocalDate.of(2001, 5, 14), "12", streetName, "Woodstock", postalCode, province, city, null,
                 gender, cellphone, "0731234567", kin);
     }
@@ -114,7 +114,7 @@ class RegistrationServiceTest {
     void registersMemberWithFullProfile() {
         stubAccountAndUserSaves();
 
-        User user = service.registerMember(request(EMAIL, "Passw0rd1"));
+        User user = service.registerMember(request(EMAIL, "test-member-1"));
 
         assertNotNull(user.getUserId());
         assertEquals("Collins", user.getFirstName());
@@ -128,7 +128,7 @@ class RegistrationServiceTest {
     void savesTheMemberRole() {
         stubAccountAndUserSaves();
 
-        service.registerMember(request(EMAIL, "Passw0rd1"));
+        service.registerMember(request(EMAIL, "test-member-1"));
 
         ArgumentCaptor<UserRole> captor = ArgumentCaptor.forClass(UserRole.class);
         verify(userRoles, times(1)).save(captor.capture());
@@ -141,7 +141,7 @@ class RegistrationServiceTest {
         stubAccountAndUserSaves();
 
         User user = service.registerStaff(
-                new RegisterRequest("Thandi", "Nkosi", "thandi@fitnova.co.za", "Tr@iner123", null),
+                new RegisterRequest("Thandi", "Nkosi", "thandi@fitnova.co.za", "Test-trainer-1!", null),
                 RoleType.TRAINER);
 
         assertEquals("Thandi", user.getFirstName());
@@ -154,7 +154,7 @@ class RegistrationServiceTest {
     void registersAdminRole() {
         stubAccountAndUserSaves();
 
-        service.registerStaff(request("admin@fitnova.co.za", "Adm1n!Pass"), RoleType.ADMIN);
+        service.registerStaff(request("admin@fitnova.co.za", "Test-admin-1!"), RoleType.ADMIN);
 
         ArgumentCaptor<UserRole> captor = ArgumentCaptor.forClass(UserRole.class);
         verify(userRoles).save(captor.capture());
@@ -164,9 +164,9 @@ class RegistrationServiceTest {
     @Test
     void staffRegistrationRejectsMemberRole() {
         assertThrows(IllegalArgumentException.class,
-                () -> service.registerStaff(request(EMAIL, "Passw0rd1!"), RoleType.MEMBER));
+                () -> service.registerStaff(request(EMAIL, "test-member-1!"), RoleType.MEMBER));
         assertThrows(IllegalArgumentException.class,
-                () -> service.registerStaff(request(EMAIL, "Passw0rd1!"), null));
+                () -> service.registerStaff(request(EMAIL, "test-member-1!"), null));
         verify(accounts, never()).save(any(Account.class));
     }
 
@@ -174,7 +174,7 @@ class RegistrationServiceTest {
     void appliesStandardPolicyToMember() {
         stubAccountAndUserSaves();
 
-        assertDoesNotThrow(() -> service.registerMember(request(EMAIL, "Passw0rd")));
+        assertDoesNotThrow(() -> service.registerMember(request(EMAIL, "Testpass1")));
     }
 
     @Test
@@ -187,7 +187,7 @@ class RegistrationServiceTest {
     @Test
     void appliesStrictPolicyToStaff() {
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-                () -> service.registerStaff(request("staff@fitnova.co.za", "Passw0rd"), RoleType.TRAINER));
+                () -> service.registerStaff(request("staff@fitnova.co.za", "Testpass1"), RoleType.TRAINER));
 
         assertTrue(thrown.getMessage().contains("strict"));
         verify(accounts, never()).save(any(Account.class));
@@ -200,7 +200,7 @@ class RegistrationServiceTest {
         when(accounts.findByEmail(EMAIL)).thenReturn(existingAccount());
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-                () -> service.registerMember(request(EMAIL, "Passw0rd1")));
+                () -> service.registerMember(request(EMAIL, "test-member-1")));
 
         assertTrue(thrown.getMessage().contains("already exists"));
         verify(accounts, never()).save(any(Account.class));
@@ -211,14 +211,14 @@ class RegistrationServiceTest {
         when(accounts.findByEmail(EMAIL)).thenReturn(existingAccount());
 
         assertThrows(IllegalArgumentException.class,
-                () -> service.registerMember(request("  COLLINS@FitNova.co.za ", "Passw0rd1")));
+                () -> service.registerMember(request("  COLLINS@FitNova.co.za ", "test-member-1")));
     }
 
     @Test
     void storesEmailInLowerCase() {
         stubAccountAndUserSaves();
 
-        service.registerMember(request("  Collins@FitNova.co.za ", "Passw0rd1"));
+        service.registerMember(request("  Collins@FitNova.co.za ", "test-member-1"));
 
         ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
         verify(accounts).save(captor.capture());
@@ -229,25 +229,25 @@ class RegistrationServiceTest {
     void storesHashedPassword() {
         stubAccountAndUserSaves();
 
-        service.registerMember(request(EMAIL, "Passw0rd1"));
+        service.registerMember(request(EMAIL, "test-member-1"));
 
         ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
         verify(accounts).save(captor.capture());
         String stored = captor.getValue().getPassword();
-        assertNotEquals("Passw0rd1", stored);
-        assertTrue(encoder.matches("Passw0rd1", stored));
-        assertFalse(encoder.matches("Passw0rd2", stored));
+        assertNotEquals("test-member-1", stored);
+        assertTrue(encoder.matches("test-member-1", stored));
+        assertFalse(encoder.matches("test-member-2", stored));
     }
 
     @Test
     void rejectsMissingFields() {
         assertThrows(IllegalArgumentException.class, () -> service.registerMember(null));
         assertThrows(IllegalArgumentException.class, () -> service.registerMember(
-                new RegisterRequest("", "Shibambo", EMAIL, "Passw0rd1", null)));
+                new RegisterRequest("", "Shibambo", EMAIL, "test-member-1", null)));
         assertThrows(IllegalArgumentException.class, () -> service.registerMember(
-                new RegisterRequest("Collins", " ", EMAIL, "Passw0rd1", null)));
+                new RegisterRequest("Collins", " ", EMAIL, "test-member-1", null)));
         assertThrows(IllegalArgumentException.class, () -> service.registerMember(
-                new RegisterRequest("Collins", "Shibambo", "not-an-email", "Passw0rd1", null)));
+                new RegisterRequest("Collins", "Shibambo", "not-an-email", "test-member-1", null)));
         assertThrows(IllegalArgumentException.class, () -> service.registerMember(
                 new RegisterRequest("Collins", "Shibambo", EMAIL, null, null)));
         verify(accounts, never()).save(any(Account.class));
@@ -258,7 +258,7 @@ class RegistrationServiceTest {
         stubAccountAndUserSaves();
 
         User user = service.registerMember(
-                new RegisterRequest("  Collins ", " Shibambo  ", EMAIL, "Passw0rd1", null));
+                new RegisterRequest("  Collins ", " Shibambo  ", EMAIL, "test-member-1", null));
 
         assertEquals("Collins", user.getFirstName());
         assertEquals("Shibambo", user.getLastName());
@@ -294,7 +294,7 @@ class RegistrationServiceTest {
     void savesNoProfileExtrasWhenNoneAreProvided() {
         stubAccountAndUserSaves();
 
-        User user = service.registerMember(request(EMAIL, "Passw0rd1"));
+        User user = service.registerMember(request(EMAIL, "test-member-1"));
 
         assertNull(user.getAddress());
         assertNull(user.getContact());

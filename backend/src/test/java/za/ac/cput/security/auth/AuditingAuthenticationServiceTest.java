@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AuditingAuthenticationServiceTest {
 
     private static final String EMAIL = "collins@fitnova.co.za";
-    private static final String PASSWORD = "Passw0rd1";
+    private static final String PASSWORD = "test-member-1";
 
     private List<SecurityEvent> published;
     private StubAuthenticationService delegate;

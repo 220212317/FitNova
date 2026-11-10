@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
 class AuthControllerTest {
 
     private static final String EMAIL = "collins@fitnova.co.za";
-    private static final String PASSWORD = "Passw0rd1";
+    private static final String PASSWORD = "test-member-1";
 
     @Mock
     private IAccountRepository accounts;
