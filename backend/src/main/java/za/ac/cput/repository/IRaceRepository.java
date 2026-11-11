@@ -9,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import za.ac.cput.domain.Race;
 
 public interface IRaceRepository extends JpaRepository<Race, String> {
+
+    java.util.Optional<Race> findFirstByDescriptionIgnoreCase(String description);
 }

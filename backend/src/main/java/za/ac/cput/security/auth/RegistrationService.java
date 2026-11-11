@@ -14,6 +14,7 @@ import za.ac.cput.domain.Contact;
 import za.ac.cput.domain.Demographic;
 import za.ac.cput.domain.Gender;
 import za.ac.cput.domain.NextOfKinContact;
+import za.ac.cput.domain.Race;
 import za.ac.cput.domain.User;
 import za.ac.cput.domain.UserRole;
 import za.ac.cput.domain.enums.RoleType;
@@ -23,6 +24,7 @@ import za.ac.cput.repository.IContactRepository;
 import za.ac.cput.repository.IDemographicRepository;
 import za.ac.cput.repository.IGenderRepository;
 import za.ac.cput.repository.INextOfKinContactRepository;
+import za.ac.cput.repository.IRaceRepository;
 import za.ac.cput.repository.IUserRepository;
 import za.ac.cput.repository.IUserRoleRepository;
 import za.ac.cput.security.policy.PasswordPolicySelector;
@@ -39,6 +41,7 @@ public class RegistrationService {
     private final IAddressRepository addresses;
     private final IContactRepository contacts;
     private final IGenderRepository genders;
+    private final IRaceRepository races;
     private final IDemographicRepository demographics;
     private final INextOfKinContactRepository nextOfKin;
     private final PasswordEncoder encoder;
@@ -50,6 +53,7 @@ public class RegistrationService {
                                IAddressRepository addresses,
                                IContactRepository contacts,
                                IGenderRepository genders,
+                               IRaceRepository races,
                                IDemographicRepository demographics,
                                INextOfKinContactRepository nextOfKin,
                                PasswordEncoder encoder,
@@ -60,6 +64,7 @@ public class RegistrationService {
         this.addresses = addresses;
         this.contacts = contacts;
         this.genders = genders;
+        this.races = races;
         this.demographics = demographics;
         this.nextOfKin = nextOfKin;
         this.encoder = encoder;
@@ -123,16 +128,29 @@ public class RegistrationService {
         }
 
         Demographic demographic = null;
-        if (!Helper.isNullOrEmpty(request.gender())) {
-            String description = request.gender().trim();
-            Gender gender = genders.findFirstByDescriptionIgnoreCase(description)
-                    .orElseGet(() -> genders.save(new Gender.Builder()
-                            .setGenderId(Helper.generateId())
-                            .setDescription(description)
-                            .build()));
+        if (!Helper.isNullOrEmpty(request.gender()) || !Helper.isNullOrEmpty(request.race())) {
+            Gender gender = null;
+            if (!Helper.isNullOrEmpty(request.gender())) {
+                String description = request.gender().trim();
+                gender = genders.findFirstByDescriptionIgnoreCase(description)
+                        .orElseGet(() -> genders.save(new Gender.Builder()
+                                .setGenderId(Helper.generateId())
+                                .setDescription(description)
+                                .build()));
+            }
+            Race race = null;
+            if (!Helper.isNullOrEmpty(request.race())) {
+                String description = request.race().trim();
+                race = races.findFirstByDescriptionIgnoreCase(description)
+                        .orElseGet(() -> races.save(new Race.Builder()
+                                .setRaceId(Helper.generateId())
+                                .setDescription(description)
+                                .build()));
+            }
             demographic = demographics.save(new Demographic.Builder()
                     .setDemographyId(Helper.generateId())
                     .setGender(gender)
+                    .setRace(race)
                     .build());
         }
 
