@@ -8,6 +8,7 @@ import type { Profile } from "../../types";
 import "./ProfilePage.css";
 
 const DEFAULT_GENDERS = ["Male", "Female", "Non-binary", "Other", "Prefer not to say"];
+const DEFAULT_RACES = ["Black African", "Coloured", "Indian/Asian", "White", "Other"];
 const RELATIONSHIPS = ["Parent", "Spouse / Partner", "Sibling", "Child", "Friend", "Other"];
 const PHONE_PATTERN = /^\+?[0-9 ]{9,15}$/;
 
@@ -16,6 +17,7 @@ interface FormState {
     lastName: string;
     dateOfBirth: string;
     gender: string;
+    race: string;
     streetNumber: string;
     streetName: string;
     suburbName: string;
@@ -36,6 +38,7 @@ function toForm(p: Profile): FormState {
         lastName: p.lastName ?? "",
         dateOfBirth: p.dateOfBirth ?? "",
         gender: p.gender ?? "",
+        race: p.race ?? "",
         streetNumber: p.streetNumber ?? "",
         streetName: p.streetName ?? "",
         suburbName: p.suburbName ?? "",
@@ -64,6 +67,7 @@ export default function ProfilePage() {
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
     const [genderOptions, setGenderOptions] = useState<string[]>(DEFAULT_GENDERS);
+    const [raceOptions, setRaceOptions] = useState<string[]>(DEFAULT_RACES);
     const [confirmingDelete, setConfirmingDelete] = useState(false);
     const [deletePassword, setDeletePassword] = useState("");
     const [deleting, setDeleting] = useState(false);
@@ -74,10 +78,14 @@ export default function ProfilePage() {
             .then((p) => { if (active) { setProfile(p); setForm(toForm(p)); } })
             .catch((e) => { if (active) setError(e instanceof Error ? e.message : "Could not load your profile."); })
             .finally(() => { if (active) setLoading(false); });
-        lookupsApi.genders()
-            .then((list) => {
-                const names = (Array.isArray(list) ? list : []).map((g) => g.description).filter(Boolean);
+        lookupsApi.genderNames()
+            .then((names) => {
                 if (active && names.length) setGenderOptions(names);
+            })
+            .catch(() => undefined);
+        lookupsApi.raceNames()
+            .then((names) => {
+                if (active && names.length) setRaceOptions(names);
             })
             .catch(() => undefined);
         return () => { active = false; };
@@ -104,6 +112,7 @@ export default function ProfilePage() {
         if (!f.firstName.trim() || !f.lastName.trim()) return "First name and last name are required.";
         if (!f.dateOfBirth) return "Enter your date of birth.";
         if (!f.gender) return "Select your gender.";
+        if (!f.race) return "Select your race.";
         if (!f.streetName.trim() || !f.province || !f.city) return "Enter your street name and select a province and city.";
         if (f.postalCode.trim() && !/^\d{4}$/.test(f.postalCode.trim())) return "Postal code must be 4 digits.";
         if (!PHONE_PATTERN.test(f.cellphoneNumber.trim())) return "Enter a valid cellphone number.";
@@ -130,6 +139,7 @@ export default function ProfilePage() {
                 lastName: form.lastName.trim(),
                 dateOfBirth: form.dateOfBirth,
                 gender: form.gender,
+                race: form.race,
                 streetNumber: form.streetNumber.trim(),
                 streetName: form.streetName.trim(),
                 suburbName: form.suburbName.trim(),
@@ -250,6 +260,14 @@ export default function ProfilePage() {
                                     </select>
                                 </div>
                                 <div className="profile-field">
+                                    <label htmlFor="pf-race">Race</label>
+                                    <select id="pf-race" value={form.race} onChange={(e) => set("race", e.target.value)}>
+                                        <option value="">Select race</option>
+                                        {form.race && !raceOptions.includes(form.race) && <option value={form.race}>{form.race}</option>}
+                                        {raceOptions.map((r) => <option key={r} value={r}>{r}</option>)}
+                                    </select>
+                                </div>
+                                <div className="profile-field">
                                     <label htmlFor="pf-email">Email address</label>
                                     <input id="pf-email" value={profile.email} disabled />
                                     <small>Your email is your login and can't be changed here.</small>
@@ -325,6 +343,7 @@ export default function ProfilePage() {
                                 {view("Last name", profile.lastName)}
                                 {view("Date of birth", profile.dateOfBirth)}
                                 {view("Gender", profile.gender)}
+                                {view("Race", profile.race)}
                                 {view("Email address", profile.email)}
                                 {view("Member since", profile.memberSince)}
                             </div>

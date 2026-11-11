@@ -7,6 +7,7 @@ import { PROVINCE_NAMES, SA_PROVINCES } from "../../data/southAfrica";
 import "./LoginPage.css";
 
 const DEFAULT_GENDERS = ["Male", "Female", "Non-binary", "Other", "Prefer not to say"];
+const DEFAULT_RACES = ["Black African", "Coloured", "Indian/Asian", "White", "Other"];
 const PHONE_PATTERN = /^\+?[0-9 ]{9,15}$/;
 const RELATIONSHIPS = ["Parent", "Spouse / Partner", "Sibling", "Child", "Friend", "Other"];
 
@@ -27,6 +28,8 @@ export default function SignUpPage() {
     const [city, setCity] = useState("");
     const [gender, setGender] = useState("");
     const [genderOptions, setGenderOptions] = useState<string[]>(DEFAULT_GENDERS);
+    const [race, setRace] = useState("");
+    const [raceOptions, setRaceOptions] = useState<string[]>(DEFAULT_RACES);
     const [cellphone, setCellphone] = useState("");
     const [altCellphone, setAltCellphone] = useState("");
     const [kinFirstName, setKinFirstName] = useState("");
@@ -38,10 +41,14 @@ export default function SignUpPage() {
 
     useEffect(() => {
         let active = true;
-        lookupsApi.genders()
-            .then((list) => {
-                const names = (Array.isArray(list) ? list : []).map((g) => g.description).filter(Boolean);
+        lookupsApi.genderNames()
+            .then((names) => {
                 if (active && names.length) setGenderOptions(names);
+            })
+            .catch(() => undefined);
+        lookupsApi.raceNames()
+            .then((names) => {
+                if (active && names.length) setRaceOptions(names);
             })
             .catch(() => undefined);
         return () => { active = false; };
@@ -64,8 +71,8 @@ export default function SignUpPage() {
     const continueToAddress = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError("");
-        if (!firstName.trim() || !lastName.trim() || !dateOfBirth || !gender) {
-            setError("Complete all profile fields, including gender.");
+        if (!firstName.trim() || !lastName.trim() || !dateOfBirth || !gender || !race) {
+            setError("Complete all profile fields, including gender and race.");
             return;
         }
         setStep(3);
@@ -119,6 +126,7 @@ export default function SignUpPage() {
                 city,
                 country: "South Africa",
                 gender,
+                race,
                 cellphoneNumber: cellphone.trim(),
                 alternativeCellphoneNumber: altCellphone.trim() || undefined,
                 nextOfKin: {
@@ -172,6 +180,11 @@ export default function SignUpPage() {
                         <select id="signup-gender" value={gender} onChange={(event) => setGender(event.target.value)}>
                             <option value="">Select gender</option>
                             {genderOptions.map((name) => <option key={name} value={name}>{name}</option>)}
+                        </select>
+                        <label htmlFor="signup-race">Race</label>
+                        <select id="signup-race" value={race} onChange={(event) => setRace(event.target.value)}>
+                            <option value="">Select race</option>
+                            {raceOptions.map((name) => <option key={name} value={name}>{name}</option>)}
                         </select>
                         <div className="auth-actions">
                             <button className="auth-secondary" type="button" onClick={() => { setError(""); setStep(1); }}>Back</button>

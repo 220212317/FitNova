@@ -166,7 +166,35 @@ export const slotsApi = {
 export const lookupsApi = {
     genders: () =>
         api.get<Gender[]>("/gender/getAll").catch(() => [] as Gender[]),
+    genderNames: async (): Promise<string[]> => {
+        const list = await api.get<Gender[]>("/gender/getAll").catch(() => [] as Gender[]);
+        const seen = new Set<string>();
+        const names: string[] = [];
+        for (const gender of Array.isArray(list) ? list : []) {
+            const name = (gender?.description ?? "").trim();
+            const key = name.toLowerCase();
+            if (key && !seen.has(key)) {
+                seen.add(key);
+                names.push(name);
+            }
+        }
+        return names;
+    },
     races: () => api.get<Race[]>("/race/getAll").catch(() => [] as Race[]),
+    raceNames: async (): Promise<string[]> => {
+        const list = await api.get<Race[]>("/race/getAll").catch(() => [] as Race[]);
+        const seen = new Set<string>();
+        const names: string[] = [];
+        for (const race of Array.isArray(list) ? list : []) {
+            const name = (race?.description ?? "").trim();
+            const key = name.toLowerCase();
+            if (key && !seen.has(key)) {
+                seen.add(key);
+                names.push(name);
+            }
+        }
+        return names;
+    },
     createGender: (gender: Gender) =>
         api.post<Gender>("/gender/create", {
             ...gender,
