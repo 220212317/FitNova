@@ -7,8 +7,10 @@ import za.ac.cput.domain.Gender;
 import za.ac.cput.repository.IGenderRepository;
 import za.ac.cput.service.IGenderService;
 import za.ac.cput.util.Helper;
+import za.ac.cput.util.LookupNames;
 
 import java.util.List;
+import java.util.Objects;
 
 /*
  * Author: Inga Plati
@@ -26,21 +28,24 @@ public class GenderServiceImpl implements IGenderService {
     }
 
     @Override
-    public Gender create(Gender gender) {
+    public synchronized Gender create(Gender gender) {
         if (gender == null) {
             return null;
         }
-        if (Helper.isNullOrEmpty(gender.getDescription())) {
+        String description = LookupNames.clean(gender.getDescription());
+        if (LookupNames.key(description).isEmpty()) {
             throw new IllegalArgumentException("Gender description is required.");
         }
+        assertNotDuplicate(description, gender.getGenderId());
         String id = gender.getGenderId();
         if (Helper.isNullOrEmpty(id)) {
-            gender = new Gender.Builder()
-                    .copy(gender)
-                    .setGenderId(Helper.generateId())
-                    .build();
+            id = Helper.generateId();
         }
-        return repository.save(gender);
+        return repository.save(new Gender.Builder()
+                .copy(gender)
+                .setGenderId(id)
+                .setDescription(description)
+                .build());
     }
 
     @Override
@@ -52,17 +57,22 @@ public class GenderServiceImpl implements IGenderService {
     }
 
     @Override
-    public Gender update(Gender gender) {
+    public synchronized Gender update(Gender gender) {
         if (gender == null || Helper.isNullOrEmpty(gender.getGenderId())) {
             return null;
         }
         if (!repository.existsById(gender.getGenderId())) {
             return null;
         }
-        if (Helper.isNullOrEmpty(gender.getDescription())) {
+        String description = LookupNames.clean(gender.getDescription());
+        if (LookupNames.key(description).isEmpty()) {
             throw new IllegalArgumentException("Gender description is required.");
         }
-        return repository.save(gender);
+        assertNotDuplicate(description, gender.getGenderId());
+        return repository.save(new Gender.Builder()
+                .copy(gender)
+                .setDescription(description)
+                .build());
     }
 
     @Override
@@ -83,5 +93,19 @@ public class GenderServiceImpl implements IGenderService {
     @Override
     public List<Gender> getAll() {
         return repository.findAll();
+    }
+
+
+    private void assertNotDuplicate(String description, String ownId) {
+        String key = LookupNames.key(description);
+        for (Gender existing : repository.findAll()) {
+            if (Objects.equals(existing.getGenderId(), ownId)) {
+                continue;
+            }
+            if (key.equals(LookupNames.key(existing.getDescription()))) {
+                throw new IllegalStateException(
+                        "A gender called \"" + existing.getDescription() + "\" already exists.");
+            }
+        }
     }
 }

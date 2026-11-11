@@ -7,8 +7,10 @@ import za.ac.cput.domain.Race;
 import za.ac.cput.repository.IRaceRepository;
 import za.ac.cput.service.IRaceService;
 import za.ac.cput.util.Helper;
+import za.ac.cput.util.LookupNames;
 
 import java.util.List;
+import java.util.Objects;
 
 /*
  * Author: Inga Plati
@@ -26,21 +28,24 @@ public class RaceServiceImpl implements IRaceService {
     }
 
     @Override
-    public Race create(Race race) {
+    public synchronized Race create(Race race) {
         if (race == null) {
             return null;
         }
-        if (Helper.isNullOrEmpty(race.getDescription())) {
+        String description = LookupNames.clean(race.getDescription());
+        if (LookupNames.key(description).isEmpty()) {
             throw new IllegalArgumentException("Race description is required.");
         }
+        assertNotDuplicate(description, race.getRaceId());
         String id = race.getRaceId();
         if (Helper.isNullOrEmpty(id)) {
-            race = new Race.Builder()
-                    .copy(race)
-                    .setRaceId(Helper.generateId())
-                    .build();
+            id = Helper.generateId();
         }
-        return repository.save(race);
+        return repository.save(new Race.Builder()
+                .copy(race)
+                .setRaceId(id)
+                .setDescription(description)
+                .build());
     }
 
     @Override
@@ -52,17 +57,22 @@ public class RaceServiceImpl implements IRaceService {
     }
 
     @Override
-    public Race update(Race race) {
+    public synchronized Race update(Race race) {
         if (race == null || Helper.isNullOrEmpty(race.getRaceId())) {
             return null;
         }
         if (!repository.existsById(race.getRaceId())) {
             return null;
         }
-        if (Helper.isNullOrEmpty(race.getDescription())) {
+        String description = LookupNames.clean(race.getDescription());
+        if (LookupNames.key(description).isEmpty()) {
             throw new IllegalArgumentException("Race description is required.");
         }
-        return repository.save(race);
+        assertNotDuplicate(description, race.getRaceId());
+        return repository.save(new Race.Builder()
+                .copy(race)
+                .setDescription(description)
+                .build());
     }
 
     @Override
@@ -83,5 +93,18 @@ public class RaceServiceImpl implements IRaceService {
     @Override
     public List<Race> getAll() {
         return repository.findAll();
+    }
+
+    private void assertNotDuplicate(String description, String ownId) {
+        String key = LookupNames.key(description);
+        for (Race existing : repository.findAll()) {
+            if (Objects.equals(existing.getRaceId(), ownId)) {
+                continue;
+            }
+            if (key.equals(LookupNames.key(existing.getDescription()))) {
+                throw new IllegalStateException(
+                        "A race called \"" + existing.getDescription() + "\" already exists.");
+            }
+        }
     }
 }
