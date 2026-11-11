@@ -71,4 +71,24 @@ class RaceServiceImplTest {
         Race deleted = service.read(race.getRaceId());
         assertNull(deleted);
     }
+
+    @Test
+    @Order(6)
+    void rejectsDuplicateDescription() {
+        Race first = service.create(new Race.Builder()
+                .setRaceId("RACE-DUP-001").setDescription("Indian/Asian").build());
+        try {
+            assertThrows(IllegalStateException.class, () -> service.create(new Race.Builder()
+                    .setRaceId("RACE-DUP-002").setDescription("indian asian").build()));
+        } finally {
+            service.delete(first.getRaceId());
+        }
+    }
+
+    @Test
+    @Order(7)
+    void rejectsBlankDescription() {
+        assertThrows(IllegalArgumentException.class, () -> service.create(new Race.Builder()
+                .setRaceId("RACE-BLANK-001").setDescription("   ").build()));
+    }
 }

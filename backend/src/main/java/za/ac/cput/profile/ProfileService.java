@@ -8,6 +8,7 @@ import za.ac.cput.domain.Contact;
 import za.ac.cput.domain.Demographic;
 import za.ac.cput.domain.Gender;
 import za.ac.cput.domain.NextOfKinContact;
+import za.ac.cput.domain.Race;
 import za.ac.cput.domain.User;
 import za.ac.cput.domain.UserRole;
 import za.ac.cput.domain.enums.RoleType;
@@ -16,6 +17,7 @@ import za.ac.cput.repository.IContactRepository;
 import za.ac.cput.repository.IDemographicRepository;
 import za.ac.cput.repository.IGenderRepository;
 import za.ac.cput.repository.INextOfKinContactRepository;
+import za.ac.cput.repository.IRaceRepository;
 import za.ac.cput.repository.IUserRepository;
 import za.ac.cput.repository.IUserRoleRepository;
 import za.ac.cput.service.IUserService;
@@ -34,6 +36,7 @@ public class ProfileService {
     private final IAddressRepository addresses;
     private final IContactRepository contacts;
     private final IGenderRepository genders;
+    private final IRaceRepository races;
     private final IDemographicRepository demographics;
     private final INextOfKinContactRepository nextOfKin;
     private final IUserRoleRepository userRoles;
@@ -44,6 +47,7 @@ public class ProfileService {
                           IAddressRepository addresses,
                           IContactRepository contacts,
                           IGenderRepository genders,
+                          IRaceRepository races,
                           IDemographicRepository demographics,
                           INextOfKinContactRepository nextOfKin,
                           IUserRoleRepository userRoles,
@@ -53,6 +57,7 @@ public class ProfileService {
         this.addresses = addresses;
         this.contacts = contacts;
         this.genders = genders;
+        this.races = races;
         this.demographics = demographics;
         this.nextOfKin = nextOfKin;
         this.userRoles = userRoles;
@@ -112,19 +117,30 @@ public class ProfileService {
                     .build());
         }
 
-        // Gender (race is preserved)
         Demographic demographic = user.getDemographic();
-        if (!Helper.isNullOrEmpty(req.gender())) {
-            String description = req.gender().trim();
-            Gender gender = genders.findFirstByDescriptionIgnoreCase(description)
-                    .orElseGet(() -> genders.save(new Gender.Builder()
-                            .setGenderId(Helper.generateId())
-                            .setDescription(description)
-                            .build()));
+        if (!Helper.isNullOrEmpty(req.gender()) || !Helper.isNullOrEmpty(req.race())) {
+            Gender gender = demographic != null ? demographic.getGender() : null;
+            if (!Helper.isNullOrEmpty(req.gender())) {
+                String description = req.gender().trim();
+                gender = genders.findFirstByDescriptionIgnoreCase(description)
+                        .orElseGet(() -> genders.save(new Gender.Builder()
+                                .setGenderId(Helper.generateId())
+                                .setDescription(description)
+                                .build()));
+            }
+            Race race = demographic != null ? demographic.getRace() : null;
+            if (!Helper.isNullOrEmpty(req.race())) {
+                String description = req.race().trim();
+                race = races.findFirstByDescriptionIgnoreCase(description)
+                        .orElseGet(() -> races.save(new Race.Builder()
+                                .setRaceId(Helper.generateId())
+                                .setDescription(description)
+                                .build()));
+            }
             demographic = demographics.save(new Demographic.Builder()
                     .setDemographyId(demographic != null ? demographic.getDemographyId() : Helper.generateId())
                     .setGender(gender)
-                    .setRace(demographic != null ? demographic.getRace() : null)
+                    .setRace(race)
                     .build());
         }
 
@@ -193,6 +209,8 @@ public class ProfileService {
                 roles,
                 u.getDemographic() != null && u.getDemographic().getGender() != null
                         ? u.getDemographic().getGender().getDescription() : null,
+                u.getDemographic() != null && u.getDemographic().getRace() != null
+                        ? u.getDemographic().getRace().getDescription() : null,
                 a != null ? a.getStreetNumber() : null,
                 a != null ? a.getStreetName() : null,
                 a != null ? a.getSuburbName() : null,

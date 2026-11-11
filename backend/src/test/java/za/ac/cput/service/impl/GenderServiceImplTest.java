@@ -71,4 +71,38 @@ class GenderServiceImplTest {
         Gender deleted = service.read(gender.getGenderId());
         assertNull(deleted);
     }
+
+    @Test
+    @Order(6)
+    void rejectsDuplicateDescription() {
+        Gender first = service.create(new Gender.Builder()
+                .setGenderId("GEN-DUP-001").setDescription("Non-binary").build());
+        try {
+            assertThrows(IllegalStateException.class, () -> service.create(new Gender.Builder()
+                    .setGenderId("GEN-DUP-002").setDescription("non binary").build()));
+            assertThrows(IllegalStateException.class, () -> service.create(new Gender.Builder()
+                    .setGenderId("GEN-DUP-003").setDescription("  NON-BINARY  ").build()));
+        } finally {
+            service.delete(first.getGenderId());
+        }
+    }
+
+    @Test
+    @Order(7)
+    void rejectsBlankDescription() {
+        assertThrows(IllegalArgumentException.class, () -> service.create(new Gender.Builder()
+                .setGenderId("GEN-BLANK-001").setDescription("   ").build()));
+    }
+
+    @Test
+    @Order(8)
+    void trimsDescriptionOnCreate() {
+        Gender created = service.create(new Gender.Builder()
+                .setGenderId("GEN-TRIM-001").setDescription("  Prefer   not to say  ").build());
+        try {
+            assertEquals("Prefer not to say", created.getDescription());
+        } finally {
+            service.delete(created.getGenderId());
+        }
+    }
 }

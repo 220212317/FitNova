@@ -148,6 +148,7 @@ export interface Profile {
   memberSince?: string | null;
   roles: string[];
   gender?: string | null;
+  race?: string | null;
   streetNumber?: string | null;
   streetName?: string | null;
   suburbName?: string | null;
