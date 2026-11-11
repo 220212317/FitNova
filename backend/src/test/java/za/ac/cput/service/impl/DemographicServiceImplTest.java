@@ -39,8 +39,8 @@ class DemographicServiceImplTest {
     @Test
     @Order(1)
     void createDemographic() {
-        gender = genderService.create(new Gender.Builder().setGenderId("GEN-DEMO-TEST").setDescription("Male").build());
-        race = raceService.create(new Race.Builder().setRaceId("RACE-DEMO-TEST").setDescription("Black African").build());
+        gender = genderService.create(new Gender.Builder().setGenderId("GEN-DEMO-TEST").setDescription("Demographic Test Gender").build());
+        race = raceService.create(new Race.Builder().setRaceId("RACE-DEMO-TEST").setDescription("Demographic Test Race").build());
 
         demographic = new Demographic.Builder()
                 .setDemographyId("DEM-TEST-001")
@@ -91,5 +91,31 @@ class DemographicServiceImplTest {
 
         genderService.delete(gender.getGenderId());
         raceService.delete(race.getRaceId());
+    }
+
+    @Test
+    @Order(6)
+    void rejectsDuplicateGenderAndRacePair() {
+        Gender g = genderService.create(new Gender.Builder()
+                .setGenderId("GEN-DUP-PAIR").setDescription("Pair Test Gender").build());
+        Race r = raceService.create(new Race.Builder()
+                .setRaceId("RACE-DUP-PAIR").setDescription("Pair Test Race").build());
+        Demographic first = service.create(new Demographic.Builder()
+                .setDemographyId("DEM-DUP-001").setGender(g).setRace(r).build());
+        try {
+            assertThrows(IllegalStateException.class, () -> service.create(new Demographic.Builder()
+                    .setDemographyId("DEM-DUP-002").setGender(g).setRace(r).build()));
+        } finally {
+            service.delete(first.getDemographyId());
+            genderService.delete(g.getGenderId());
+            raceService.delete(r.getRaceId());
+        }
+    }
+
+    @Test
+    @Order(7)
+    void rejectsDemographicWithNoGenderOrRace() {
+        assertThrows(IllegalArgumentException.class, () -> service.create(new Demographic.Builder()
+                .setDemographyId("DEM-EMPTY-001").build()));
     }
 }
