@@ -263,6 +263,7 @@ public class AvailabilitySlotServiceImpl implements IAvailabilitySlotService {
         for (Booking booking : slot.getBookings()) {
 
             if (booking.getStatus() == BookingStatus.CONFIRMED
+                    || booking.getStatus() == BookingStatus.IN_PROGRESS
                     || booking.getStatus() == BookingStatus.COMPLETED) {
                 return true;
             }

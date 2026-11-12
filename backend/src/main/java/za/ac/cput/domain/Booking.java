@@ -3,6 +3,8 @@ package za.ac.cput.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import za.ac.cput.domain.enums.BookingStatus;
 
 import java.time.LocalDateTime;
@@ -25,8 +27,10 @@ public class Booking {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime bookingDateTime;
 
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "status", nullable = false, length = 20)
     private BookingStatus status;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
@@ -41,7 +45,7 @@ public class Booking {
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "slot_id", nullable = false)
     @JsonIgnoreProperties({
-            "bookings", "trainer",
+            "bookings",
             "hibernateLazyInitializer", "handler"
     })
     private AvailabilitySlot slot;

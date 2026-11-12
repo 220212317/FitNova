@@ -4,8 +4,6 @@
      Date: 18 August 2026 */
 package za.ac.cput.domain;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -15,7 +13,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
 public class User {
 
     @Id
@@ -25,9 +22,7 @@ public class User {
     private String lastName;
     private LocalDate dateOfBirth;
 
-    // No PERSIST cascade: account/demographic/address/contact are created via their
-    // own endpoints first, then referenced here by ID. PERSIST would cause a
-    // second INSERT (duplicate key) because Jackson produces transient instances.
+
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "account_id", referencedColumnName = "accountId")
     private Account account;

@@ -47,18 +47,23 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(FitNovaUserDetailsService users, PasswordEncoder encoder) {
+    public AuthenticationManager authenticationManager(
+            FitNovaUserDetailsService users,
+            PasswordEncoder encoder
+    ) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(users);
         provider.setPasswordEncoder(encoder);
         return new ProviderManager(provider);
     }
 
-    /** Lets the React dev server (Vite) call the API. Override origins with fitnova.cors.allowed-origin-patterns. */
+    // Lets the React dev server (Vite) call the API.
+    // Override origins with fitnova.cors.allowed-origin-patterns.
     @Bean
     public CorsConfigurationSource corsConfigurationSource(
             @Value("${fitnova.cors.allowed-origin-patterns:http://localhost:*,http://127.0.0.1:*,https://localhost:*}")
-            String[] originPatterns) {
+            String[] originPatterns
+    ) {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of(originPatterns));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
@@ -66,31 +71,60 @@ public class SecurityConfig {
         config.setExposedHeaders(List.of("WWW-Authenticate"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, AccessTokenService tokens,
-                                           FitNovaUserDetailsService users) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            AccessTokenService tokens,
+            FitNovaUserDetailsService users
+    ) throws Exception {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(e -> e
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(unauthorized())
-                        .accessDeniedHandler(forbidden()))
+                        .accessDeniedHandler(forbidden())
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register", "/auth/refresh").permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/auth/login",
+                                "/auth/register",
+                                "/auth/refresh"
+                        ).permitAll()
 
-                        .requestMatchers("/admin/**", "/account/**", "/userrole/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/admin/**",
+                                "/account/**",
+                                "/userrole/**"
+                        ).hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.GET, "/gender/getAll", "/race/getAll").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/gender/**", "/race/**", "/demographic/**").authenticated()
-                        .requestMatchers("/gender/**", "/race/**", "/demographic/**").hasAuthority("lookup:manage")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/gender/getAll",
+                                "/race/getAll"
+                        ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/gender/**",
+                                "/race/**",
+                                "/demographic/**"
+                        ).authenticated()
+                        .requestMatchers(
+                                "/gender/**",
+                                "/race/**",
+                                "/demographic/**"
+                        ).hasAuthority("lookup:manage")
 
                         // Gym resources: everyone signed in can read; only admins write.
                         .requestMatchers(HttpMethod.GET, "/resource/**").authenticated()
@@ -99,40 +133,94 @@ public class SecurityConfig {
                         // Admins oversee the platform but never book sessions themselves.
                         .requestMatchers(HttpMethod.POST, "/booking/create").access(notAdmin())
 
-                        .requestMatchers(HttpMethod.GET, "/availability-slots/**").authenticated()
-                        .requestMatchers("/availability-slots/**").hasAuthority("slot:manage")
+                        // Trainers can view bookings on their own slots.
+                        .requestMatchers(HttpMethod.GET, "/booking/trainer").hasRole("TRAINER")
 
-                        .requestMatchers(HttpMethod.GET, "/trainers", "/trainers/**")
-                        .hasAuthority("profile:read")
+                        // These booking endpoints require member:read permission.
+                        .requestMatchers(
+                                "/booking/getAll",
+                                "/booking/findBySlot/**",
+                                "/booking/findByStatus/**"
+                        ).hasAuthority("member:read")
 
-                        .requestMatchers("/booking/getAll", "/booking/findBySlot/**", "/booking/findByStatus/**")
-                        .hasAuthority("member:read")
-                        .requestMatchers("/user/getAll", "/user/searchByLastName/**", "/user/findByName/**")
-                        .hasAuthority("member:read")
-                        .requestMatchers(HttpMethod.POST, "/user/create").hasAuthority("user:manage")
-                        .requestMatchers(HttpMethod.DELETE, "/user/delete/**").hasAuthority("user:manage")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/availability-slots/**"
+                        ).authenticated()
+                        .requestMatchers(
+                                "/availability-slots/**"
+                        ).hasAuthority("slot:manage")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/trainers",
+                                "/trainers/**"
+                        ).hasAuthority("profile:read")
+
+                        .requestMatchers(
+                                "/user/getAll",
+                                "/user/searchByLastName/**",
+                                "/user/findByName/**"
+                        ).hasAuthority("member:read")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/user/create"
+                        ).hasAuthority("user:manage")
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/user/delete/**"
+                        ).hasAuthority("user:manage")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/address/getAll",
+                                "/address/findByCity/**",
+                                "/address/findByProvince/**",
+                                "/address/findByPostalCode/**",
+                                "/contact/getAll",
+                                "/contact/findByCellphoneNumber/**",
+                                "/contact/findByEmailAddress/**",
+                                "/nextofkincontact/getAll",
+                                "/nextofkincontact/findByFirstName/**",
+                                "/nextofkincontact/findByLastName/**",
+                                "/nextofkincontact/findByRelationship/**"
+                        ).hasAuthority("member:read")
 
                         .requestMatchers(HttpMethod.GET,
-                                "/address/getAll", "/address/findByCity/**", "/address/findByProvince/**",
-                                "/address/findByPostalCode/**",
-                                "/contact/getAll", "/contact/findByCellphoneNumber/**", "/contact/findByEmailAddress/**",
-                                "/nextofkincontact/getAll", "/nextofkincontact/findByFirstName/**",
-                                "/nextofkincontact/findByLastName/**", "/nextofkincontact/findByRelationship/**")
-                        .hasAuthority("member:read")
+                                "/booking/trainer"
+                        ).hasRole("TRAINER")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/booking/*/start",
+                                "/booking/*/complete"
+                        ).hasRole("TRAINER")
 
-                        .anyRequest().authenticated())
-                .addFilterBefore(new JwtAuthFilter(tokens, users), UsernamePasswordAuthenticationFilter.class);
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(
+                        new JwtAuthFilter(tokens, users),
+                        UsernamePasswordAuthenticationFilter.class
+                );
+
         return http.build();
     }
 
-    /** Signed-in users who do not hold the ADMIN role. Anonymous callers are denied (-> 401). */
+    /**
+     * Signed-in users who do not hold the ADMIN role.
+     * Anonymous callers are denied (401).
+     */
     private static AuthorizationManager<RequestAuthorizationContext> notAdmin() {
         return (authentication, context) -> {
             Authentication auth = authentication.get();
+
             boolean allowed = auth != null
                     && auth.isAuthenticated()
                     && !(auth instanceof AnonymousAuthenticationToken)
-                    && auth.getAuthorities().stream().noneMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+                    && auth.getAuthorities().stream()
+                    .noneMatch(authority ->
+                            "ROLE_ADMIN".equals(authority.getAuthority())
+                    );
+
             return new AuthorizationDecision(allowed);
         };
     }
@@ -141,23 +229,37 @@ public class SecurityConfig {
     private static AuthenticationEntryPoint unauthorized() {
         return (request, response, ex) -> {
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer");
-            writeJson(response, HttpStatus.UNAUTHORIZED, "Authentication is required.");
+            writeJson(
+                    response,
+                    HttpStatus.UNAUTHORIZED,
+                    "Authentication is required."
+            );
         };
     }
 
     /** 403: signed in, but the role or permission is not enough. */
     private static AccessDeniedHandler forbidden() {
         return (request, response, ex) ->
-                writeJson(response, HttpStatus.FORBIDDEN, "You do not have permission to do that.");
+                writeJson(
+                        response,
+                        HttpStatus.FORBIDDEN,
+                        "You do not have permission to do that."
+                );
     }
 
-    /** Same JSON shape as GlobalExceptionHandler: status, error, message */
-    private static void writeJson(HttpServletResponse response, HttpStatus status, String message) throws IOException {
+    /** Same JSON shape as GlobalExceptionHandler: status, error, message. */
+    private static void writeJson(
+            HttpServletResponse response,
+            HttpStatus status,
+            String message
+    ) throws IOException {
         response.setStatus(status.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("{\"status\":" + status.value()
-                + ",\"error\":\"" + status.getReasonPhrase()
-                + "\",\"message\":\"" + message + "\"}");
+        response.getWriter().write(
+                "{\"status\":" + status.value()
+                        + ",\"error\":\"" + status.getReasonPhrase()
+                        + "\",\"message\":\"" + message + "\"}"
+        );
     }
 }
