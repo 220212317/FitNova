@@ -9,7 +9,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import za.ac.cput.domain.AvailabilitySlot;
+import za.ac.cput.domain.Booking;
 import za.ac.cput.domain.User;
+import za.ac.cput.domain.enums.BookingStatus;
 import za.ac.cput.domain.enums.SlotStatus;
 import za.ac.cput.repository.IAvailabilitySlotRepository;
 import za.ac.cput.repository.IUserRepository;
@@ -172,5 +174,64 @@ class AvailabilitySlotServiceImplTest {
 
         verify(repository, times(1))
                 .delete(slot);
+    }
+
+    private AvailabilitySlot slotWithBooking(BookingStatus bookingStatus) {
+        Booking booking = new Booking.Builder()
+                .setBookingId("BOOK001")
+                .setStatus(bookingStatus)
+                .build();
+
+        return new AvailabilitySlot.Builder()
+                .copy(slot)
+                .setBookings(new java.util.ArrayList<>(List.of(booking)))
+                .build();
+    }
+
+    @Test
+    void delete_allowedWhenOnlyCancelledBookingsRemain() {
+
+        AvailabilitySlot withCancelled = slotWithBooking(BookingStatus.CANCELLED);
+        when(repository.findById("SLOT001")).thenReturn(Optional.of(withCancelled));
+
+        assertTrue(service.delete("SLOT001"));
+        verify(repository, times(1)).delete(withCancelled);
+    }
+
+    @Test
+    void delete_blockedForConfirmedInProgressOrCompletedBookings() {
+
+        for (BookingStatus status : List.of(
+                BookingStatus.CONFIRMED,
+                BookingStatus.IN_PROGRESS,
+                BookingStatus.COMPLETED)) {
+
+            AvailabilitySlot protectedSlot = slotWithBooking(status);
+            when(repository.findById("SLOT001")).thenReturn(Optional.of(protectedSlot));
+
+            assertFalse(service.delete("SLOT001"), "Should be protected: " + status);
+            verify(repository, never()).delete(protectedSlot);
+        }
+    }
+
+    @Test
+    void delete_anotherTrainersSlotIsForbidden() {
+
+        User otherTrainer = new User.Builder()
+                .setUserId("User002")
+                .setFirstName("Other")
+                .setLastName("Trainer")
+                .setDateOfBirth(LocalDate.of(2000, 1, 1))
+                .build();
+
+        AvailabilitySlot othersSlot = new AvailabilitySlot.Builder()
+                .copy(slot)
+                .setTrainer(otherTrainer)
+                .build();
+
+        when(repository.findById("SLOT001")).thenReturn(Optional.of(othersSlot));
+
+        assertThrows(IllegalStateException.class, () -> service.delete("SLOT001"));
+        verify(repository, never()).delete(any(AvailabilitySlot.class));
     }
 }
