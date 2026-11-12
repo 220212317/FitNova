@@ -6,7 +6,7 @@ import { Modal, ConfirmDialog } from "../../components/Modal";
 import { Toast } from "../../components/Toast";
 import type { AvailabilitySlot, Booking, BookingStatus, User } from "../../types";
 
-const STATUS_OPTIONS: BookingStatus[] = ["CONFIRMED", "CANCELLED", "COMPLETED"];
+const STATUS_OPTIONS: BookingStatus[] = ["CONFIRMED", "IN_PROGRESS", "CANCELLED", "COMPLETED"];
 
 interface BookingForm {
     bookingId?: string;
@@ -15,7 +15,7 @@ interface BookingForm {
     status: BookingStatus;
 }
 
-/** LocalDateTime-friendly: 2026-08-24T15:30:00 (no Z, no millis) */
+
 function nowLocalDateTime(): string {
     const d = new Date();
     const pad = (n: number) => String(n).padStart(2, "0");
@@ -67,13 +67,7 @@ export function BookingsPage() {
         }
     }
 
-    // Mount-time fetch uses a plain promise chain (.then/.catch/.finally),
-    // NOT a directly-invoked async function, because
-    // react-hooks/set-state-in-effect flags ANY effect body that
-    // synchronously calls a function which itself calls a state setter —
-    // even wrapped in void/await. All state updates below happen inside
-    // .then()/.catch()/.finally() callbacks, which the rule's own docs
-    // explicitly allow.
+
     useEffect(() => {
         let cancelled = false;
 

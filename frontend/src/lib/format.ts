@@ -30,6 +30,7 @@ export function statusBadgeClass(status?: string) {
   if (s === "AVAILABLE") return "badge badge-available";
   if (s === "BOOKED") return "badge badge-booked";
   if (s === "CONFIRMED" || s === "COMPLETED") return "badge badge-accepted";
+  if (s === "IN_PROGRESS" || s === "IN-PROGRESS") return "badge badge-pending";
   if (s === "CANCELLED" || s === "UNAVAILABLE" || s === "REJECTED") return "badge badge-cancelled";
   if (s === "PENDING") return "badge badge-pending";
   return "badge";

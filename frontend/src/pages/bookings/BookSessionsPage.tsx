@@ -11,11 +11,7 @@ import {
 } from "../../lib/format";
 import { ensureId } from "../../api/ids";
 
-/**
- * Member books an AVAILABLE slot.
- * Backend BookingStatus = CONFIRMED | CANCELLED | COMPLETED (no pending step).
- * Slot moves AVAILABLE → BOOKED.
- */
+
 export function BookSessionsPage() {
   const { user } = useAuth();
   const { toast } = useToast();

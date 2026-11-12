@@ -1,11 +1,8 @@
-/** FitNova domain types — aligned with backend enums */
-
 export type RoleType = "MEMBER" | "TRAINER" | "ADMIN";
 
-/** Backend: za.ac.cput.domain.enums.BookingStatus */
-export type BookingStatus = "CONFIRMED" | "CANCELLED" | "COMPLETED";
 
-/** Backend: za.ac.cput.domain.enums.SlotStatus */
+export type BookingStatus = "CONFIRMED" | "IN_PROGRESS" | "CANCELLED" | "COMPLETED";
+
 export type SlotStatus = "AVAILABLE" | "BOOKED" | "UNAVAILABLE";
 
 export interface Account {
@@ -84,7 +81,7 @@ export interface TrainerSummary {
   lastName: string;
 }
 
-/** Backend AvailabilitySlot — no title/notes fields */
+
 export interface AvailabilitySlot {
   slotId: string;
   date: string;
@@ -96,14 +93,14 @@ export interface AvailabilitySlot {
 
 export interface Booking {
   bookingId: string;
-  /** ISO local: yyyy-MM-dd'T'HH:mm:ss */
+
   bookingDateTime: string;
   status: BookingStatus;
   member?: User;
   slot?: AvailabilitySlot;
 }
 
-/** Backend: za.ac.cput.domain.GymResource (category is serialised lower-case) */
+
 export type GymResourceCategory = "manual" | "nutrition" | "tip";
 
 export interface GymResource {
@@ -131,7 +128,7 @@ export interface TrainerApplication {
   adminNotes?: string;
 }
 
-/** Backend: za.ac.cput.profile.ProfileResponse (GET/PUT /profile/me) */
+
 export interface NextOfKinInfo {
   firstName: string;
   lastName: string;

@@ -139,6 +139,11 @@ export const bookingsApi = {
         api.get<Booking[]>(`/booking/findBySlot/${slotId}`),
     byStatus: (status: string) =>
         api.get<Booking[]>(`/booking/findByStatus/${status}`),
+    byTrainer: () => api.get<Booking[]>("/booking/trainer"),
+    startSession: (bookingId: string) =>
+        api.post<Booking>(`/booking/${encodeURIComponent(bookingId)}/start`, {}),
+    completeSession: (bookingId: string) =>
+        api.post<Booking>(`/booking/${encodeURIComponent(bookingId)}/complete`, {}),
 };
 
 /** Backend maps getAll to `/availability-slots/all` */

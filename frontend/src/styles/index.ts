@@ -1,6 +1,6 @@
 /**Athi Sintiya (220212317) */
 export type RoleType = "MEMBER" | "TRAINER" | "ADMIN";
-export type BookingStatus = "CONFIRMED" | "CANCELLED" | "COMPLETED";
+export type BookingStatus = "CONFIRMED" | "IN_PROGRESS" | "CANCELLED" | "COMPLETED";
 export type SlotStatus = "AVAILABLE" | "BOOKED" | "UNAVAILABLE";
 
 export interface Account {

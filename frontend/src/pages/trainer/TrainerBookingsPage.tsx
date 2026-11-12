@@ -1,84 +1,190 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { bookingsApi } from "../../api/fitnova";
 import { useAuth } from "../../auth/AuthContext";
-import type { Booking } from "../../types";
+import { useToast } from "../../components/ToastContext";
+import type { Booking, User } from "../../types";
 import { formatDate, formatTime, statusBadgeClass } from "../../lib/format";
 
-/**
- * Backend has no trainer accept/reject step — bookings are CONFIRMED on create.
- * Trainers (and admins) view bookings on their slots.
- */
+
+function memberName(
+    booking: Booking,
+    all: Booking[]
+): string {
+  let member = booking.member as User | string | undefined;
+  if (typeof member === "string") {
+    const id = member;
+    member = (all.find((b) => typeof b.member === "object" && b.member?.userId === id)?.member as User | undefined);
+  }
+  if (member && typeof member === "object") {
+    const name = `${member.firstName ?? ""} ${member.lastName ?? ""}`.trim();
+    if (name) return name;
+  }
+  return "Member";
+}
+
 export function TrainerBookingsPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
+
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [busyBookingId, setBusyBookingId] = useState<string | null>(null);
+
+  const loadBookings = useCallback(async () => {
+    if (user?.role !== "TRAINER") {
+      setBookings([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const trainerBookings = await bookingsApi.byTrainer();
+      trainerBookings.sort((a, b) => {
+        const dateComparison = (a.slot?.date ?? "").localeCompare(
+            b.slot?.date ?? ""
+        );
+        if (dateComparison !== 0) return dateComparison;
+        return (a.slot?.startTime ?? "").localeCompare(
+            b.slot?.startTime ?? ""
+        );
+      });
+      setBookings(trainerBookings);
+    } catch (error) {
+      toast(
+          error instanceof Error ? error.message : "Could not load your bookings.",
+          "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.userId, user?.role, toast]);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const all = await bookingsApi.getAll().catch(() => [] as Booking[]);
-        if (cancelled) return;
-        const filtered =
-          user?.role === "ADMIN"
-            ? all
-            : all.filter((b) => b.slot?.trainer?.userId === user?.userId);
-        filtered.sort((a, b) =>
-          (b.bookingDateTime ?? "").localeCompare(a.bookingDateTime ?? "")
-        );
-        setBookings(filtered);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [user?.userId, user?.role]);
+    void loadBookings();
+  }, [loadBookings]);
+
+  const startSession = async (booking: Booking) => {
+    setBusyBookingId(booking.bookingId);
+    try {
+      await bookingsApi.startSession(booking.bookingId);
+      toast("Session started.", "success");
+      await loadBookings();
+    } catch (error) {
+      toast(
+          error instanceof Error ? error.message : "Could not start the session.",
+          "error"
+      );
+    } finally {
+      setBusyBookingId(null);
+    }
+  };
+
+  const completeSession = async (booking: Booking) => {
+    setBusyBookingId(booking.bookingId);
+    try {
+      await bookingsApi.completeSession(booking.bookingId);
+      toast("Session completed and added to the member's progress.", "success");
+      await loadBookings();
+    } catch (error) {
+      toast(
+          error instanceof Error ? error.message : "Could not complete the session.",
+          "error"
+      );
+    } finally {
+      setBusyBookingId(null);
+    }
+  };
 
   return (
-    <div>
-      <h1 className="page-title">{user?.role === "ADMIN" ? "All bookings" : "Session bookings"}</h1>
-      <p className="page-sub">
-        {user?.role === "ADMIN"
-          ? "Every booking on the platform. Status is CONFIRMED, CANCELLED, or COMPLETED."
-          : "Bookings linked to your slots. Status is CONFIRMED, CANCELLED, or COMPLETED (backend model)."}
-      </p>
+      <div>
+        <h1 className="page-title">Bookings on my slots</h1>
+        <p className="page-sub">
+          Start a session during its scheduled time. Complete it when the slot ends;
+          completed sessions appear in the member&apos;s My Progress.
+        </p>
 
-      {loading ? (
-        <div className="skeleton" style={{ height: 100 }} />
-      ) : bookings.length === 0 ? (
-        <div className="card empty">{user?.role === "ADMIN" ? "No bookings yet." : "No bookings on your slots yet."}</div>
-      ) : (
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
-            <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid var(--fn-border)" }}>
-                <th style={{ padding: "0.85rem 1rem" }}>Member</th>
-                <th style={{ padding: "0.85rem 1rem" }}>Date</th>
-                <th style={{ padding: "0.85rem 1rem" }}>Time</th>
-                <th style={{ padding: "0.85rem 1rem" }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map((b) => (
-                <tr key={b.bookingId} style={{ borderBottom: "1px solid var(--fn-border)" }}>
-                  <td style={{ padding: "0.85rem 1rem" }}>
-                    {b.member ? `${b.member.firstName} ${b.member.lastName}` : "Member"}
-                  </td>
-                  <td style={{ padding: "0.85rem 1rem" }}>{formatDate(b.slot?.date)}</td>
-                  <td style={{ padding: "0.85rem 1rem" }}>
-                    {formatTime(b.slot?.startTime)}–{formatTime(b.slot?.endTime)}
-                  </td>
-                  <td style={{ padding: "0.85rem 1rem" }}>
-                    <span className={statusBadgeClass(b.status)}>{b.status}</span>
-                  </td>
+        {loading ? (
+            <div className="skeleton" style={{ height: 100 }} />
+        ) : bookings.length === 0 ? (
+            <div className="card empty">No bookings on your slots yet.</div>
+        ) : (
+            <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+              <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "0.9rem",
+                  }}
+              >
+                <thead>
+                <tr
+                    style={{
+                      textAlign: "left",
+                      borderBottom: "1px solid var(--fn-border)",
+                    }}
+                >
+                  <th style={{ padding: "0.85rem 1rem" }}>Member</th>
+                  <th style={{ padding: "0.85rem 1rem" }}>Date</th>
+                  <th style={{ padding: "0.85rem 1rem" }}>Time</th>
+                  <th style={{ padding: "0.85rem 1rem" }}>Status</th>
+                  <th style={{ padding: "0.85rem 1rem" }}>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+                </thead>
+                <tbody>
+                {bookings.map((booking) => (
+                    <tr
+                        key={booking.bookingId}
+                        style={{ borderBottom: "1px solid var(--fn-border)" }}
+                    >
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                        {memberName(booking, bookings)}
+                      </td>
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                        {formatDate(booking.slot?.date)}
+                      </td>
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                        {formatTime(booking.slot?.startTime)}–
+                        {formatTime(booking.slot?.endTime)}
+                      </td>
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                    <span className={statusBadgeClass(booking.status)}>
+                      {booking.status}
+                    </span>
+                      </td>
+                      <td style={{ padding: "0.85rem 1rem" }}>
+                        {booking.status === "CONFIRMED" ? (
+                            <button
+                                type="button"
+                                className="btn"
+                                disabled={busyBookingId === booking.bookingId}
+                                onClick={() => void startSession(booking)}
+                            >
+                              {busyBookingId === booking.bookingId
+                                  ? "Starting..."
+                                  : "Start session"}
+                            </button>
+                        ) : booking.status === "IN_PROGRESS" ? (
+                            <button
+                                type="button"
+                                className="btn"
+                                disabled={busyBookingId === booking.bookingId}
+                                onClick={() => void completeSession(booking)}
+                            >
+                              {busyBookingId === booking.bookingId
+                                  ? "Completing..."
+                                  : "End session"}
+                            </button>
+                        ) : (
+                            <span style={{ color: "var(--fn-muted)" }}>—</span>
+                        )}
+                      </td>
+                    </tr>
+                ))}
+                </tbody>
+              </table>
+            </div>
+        )}
+      </div>
   );
 }
