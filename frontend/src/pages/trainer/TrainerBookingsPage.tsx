@@ -1,24 +1,25 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { bookingsApi } from "../../api/fitnova";
 import { useAuth } from "../../auth/AuthContext";
 import { useToast } from "../../components/ToastContext";
 import type { Booking, User } from "../../types";
 import { formatDate, formatTime, statusBadgeClass } from "../../lib/format";
 
-
-function memberName(
-    booking: Booking,
-    all: Booking[]
-): string {
+function memberName(booking: Booking, all: Booking[]): string {
   let member = booking.member as User | string | undefined;
+
   if (typeof member === "string") {
     const id = member;
-    member = (all.find((b) => typeof b.member === "object" && b.member?.userId === id)?.member as User | undefined);
+    member = all.find(
+        (b) => typeof b.member === "object" && b.member?.userId === id,
+    )?.member as User | undefined;
   }
+
   if (member && typeof member === "object") {
     const name = `${member.firstName ?? ""} ${member.lastName ?? ""}`.trim();
     if (name) return name;
   }
+
   return "Member";
 }
 
@@ -30,50 +31,80 @@ export function TrainerBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [busyBookingId, setBusyBookingId] = useState<string | null>(null);
 
-  const loadBookings = useCallback(async () => {
+  useEffect(() => {
     if (user?.role !== "TRAINER") {
-      setBookings([]);
-      setLoading(false);
       return;
     }
 
-    setLoading(true);
-    try {
-      const trainerBookings = await bookingsApi.byTrainer();
-      trainerBookings.sort((a, b) => {
-        const dateComparison = (a.slot?.date ?? "").localeCompare(
-            b.slot?.date ?? ""
-        );
-        if (dateComparison !== 0) return dateComparison;
-        return (a.slot?.startTime ?? "").localeCompare(
-            b.slot?.startTime ?? ""
-        );
-      });
-      setBookings(trainerBookings);
-    } catch (error) {
-      toast(
-          error instanceof Error ? error.message : "Could not load your bookings.",
-          "error"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.userId, user?.role, toast]);
+    let cancelled = false;
 
-  useEffect(() => {
-    void loadBookings();
-  }, [loadBookings]);
+    const fetchBookings = async () => {
+      setLoading(true);
+
+      try {
+        const trainerBookings = await bookingsApi.byTrainer();
+
+        if (cancelled) return;
+
+        trainerBookings.sort((a, b) => {
+          const dateComparison = (a.slot?.date ?? "").localeCompare(
+              b.slot?.date ?? "",
+          );
+          if (dateComparison !== 0) return dateComparison;
+
+          return (a.slot?.startTime ?? "").localeCompare(
+              b.slot?.startTime ?? "",
+          );
+        });
+
+        setBookings(trainerBookings);
+      } catch (error) {
+        if (!cancelled) {
+          toast(
+              error instanceof Error
+                  ? error.message
+                  : "Could not load your bookings.",
+              "error",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void fetchBookings();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.role, toast]);
 
   const startSession = async (booking: Booking) => {
     setBusyBookingId(booking.bookingId);
+
     try {
       await bookingsApi.startSession(booking.bookingId);
       toast("Session started.", "success");
-      await loadBookings();
+
+      const trainerBookings = await bookingsApi.byTrainer();
+      trainerBookings.sort((a, b) => {
+        const dateComparison = (a.slot?.date ?? "").localeCompare(
+            b.slot?.date ?? "",
+        );
+        if (dateComparison !== 0) return dateComparison;
+
+        return (a.slot?.startTime ?? "").localeCompare(
+            b.slot?.startTime ?? "",
+        );
+      });
+
+      setBookings(trainerBookings);
     } catch (error) {
       toast(
           error instanceof Error ? error.message : "Could not start the session.",
-          "error"
+          "error",
       );
     } finally {
       setBusyBookingId(null);
@@ -82,31 +113,53 @@ export function TrainerBookingsPage() {
 
   const completeSession = async (booking: Booking) => {
     setBusyBookingId(booking.bookingId);
+
     try {
       await bookingsApi.completeSession(booking.bookingId);
-      toast("Session completed and added to the member's progress.", "success");
-      await loadBookings();
+      toast(
+          "Session completed and added to the member's progress.",
+          "success",
+      );
+
+      const trainerBookings = await bookingsApi.byTrainer();
+      trainerBookings.sort((a, b) => {
+        const dateComparison = (a.slot?.date ?? "").localeCompare(
+            b.slot?.date ?? "",
+        );
+        if (dateComparison !== 0) return dateComparison;
+
+        return (a.slot?.startTime ?? "").localeCompare(
+            b.slot?.startTime ?? "",
+        );
+      });
+
+      setBookings(trainerBookings);
     } catch (error) {
       toast(
-          error instanceof Error ? error.message : "Could not complete the session.",
-          "error"
+          error instanceof Error
+              ? error.message
+              : "Could not complete the session.",
+          "error",
       );
     } finally {
       setBusyBookingId(null);
     }
   };
 
+  const visibleBookings = user?.role === "TRAINER" ? bookings : [];
+  const isLoading = user?.role === "TRAINER" && loading;
+
   return (
       <div>
         <h1 className="page-title">Bookings on my slots</h1>
         <p className="page-sub">
-          Start a session during its scheduled time. Complete it when the slot ends;
-          completed sessions appear in the member&apos;s My Progress.
+          Start a session during its scheduled time. Complete it when the slot
+          ends; completed sessions appear in the member&apos;s My Progress.
         </p>
 
-        {loading ? (
+        {isLoading ? (
             <div className="skeleton" style={{ height: 100 }} />
-        ) : bookings.length === 0 ? (
+        ) : visibleBookings.length === 0 ? (
             <div className="card empty">No bookings on your slots yet.</div>
         ) : (
             <div className="card" style={{ padding: 0, overflow: "hidden" }}>
@@ -132,13 +185,13 @@ export function TrainerBookingsPage() {
                 </tr>
                 </thead>
                 <tbody>
-                {bookings.map((booking) => (
+                {visibleBookings.map((booking) => (
                     <tr
                         key={booking.bookingId}
                         style={{ borderBottom: "1px solid var(--fn-border)" }}
                     >
                       <td style={{ padding: "0.85rem 1rem" }}>
-                        {memberName(booking, bookings)}
+                        {memberName(booking, visibleBookings)}
                       </td>
                       <td style={{ padding: "0.85rem 1rem" }}>
                         {formatDate(booking.slot?.date)}

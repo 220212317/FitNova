@@ -35,31 +35,41 @@ export function TrainerSlotsPage() {
     setEditingSlotId(null);
   };
 
-  const load = async () => {
+  useEffect(() => {
     if (!user) {
-      setSlots([]);
-      setLoading(false);
       return;
     }
 
-    setLoading(true);
-    try {
-      const all = await slotsApi.getAll().catch(() => [] as AvailabilitySlot[]);
-      const own = all.filter((slot) => slot.trainer?.userId === user.userId);
-      setSlots(own);
-    } catch (err) {
-      toast(
-          err instanceof Error ? err.message : "Failed to load your slots.",
-          "error"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    let cancelled = false;
 
-  useEffect(() => {
-    void load();
-  }, [user?.userId, user?.role]);
+    const fetchSlots = async () => {
+      setLoading(true);
+
+      try {
+        const all = await slotsApi.getAll();
+        const own = all.filter((slot) => slot.trainer?.userId === user.userId);
+
+        if (cancelled) return;
+
+        setSlots(own);
+      } catch (err) {
+        toast(
+            err instanceof Error ? err.message : "Failed to load your slots.",
+            "error",
+        );
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void fetchSlots();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [toast, user]);
 
   const validateAndBuildSlot = () => {
     if (!date || !startTime || !endTime) {
@@ -108,11 +118,16 @@ export function TrainerSlotsPage() {
       }
 
       resetForm();
-      await load();
+
+      if (user) {
+        const all = await slotsApi.getAll();
+        const own = all.filter((slot) => slot.trainer?.userId === user.userId);
+        setSlots(own);
+      }
     } catch (err) {
       toast(
           err instanceof Error ? err.message : "Failed to save slot.",
-          "error"
+          "error",
       );
     } finally {
       setSaving(false);
@@ -140,7 +155,7 @@ export function TrainerSlotsPage() {
     }
 
     const confirmed = window.confirm(
-        `Delete this slot on ${formatDate(slot.date)} (${formatTime(slot.startTime)} - ${formatTime(slot.endTime)})?`
+        `Delete this slot on ${formatDate(slot.date)} (${formatTime(slot.startTime)} - ${formatTime(slot.endTime)})?`,
     );
 
     if (!confirmed) return;
@@ -153,14 +168,23 @@ export function TrainerSlotsPage() {
         resetForm();
       }
 
-      await load();
+      if (user) {
+        const all = await slotsApi.getAll();
+        const own = all.filter((slot) => slot.trainer?.userId === user.userId);
+        setSlots(own);
+      }
     } catch (err) {
       toast(
           err instanceof Error ? err.message : "Failed to delete slot.",
-          "error"
+          "error",
       );
     }
   };
+
+  const visibleSlots = user
+      ? slots.filter((slot) => slot.trainer?.userId === user.userId)
+      : [];
+  const isLoading = Boolean(user) && loading;
 
   return (
       <div>
@@ -169,7 +193,11 @@ export function TrainerSlotsPage() {
           Create, edit, and delete your availability. Booked slots are protected.
         </p>
 
-        <form className="card" onSubmit={createOrUpdateSlot} style={{ marginBottom: "1.25rem" }}>
+        <form
+            className="card"
+            onSubmit={createOrUpdateSlot}
+            style={{ marginBottom: "1.25rem" }}
+        >
           <h2 style={{ fontSize: "1rem", marginBottom: "0.85rem" }}>
             {editingSlotId ? "Edit availability" : "New availability"}
           </h2>
@@ -228,7 +256,11 @@ export function TrainerSlotsPage() {
 
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
             <button type="submit" className="btn" disabled={saving}>
-              {saving ? "Saving..." : editingSlotId ? "Update slot" : "Create slot"}
+              {saving
+                  ? "Saving..."
+                  : editingSlotId
+                      ? "Update slot"
+                      : "Create slot"}
             </button>
 
             {editingSlotId && (
@@ -244,13 +276,19 @@ export function TrainerSlotsPage() {
           </div>
         </form>
 
-        {loading ? (
+        {isLoading ? (
             <div className="skeleton" style={{ height: 100 }} />
-        ) : slots.length === 0 ? (
+        ) : visibleSlots.length === 0 ? (
             <div className="card empty">No slots yet.</div>
         ) : (
             <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.92rem" }}>
+              <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "0.92rem",
+                  }}
+              >
                 <thead>
                 <tr
                     style={{
@@ -266,7 +304,7 @@ export function TrainerSlotsPage() {
                 </thead>
 
                 <tbody>
-                {slots.map((slot) => (
+                {visibleSlots.map((slot) => (
                     <tr
                         key={slot.slotId}
                         style={{ borderBottom: "1px solid var(--fn-border)" }}
@@ -286,7 +324,13 @@ export function TrainerSlotsPage() {
                       </td>
 
                       <td style={{ padding: "0.85rem 1rem" }}>
-                        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                        <div
+                            style={{
+                              display: "flex",
+                              gap: "0.5rem",
+                              flexWrap: "wrap",
+                            }}
+                        >
                           <button
                               type="button"
                               className="btn btn-secondary"
@@ -299,7 +343,7 @@ export function TrainerSlotsPage() {
                           <button
                               type="button"
                               className="btn btn-danger"
-                              onClick={() => handleDelete(slot)}
+                              onClick={() => void handleDelete(slot)}
                               disabled={slot.status === "BOOKED"}
                           >
                             Delete
