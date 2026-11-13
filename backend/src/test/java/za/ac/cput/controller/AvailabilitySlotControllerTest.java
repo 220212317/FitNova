@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -56,7 +57,8 @@ class AvailabilitySlotControllerTest {
 
         mockMvc.perform(post("/availability-slots/create")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(json)
+                        .with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.slotId").value("SLOT001"))
                 .andExpect(jsonPath("$.status").value("AVAILABLE"));
@@ -115,7 +117,8 @@ class AvailabilitySlotControllerTest {
 
         mockMvc.perform(put("/availability-slots/update")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(json)
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.slotId").value("SLOT001"));
     }
@@ -126,7 +129,8 @@ class AvailabilitySlotControllerTest {
         when(service.delete("SLOT001"))
                 .thenReturn(true);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/availability-slots/delete/SLOT001"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/availability-slots/delete/SLOT001")
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 }

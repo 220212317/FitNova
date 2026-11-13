@@ -1,5 +1,8 @@
 package za.ac.cput.controller;
 
+import za.ac.cput.support.TestAuth;
+import za.ac.cput.domain.enums.RoleType;
+import org.springframework.context.annotation.Import;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,9 +30,21 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(TestAuth.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class BookingControllerTest {
+
+    @Autowired
+    private TestAuth testAuth;
+
+    @Autowired
+    private TestRestTemplate authTemplate;
+
+    @BeforeEach
+    void authenticate() {
+        testAuth.authenticateAs(authTemplate, RoleType.MEMBER);
+    }
     @Autowired
     private TestRestTemplate restTemplate;
 

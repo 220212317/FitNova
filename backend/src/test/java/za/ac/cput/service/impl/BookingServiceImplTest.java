@@ -158,7 +158,12 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingsByStatus() {
-        Booking booking = bookingService.create(buildBooking(persistedMember(), persistedSlot(), BookingStatus.CANCELLED));
+        // create() always stores new bookings as CONFIRMED, so cancel it through update().
+        Booking created = bookingService.create(buildBooking(persistedMember(), persistedSlot(), BookingStatus.CONFIRMED));
+        Booking booking = bookingService.update(new Booking.Builder()
+                .copy(created)
+                .setStatus(BookingStatus.CANCELLED)
+                .build());
 
         List<Booking> bookings = bookingService.getBookingsByStatus(BookingStatus.CANCELLED);
 
